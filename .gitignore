@@ -1,0 +1,17 @@
+*.egg-info
+*.pyc
+/.idea
+dist/
+build/
+/.DS_Store
+/try.py
+__pycache__
+.pytest_cache
+/docs/build
+/docs/source/_static
+/docs/source/_templates
+
+results2/
+results3/
+
+*.png
