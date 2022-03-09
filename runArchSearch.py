@@ -1,5 +1,5 @@
-from qArchSearc.olsq import OLSQ
-from qArchSearc.olsq.device import qcdevice
+from qArchSearc.olsq import qArchEval
+from qArchSearc.olsq.device import qcDeviceSet
 import argparse
 import json
 import math
@@ -34,32 +34,33 @@ my_mode = "transition"
 if args.ifnormal:
     my_mode = "normal"
 
-lsqc_solver = OLSQ(mode=my_mode)
+lsqc_searcher = qArchEval(mode=my_mode)
 
-lsqc_solver.setdevice(
-    get_device(device=args.device, benchmark=args.benchmark, fidelity = args.iffidelity))
+lsqc_searcher.setdevice(
+    get_device(device=args.device, benchmark=args.benchmark))
 
 if args.benchmark == "qaoa":
     program = [args.size,
         get_qaoa_graph(size=args.size, trial=args.trial),
         ["ZZ" for _ in range( (args.size * 3) // 2 )] ]
-    lsqc_solver.setprogram(program, "IR")
+    lsqc_searcher.setprogram(program, "IR")
 elif args.benchmark == "qv":
-    lsqc_solver.setdependency([])
+    lsqc_searcher.setdependency([])
     cir = get_qv_cir(size=args.size)
     # print(math.log(args.size,2))
     program = [int(math.log(args.size,2)),
         cir,
         ['u4' for _ in range(len(cir))] ]
-    lsqc_solver.setprogram(program, "IR")
-    lsqc_solver.setdependency([])
+    lsqc_searcher.setprogram(program, "IR")
+    lsqc_searcher.setdependency([])
 else:
     file = open(args.filename)
-    lsqc_solver.setprogram(file.read())
+    lsqc_searcher.setprogram(file.read())
     file.close()
 
 
-lsqc_solver.solve(output_mode="IR")
+results = lsqc_searcher.search(output_mode="IR")
 
-with open(f"./{args.folder}/{output_file_name}.json", 'w') as file_object:
-    json.dump(info, file_object)
+for i, result in enumerate(results):
+    with open(f"./{args.folder}/extra_edge_{i}.json", 'w') as file_object:
+        json.dump(result, file_object)

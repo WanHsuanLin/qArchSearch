@@ -20,7 +20,8 @@ class qcDeviceSet:
             name: name for the device.  If it starts with "default_",
                 use existing device; otherwise, more parameters needed.
             nqubits: (optional) the number of physical qubits.
-            connection: (optional) set of edges connecting qubits.
+            connection: set of edges connecting qubits.
+            extra_connection: set of extra edges that can be added to the connection.
             swap_duration: (optional) how many time units a SWAP takes.
             fmeas: (optional) measurement fidelity of each qubit.
             fsingle: (optional) single-qubit gate fidelity of each qubit

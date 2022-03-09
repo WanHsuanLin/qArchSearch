@@ -254,7 +254,7 @@ class qArchEval:
         self.list_gate_dependency = dependency
         self.inpput_dependency = True
 
-    def solve(self, output_file_name: str = None):
+    def search(self, output_file_name: str = None):
         # using binary search to optimize swap
         """Formulate an SMT, pass it to z3 solver, and output results.
         CORE OF OLSQ, EDIT WITH CARE.
@@ -493,6 +493,7 @@ class qArchEval:
 
             # TODO: iterate each swap num
             for num_e in range(len(list_extra_qubit_edge)):
+                per_start = datetime.datetime.now()
                 lsqc.push()
                 lsqc.add(count_extra_edge <= num_e)
                 find_min_depth = False
@@ -561,11 +562,12 @@ class qArchEval:
                             bound_swap_num = (upper_b_swap + lower_b_swap)//2
                             # lsqc.pop()
                 results.append(self.write_results(model, time, pi, sigma, space, u))
+                print(f"Compilation time = {datetime.datetime.now() - per_start}.")
                 if results[-1]['cost-scaled fidelity_ct'] < results[-2]['cost-scaled fidelity_ct']:
                     break
                 lsqc.pop()
 
-        print(f"Compilation time = {datetime.datetime.now() - start_time}.")
+        print(f"Total compilation time = {datetime.datetime.now() - start_time}.")
         return results
 
     def extract_results(self, model, time, pi, sigma, space, u):

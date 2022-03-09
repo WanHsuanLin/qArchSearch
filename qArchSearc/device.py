@@ -4,7 +4,7 @@ import argparse
 import json
 dir_path = os.getcwd()
 sys.path.append(dir_path)
-from olsq.device import qcdevice
+from olsq.device import qcDeviceSet
 
 
 def get_char_graph(coupling:list):
@@ -114,189 +114,36 @@ def get_char_graph(coupling:list):
         graph += line + "\n"
     return graph
 
-def get_deviceND(device: int, benchmark:str, fidelity):
+def get_device(device: int, benchmark:str):
     # basic couplings, i.e., edges, of a 4*4 grid, i.e., device0
-    # my_coupling = [(0,1), (1,2), (2,3), (3,4), (4,5), (5,6), (6,7),
-    #     (0,8), (1,9), (2,10), (3,11), (4,12), (5,13), (6,14), (7,15),
-    #     (8,9), (9,10), (10,11), (11,12), (12,13), (13,14), (14,15)]
-
     my_coupling = [(0,1), (1,2), (2,3), (4,5), (5,6), (6,7), (8,9),
         (9,10), (10,11), (12,13), (13,14), (14,15), (0,4), (4,8),
         (8,12), (1,5), (5,9), (9,13), (2,6), (6,10), (10,14),
-        (3,7), (7,11), (11,15)]
-    # 6 circuit for only one connection
-    if device == 0:
-        my_coupling += [(0,5)]
-    elif device == 1:
-        my_coupling += [(1,4)]
-    elif device == 2:
-        my_coupling += [(1,6)]
-    elif device == 3:
-        my_coupling += [(2,5)]
-    elif device == 4:
-        my_coupling += [(5,10)]
-    elif device == 5:
-        my_coupling += [(6,9)]
-    elif device == 6:
-        my_coupling += [(0,5),(1,6)]
-    elif device == 7:
-        my_coupling += [(0,5),(5,10)]
-    elif device == 8:
-        my_coupling += [(0,5),(2,7)]
-    elif device == 9:
-        my_coupling += [(0,5),(6,11)]
-    elif device == 10:
-        my_coupling += [(0,5),(10,15)]
-    elif device == 11:
-        my_coupling += [(1,4),(2,5)]
-    elif device == 12:
-        my_coupling += [(1,4),(6,9)]
-    elif device == 13:
-        my_coupling += [(1,4),(7,10)]
-    elif device == 14:
-        my_coupling += [(1,4),(11,14)]
-    elif device == 15:
-        my_coupling += [(5,8),(6,9)]
-    elif device == 16:
-        my_coupling += [(2,5),(6,9)]
-    elif device == 17:
-        my_coupling += [(0,5),(9,12)]
-    elif device == 18:
-        my_coupling += [(4,9),(9,12)]
-    elif device == 19:
-        my_coupling += [(1,6),(9,12)]
-    elif device == 20:
-        my_coupling += [(5,10),(9,12)]
-    elif device == 21:
-        my_coupling += [(2,7),(9,12)]
-    elif device == 22:
-        my_coupling += [(5,8),(2,7)]
-    elif device == 23:
-        my_coupling += [(2,5),(2,7)]
-    elif device == 24:
-        my_coupling += [(6,9),(2,7)]
-    elif device == 25:
-        my_coupling += [(11,14),(2,7)]
-    elif device == 26:
-        my_coupling += [(1,6),(4,9)]
-    elif device == 27:
-        my_coupling += [(1,6),(9,14)]
-    elif device == 28:
-        my_coupling += [(1,6),(6,11)]
-    elif device == 29:
-        my_coupling += [(1,6),(5,8)]
-    elif device == 30:
-        my_coupling += [(1,6),(10,13)]
-    elif device == 31:
-        my_coupling += [(0,5),(1,4)]
-    elif device == 32:
-        my_coupling += [(1,6),(2,5)]
-    elif device == 33:
-        my_coupling += [(5,10),(6,9)]
-    else:
-        assert (device == -1)
-    
-
+        (3,7), (7,11), (11,15),
+        (0,5), (3,6), (9,12), (10,15), (1,4), (2,7), (8,13), (11,14),
+        (1,6), (10, 13), (2,5), (9,14), (4,9), (7,10), (5,8), (6,11),
+        (5,10), (6,9)]
+    extra_coupling = [(0,5), (3,6), (9,12), (10,15), (1,4), (2,7), (8,13), (11,14),
+        (1,6), (10, 13), (2,5), (9,14), (4,9), (7,10), (5,8), (6,11),
+        (5,10), (6,9)]
     # qaoa and qcnn: swap_duration=1 since SWAP is comparable to the gates
     # for arith, use 3
     my_swap_duration = 1
     if benchmark == "arith":
         my_swap_duration = 3
 
-    if fidelity:
-        my_ftwo = [0.99]*len(my_coupling)
-        return qcdevice(name=str(device), nqubits=16,
-            connection=my_coupling, swap_duration=my_swap_duration, ftwo = my_ftwo)
-    else:
-        return qcdevice(name=str(device), nqubits=16,
-            connection=my_coupling, swap_duration=my_swap_duration)
-
-def get_device(device: int, benchmark:str, fidelity):
-    # basic couplings, i.e., edges, of a 4*4 grid, i.e., device0
-    # my_coupling = [(0,1), (1,2), (2,3), (3,4), (4,5), (5,6), (6,7),
-    #     (0,8), (1,9), (2,10), (3,11), (4,12), (5,13), (6,14), (7,15),
-    #     (8,9), (9,10), (10,11), (11,12), (12,13), (13,14), (14,15)]
-
-    my_coupling = [(0,1), (1,2), (2,3), (4,5), (5,6), (6,7), (8,9),
-        (9,10), (10,11), (12,13), (13,14), (14,15), (0,4), (4,8),
-        (8,12), (1,5), (5,9), (9,13), (2,6), (6,10), (10,14),
-        (3,7), (7,11), (11,15)]
-    
-    tmp = device
-    if tmp % 2 == 1:
-        my_coupling += [(0,5), (3,6), (9,12), (10,15)]
-    tmp = tmp // 2
-    if tmp % 2 == 1:
-        my_coupling += [(1,4), (2,7), (8,13), (11,14)]
-    tmp = tmp // 2
-    if tmp % 2 == 1:
-        my_coupling += [(1,6), (10, 13)]
-    tmp = tmp // 2
-    if tmp % 2 == 1:
-        my_coupling += [(2,5), (9,14)]
-    tmp = tmp // 2
-    if tmp % 2 == 1:
-        my_coupling += [(4,9), (7,10)]
-    tmp = tmp // 2
-    if tmp % 2 == 1:
-        my_coupling += [(5,8), (6,11)]
-    tmp = tmp // 2
-    if tmp % 2 == 1:
-        my_coupling += [(5,10)]
-    tmp = tmp // 2
-    if tmp % 2 == 1:
-        my_coupling += [(6,9)]
-
-    # qaoa and qcnn: swap_duration=1 since SWAP is comparable to the gates
-    # for arith, use 3
-    my_swap_duration = 1
-    if benchmark == "arith":
-        my_swap_duration = 3
-
-
-    if fidelity:
-        my_ftwo = [0.99]*len(my_coupling)
-        return qcdevice(name=str(device), nqubits=16,
-            connection=my_coupling, swap_duration=my_swap_duration, ftwo = my_ftwo)
-    else:
-        return qcdevice(name=str(device), nqubits=16,
-            connection=my_coupling, swap_duration=my_swap_duration)
+    return qcDeviceSet(name=str(device), nqubits=16,
+        connection=my_coupling, extra_connection = extra_coupling, swap_duration=my_swap_duration)
 
 def get_coupling(device: int):
     # basic couplings, i.e., edges, of a 4*4 grid, i.e., device0
-    # my_coupling = [(0,1), (1,2), (2,3), (3,4), (4,5), (5,6), (6,7),
-    #     (0,8), (1,9), (2,10), (3,11), (4,12), (5,13), (6,14), (7,15),
-    #     (8,9), (9,10), (10,11), (11,12), (12,13), (13,14), (14,15)]
-
     my_coupling = [(0,1), (1,2), (2,3), (4,5), (5,6), (6,7), (8,9),
         (9,10), (10,11), (12,13), (13,14), (14,15), (0,4), (4,8),
         (8,12), (1,5), (5,9), (9,13), (2,6), (6,10), (10,14),
-        (3,7), (7,11), (11,15)]
-    
-    tmp = device
-    if tmp % 2 == 1:
-        my_coupling += [(0,5), (3,6), (9,12), (10,15)]
-    tmp = tmp // 2
-    if tmp % 2 == 1:
-        my_coupling += [(1,4), (2,7), (8,13), (11,14)]
-    tmp = tmp // 2
-    if tmp % 2 == 1:
-        my_coupling += [(1,6), (10, 13)]
-    tmp = tmp // 2
-    if tmp % 2 == 1:
-        my_coupling += [(2,5), (9,14)]
-    tmp = tmp // 2
-    if tmp % 2 == 1:
-        my_coupling += [(4,9), (7,10)]
-    tmp = tmp // 2
-    if tmp % 2 == 1:
-        my_coupling += [(5,8), (6,11)]
-    tmp = tmp // 2
-    if tmp % 2 == 1:
-        my_coupling += [(5,10)]
-    tmp = tmp // 2
-    if tmp % 2 == 1:
-        my_coupling += [(6,9)]
+        (3,7), (7,11), (11,15),
+        (0,5), (3,6), (9,12), (10,15), (1,4), (2,7), (8,13), (11,14),
+        (1,6), (10, 13), (2,5), (9,14), (4,9), (7,10), (5,8), (6,11),
+        (5,10), (6,9)]
 
     return my_coupling
 
