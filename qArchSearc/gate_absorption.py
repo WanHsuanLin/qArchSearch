@@ -1,6 +1,6 @@
-from util import get_list_of_json_files
-def compactify(gate_qubits, gate_specs, edges, num_qubits):
+from qArchSearc.util import calQCNNDepthG2G1, calQAOADepth
 
+def compactify(gate_qubits, gate_specs, edges, num_qubits):
     gate_qubits_tmp = list()
     for qubits in gate_qubits:
         q0 = qubits[0]
@@ -209,7 +209,6 @@ def example():
     from olsq import OLSQ
     from olsq.device import qcdevice
 
-
     coupling_graph = [(0,1), (1,2), (2,3), (4,5), (5,6), (6,7), (8,9),
             (9,10), (10,11), (12,13), (13,14), (14,15), (0,4), (4,8),
             (8,12), (1,5), (5,9), (9,13), (2,6), (6,10), (10,14),
@@ -262,206 +261,36 @@ def example():
 # print(result[0])
 # print(result[1])
 
+def run_gate_absorption(benchmark:str, data, coupling_graph:list):
+    num_qubit = data["M"]
+    # print('finish correction')
+    # print(result[1])
+    # print('---')
 
-def get_coupling_graph(device: int):
-    my_coupling = [(0,1), (1,2), (2,3), (4,5), (5,6), (6,7), (8,9),
-        (9,10), (10,11), (12,13), (13,14), (14,15), (0,4), (4,8),
-        (8,12), (1,5), (5,9), (9,13), (2,6), (6,10), (10,14),
-        (3,7), (7,11), (11,15)]
-    
-    tmp = device
-    if tmp % 2 == 1:
-        my_coupling += [(0,5), (3,6), (9,12), (10,15)]
-    tmp = tmp // 2
-    if tmp % 2 == 1:
-        my_coupling += [(1,4), (2,7), (8,13), (11,14)]
-    tmp = tmp // 2
-    if tmp % 2 == 1:
-        my_coupling += [(1,6), (10, 13)]
-    tmp = tmp // 2
-    if tmp % 2 == 1:
-        my_coupling += [(2,5), (9,14)]
-    tmp = tmp // 2
-    if tmp % 2 == 1:
-        my_coupling += [(4,9), (7,10)]
-    tmp = tmp // 2
-    if tmp % 2 == 1:
-        my_coupling += [(5,8), (6,11)]
-    tmp = tmp // 2
-    if tmp % 2 == 1:
-        my_coupling += [(5,10)]
-    tmp = tmp // 2
-    if tmp % 2 == 1:
-        my_coupling += [(6,9)]
-
-    return my_coupling
-
-def get_ibm_coupling_graph(device:str):
-    my_coupling = []
-    num_qubit = 0
-    if device == "p1":
-        num_qubit = 20
-        my_coupling = [(0,1),(1,2),(3,4),(5,6),(6,7),(8,9),(10,11),(11,12),(12,13),(13,14),(15,16),(16,17),(17,18),(18,19),
-                        (0,5),(1,6),(2,7),(4,9),(5,10),(6,11),(7,12),(8,13),(9,14),(10,15),(11,16),(12,17),(14,19),
-                        (1,7),(2,6),(3,9),(4,8),(5,11),(6,10),(7,13),(8,12),(11,17),(12,16),(13,19),(14,18)]
-    elif device == "p2":
-        num_qubit = 20
-        my_coupling = [(0,1),(1,2),(2,3),(3,4),(5,6),(6,7),(7,8),(8,9),(10,11),(11,12),(12,13),(13,14),(15,16),(16,17),(18,19),
-                        (0,5),(1,6),(4,9),(5,10),(6,11),(7,12),(8,13),(10,15),(11,16),(14,19),
-                        (1,7),(2,6),(3,9),(4,8),(5,11),(6,10),(7,13),(8,12),(11,17),(12,16),(13,19),(14,18)]
-    elif device == "p3":
-        num_qubit = 20
-        my_coupling = [(0,1),(1,2),(2,3),(3,4),(5,6),(6,7),(7,8),(8,9),(10,11),(11,12),(12,13),(13,14),(15,16),(16,17),(17,18),(18,19),
-                        (0,5),(4,9),(5,10),(7,12),(9,14),(10,15),(14,19)]
-    elif device == "p4":
-        num_qubit = 20
-        my_coupling = [(0,1),(1,2),(2,3),(3,4),(5,6),(6,7),(7,8),(8,9),(10,11),(11,12),(12,13),(13,14),(15,16),(16,17),(17,18),(18,19),
-                        (1,6),(3,8),(5,10),(7,12),(9,14),(11,16),(13,18)]
-    elif device == "f4":
-        num_qubit = 27
-        my_coupling = [(0,1),(1,2),(2,3),(3,5),(5,6),(6,7),(7,8),(8,10),(10,11),(13,14),(13,15),(15,16),(16,18),(18,20),(20,21),(21,22),(22,24),(24,25),
-                        (1,26),(25,26),(3,4),(8,9),(11,12),(12,13),(16,17),(6,19),(19,20),(22,23)]
-    return num_qubit, my_coupling
-
-
-def calQCNNDepthG2G1(gates:list,gate_spec:list,num_qubit:int):
-    d = [0] * num_qubit
-    cg = ["swap"] * num_qubit
-    g2 = 0
-    g1 = 0
-    for gate_pos, gate_type in zip(gates,gate_spec):
-        for pos, gtype in zip(gate_pos, gate_type):
-            g2 += 3
-            # print(pos)
-            gtype = gtype.lstrip().lstrip()
-            # print(gtype)
-            
-            if gtype == "swap":
-                d[pos[0]] = max(d[pos[0]],d[pos[1]])+3
+    tmp_qubits = list()
+    tmp_params = list()
+    for gate_pos, gate_type in zip(data["gates"],data["gate_spec"]):
+        tmp_qubits += gate_pos
+        for gtype in gate_type:
+            if gtype == "SWAP":
+                tmp_params.append('swap')
             else:
-                gtype = "U4"
-                if cg[pos[0]] == cg[pos[1]]:
-                    if cg[pos[0]] == "swap":
-                        g1 += 7
-                        d[pos[0]] = max(d[pos[0]],d[pos[1]])+7
-                    elif cg[pos[0]] == "U4":
-                        g1 += 5
-                        d[pos[0]] = max(d[pos[0]],d[pos[1]])+6
-                    else:
-                        assert(False)
-                elif (cg[pos[0]] == "swap") and (cg[pos[1]] == "U4"):
-                    d[pos[0]] = max(d[pos[0]]+7,d[pos[1]]+6)
-                    if d[pos[0]]+7 > d[pos[1]]+6:
-                        g1 += 7
-                    else:
-                        g1 += 5
-                elif (cg[pos[0]] == "U4") and (cg[pos[1]] == "swap"):
-                    g1 += 7
-                    d[pos[0]] = max(d[pos[0]]+6,d[pos[1]]+7)
-                    if d[pos[0]]+6 > d[pos[1]]+7:
-                        g1 += 7
-                    else:
-                        g1 += 5
+                if benchmark == "qaoa":
+                    tmp_params.append('ZZ') #U4
                 else:
-                    assert (False)
-            # else:
-            #     assert(False)
-            d[pos[1]] = d[pos[0]]
-            cg[pos[0]] = gtype
-            cg[pos[1]] = gtype
-    return [max(d), g2, g1]
+                    tmp_params.append("U4")
 
-def calQAOADepthG2G1(gates:list,gate_spec:list,num_qubit:int):
-    d = [0] * num_qubit
-    cg = ["swap"] * num_qubit
-    for gate_pos, gate_type in zip(gates,gate_spec):
-        for pos, gtype in zip(gate_pos, gate_type):
-            # print(pos)
-            gtype = gtype.lstrip().lstrip()
-            # print(gtype)
-            
-            if gtype == "swap" or gtype == "ZZ" or gtype == "ZZ ZZ":
-                d[pos[0]] = max(d[pos[0]],d[pos[1]])+3
-            elif gtype == "ZZ swap":
-                d[pos[0]] = max(d[pos[0]],d[pos[1]])+4
-            else:
-                assert(False)
-            d[pos[1]] = d[pos[0]]
-            cg[pos[0]] = gtype
-            cg[pos[1]] = gtype
-    return max(d)
+    tmp1_qubits, tmp1_params = compactify(tmp_qubits, tmp_params, coupling_graph, num_qubit)
+    depth, swap_count, u4gate_qubits, u4gate_params = push_left_layers(tmp1_qubits, tmp1_params, num_qubit, True)
 
-if __name__ == "__main__":
-    import argparse
-    import json
-    parser = argparse.ArgumentParser()
-    # Adding optional argument
-    parser.add_argument("folder", metavar='folder', type=str,
-        help="Result Folder: each benchmark result")
-    parser.add_argument("benchmark", metavar='B', type=str,
-        help="Benchmark Set: arith or qaoa or qcnn")
-    args = parser.parse_args()
-    list_of_files = get_list_of_json_files(args.folder)
-    for file in list_of_files:
-        print(file)
-        with open(file) as f:
-            data = json.load(f)
-        coupling_graph = get_coupling_graph(data["device"])
-        num_qubit = 16
-        # num_qubit, coupling_graph = get_ibm_coupling_graph(data["device"])
-        # print('before correction')
-        # print(data["gates"])
-        # print('---')
+    data["gates"] = u4gate_qubits
+    data["gate_spec"] = u4gate_params
+    if benchmark == "qaoa":
+        data["D"] = calQAOADepth(data["gates"], data["gate_spec"], num_qubit)
+        nZZ = (len(tmp1_params)-swap_count)
+        data["g2"] = nZZ*2 + swap_count*3
+        data["g1"] = nZZ
+    elif benchmark == "qcnn":
+        data["D"], data["g2"], data["g1"] = calQCNNDepthG2G1(data["gates"], data["gate_spec"], num_qubit)
 
-        result = correct_bug(data["gates"],data["gate_spec"],coupling_graph,data["initial_mapping"])
-        data["gates"] = result[1]
-
-        # print('finish correction')
-        # print(result[1])
-        # print('---')
-
-        tmp_qubits = list()
-        tmp_params = list()
-        for gate_pos, gate_type in zip(data["gates"],data["gate_spec"]):
-            tmp_qubits += gate_pos
-            for gtype in gate_type:
-                if gtype == "SWAP":
-                    tmp_params.append('swap')
-                else:
-                    if args.benchmark == "qaoa":
-                        tmp_params.append('ZZ') #U4
-                    else:
-                        tmp_params.append("U4")
-        
-        # for i in range(results[0]):
-        #     tmp_qubits += results[2][i]
-        #     for param in results[1][i]:
-        #         if param == 'SWAP':
-        #             tmp_params.append('swap')
-        #         else:
-        #             tmp_params.append(param)
-        # print(tmp_qubits)
-        # print(tmp_params)
-
-        tmp1_qubits, tmp1_params = compactify(tmp_qubits, tmp_params, coupling_graph, num_qubit)
-        depth, swap_count, u4gate_qubits, u4gate_params = push_left_layers(tmp1_qubits, tmp1_params, num_qubit, True)
-
-        data["gates"] = u4gate_qubits
-        data["gate_spec"] = u4gate_params
-        if args.benchmark == "qaoa":
-            data["D"] = depth*3
-            nZZ = (len(tmp1_params)-swap_count)
-            data["g2"] = nZZ*2 + swap_count*3
-            data["g1"] = nZZ
-        elif args.benchmark == "qcnn":
-            print(data["gates"])
-            print(data["gate_spec"])
-            data["D"], data["g2"], data["g1"] = calQCNNDepthG2G1(data["gates"], data["gate_spec"], num_qubit)
-        print("------------")
-        print(data["D"])
-
-        with open(file, 'w+') as f:
-            json.dump(data, f)
     
-        # print(results)
-        

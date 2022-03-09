@@ -8,8 +8,9 @@ from z3 import Int, IntVector, Bool, Optimize, Implies, And, Or, If, sat, Solver
 from olsq.input import input_qasm
 from olsq.output import output_qasm
 from olsq.device import qcDeviceSet
-from qArchSearc.util import calExactDepth, calculateFidelity, calculateCostScaledFidelity
+from qArchSearc.util import calExactDepth, calculateFidelity, calculateCostScaledFidelity, calQCNNDepthG2G1
 from qArchSearc.device import get_char_graph
+from qArchSearc.gate_absorption import run_gate_absorption
 import pkgutil
 
 def collision_extracting(list_gate_qubits):
@@ -730,26 +731,15 @@ class qArchEval:
         program_out = ""
         g2 = 0
         g1 = 0
-        for layer in range(results[0]):
-            for gate in range(len(results[1][layer])):
-                if len(results[2][layer][gate]) == 2:
-                    program_out += f"{results[1][layer][gate]} {results[2][layer][gate][0]} {results[2][layer][gate][1]}\n"
-                    g2 += 1
-                else:
-                    program_out += f"{results[1][layer][gate]} {results[2][layer][gate][0]}\n"
-                    g1 += 1
-
-        # D=results[0]*3 for qaoa and qcnn; D=results[0] for arith
-        if self.benchmark == "qaoa" or self.benchmark == "qcnn":
-            D *= 3
-            # if qcnn g2 *= 3 since the gates are generic two-qubti gates
-            g2 *= 3
-        if self.benchmark == "qaoa":
-            # if qaoa each swap is triple and each ZZ-phase is double, so g2 = g2*3-#ZZ
-            g2 -= (self.count_program_qubit * 3) // 2
-            # there is a Rz gate in every ZZ-Phase
-            g1 += (self.count_program_qubit * 3) // 2
-
+        if self.benchmark == "arith":
+            for layer in range(results[0]):
+                for gate in range(len(results[1][layer])):
+                    if len(results[2][layer][gate]) == 2:
+                        program_out += f"{results[1][layer][gate]} {results[2][layer][gate][0]} {results[2][layer][gate][1]}\n"
+                        g2 += 1
+                    else:
+                        program_out += f"{results[1][layer][gate]} {results[2][layer][gate][0]}\n"
+                        g1 += 1
 
         info = dict()
         info["M"] = self.count_program_qubit
@@ -770,13 +760,15 @@ class qArchEval:
         info["initial_mapping"] = results[3]
         info["final_mapping"] = results[4]
         info["objective_value"] = results[5]
-        info["coupling_graph"] = get_char_graph(self.device.list_qubit_edge)
+        device_connection = info["extra_edge"] + self.device.list_qubit_edge 
+        info["coupling_graph"] = get_char_graph(device_connection)
         if self.if_transition_based:
             info["olsq_mode"] = "transition"
         else: 
             info["olsq_mode"] = "normal"
-        if self.benchmark == "qcnn":
-            calExactDepth(info)
+        if self.benchmark == "qaoa" or self.benchmark == "qcnn":
+            # run gate absorption
+            run_gate_absorption(self.benchmark, info, device_connection)
         calculateFidelity(info)
         calculateCostScaledFidelity(info)
         return info

@@ -209,3 +209,71 @@ def calculateFidelity(info):
 def calculateCostScaledFidelity(info):
     info['cost-scaled fidelity'] = info['fidelity'] / info['cost']
     info['cost-scaled fidelity_ct'] = info['fidelity_ct'] / info['cost']
+
+
+def calQCNNDepthG2G1(gates:list,gate_spec:list,num_qubit:int):
+    d = [0] * num_qubit
+    cg = ["swap"] * num_qubit
+    g2 = 0
+    g1 = 0
+    for gate_pos, gate_type in zip(gates,gate_spec):
+        for pos, gtype in zip(gate_pos, gate_type):
+            g2 += 3
+            # print(pos)
+            gtype = gtype.lstrip().lstrip()
+            # print(gtype)
+            
+            if gtype == "swap":
+                d[pos[0]] = max(d[pos[0]],d[pos[1]])+3
+            else:
+                gtype = "U4"
+                if cg[pos[0]] == cg[pos[1]]:
+                    if cg[pos[0]] == "swap":
+                        g1 += 7
+                        d[pos[0]] = max(d[pos[0]],d[pos[1]])+7
+                    elif cg[pos[0]] == "U4":
+                        g1 += 5
+                        d[pos[0]] = max(d[pos[0]],d[pos[1]])+6
+                    else:
+                        assert(False)
+                elif (cg[pos[0]] == "swap") and (cg[pos[1]] == "U4"):
+                    d[pos[0]] = max(d[pos[0]]+7,d[pos[1]]+6)
+                    if d[pos[0]]+7 > d[pos[1]]+6:
+                        g1 += 7
+                    else:
+                        g1 += 5
+                elif (cg[pos[0]] == "U4") and (cg[pos[1]] == "swap"):
+                    g1 += 7
+                    d[pos[0]] = max(d[pos[0]]+6,d[pos[1]]+7)
+                    if d[pos[0]]+6 > d[pos[1]]+7:
+                        g1 += 7
+                    else:
+                        g1 += 5
+                else:
+                    assert (False)
+            # else:
+            #     assert(False)
+            d[pos[1]] = d[pos[0]]
+            cg[pos[0]] = gtype
+            cg[pos[1]] = gtype
+    return [max(d), g2, g1]
+
+def calQAOADepth(gates:list,gate_spec:list,num_qubit:int):
+    d = [0] * num_qubit
+    cg = ["swap"] * num_qubit
+    for gate_pos, gate_type in zip(gates,gate_spec):
+        for pos, gtype in zip(gate_pos, gate_type):
+            # print(pos)
+            gtype = gtype.lstrip().lstrip()
+            # print(gtype)
+            
+            if gtype == "swap" or gtype == "ZZ" or gtype == "ZZ ZZ":
+                d[pos[0]] = max(d[pos[0]],d[pos[1]])+3
+            elif gtype == "ZZ swap":
+                d[pos[0]] = max(d[pos[0]],d[pos[1]])+4
+            else:
+                assert(False)
+            d[pos[1]] = d[pos[0]]
+            cg[pos[0]] = gtype
+            cg[pos[1]] = gtype
+    return max(d)
