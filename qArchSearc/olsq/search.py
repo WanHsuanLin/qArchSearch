@@ -6,9 +6,8 @@ from numpy import insert
 from z3 import Int, IntVector, Bool, Optimize, Implies, And, Or, If, sat, Solver
 
 from olsq.input import input_qasm
-from olsq.output import output_qasm
 from olsq.device import qcDeviceSet
-from qArchSearc.util import calExactDepth, calculateFidelity, calculateCostScaledFidelity, calQCNNDepthG2G1
+from qArchSearc.util import calculateFidelity, calculateCostScaledFidelity, calCost
 from qArchSearc.device import get_char_graph
 from qArchSearc.gate_absorption import run_gate_absorption
 import pkgutil
@@ -769,6 +768,7 @@ class qArchEval:
         if self.benchmark == "qaoa" or self.benchmark == "qcnn":
             # run gate absorption
             run_gate_absorption(self.benchmark, info, device_connection)
+        info["cost"] = calCost(results[5])
         calculateFidelity(info)
         calculateCostScaledFidelity(info)
         return info

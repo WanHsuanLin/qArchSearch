@@ -1,10 +1,9 @@
-
 import argparse
 import json
 import csv
 import pandas as pd
 import numpy as np
-from util import get_list_of_json_files, calculateCrosstalk
+from util import get_list_of_json_files, calculateCrosstalk, calCost, calculateFidelity, calculateCostScaledFidelity
 
 def create_list_from_json(jsonfile:str):
     with open(jsonfile) as f:
@@ -53,19 +52,10 @@ def write_csv():
         c.close()
     df = pd.read_csv(csvName)
     calculateFidelity(df)
-    calculateCost(df)
-    if args.ifcrosstalk:
-        calculateFidelityCrosstalk(df)
-        calculateCostCrosstalk(df)
-        calculateFidelityDicrease(df)
-        calculateCrosstalkRatio(df)
+    calculateFidelityDicrease(df)
+    calculateCrosstalkRatio(df)
 
-    sorted_df = df.sort_values(by=['device'])
-    if (args.ifdevice == True):
-        if(args.benchmark == "qcnn" or args.benchmark == "QCNN"):
-            calculateImproRatio(sorted_df, tmpStr[-1])
-        elif args.benchmark == "qaoa":
-            calculateImproRatio(sorted_df, tmpStr[-1])        
+    sorted_df = df.sort_values(by=['device'])  
 
     # sorted_df = df.sort_values(by=['cost','device'])
     # sorted_df['corss rank'] = np.arange(0, 256, 1)
@@ -83,112 +73,19 @@ def write_csv():
     
         calculateImproRatio(sorted_df, tmpStr[-1])
     sorted_df = sorted_df.reset_index(drop=True)
-    groupSameTopoDevice(sorted_df)
 
     sorted_df.to_csv(csvName, index=False)
-
-
-def calculateFidelity(df):
-    df['fidelity'] = pow(0.999, df['g1']) * pow(args.twoErr, df['g2']) * np.exp(-(df['M'] * df['D'] - 2 * df['g2'] - df['g1'])/args.co_t)
-    # df['fidelity'] = pow(args.twoErr, df['g2']) * np.exp(-(df['M'] * df['D'] - 2 * df['g2'] - df['g1'])/args.co_t)
-    # df['fidelity'] = pow(df['fidelity'],5)
-
-def calculateFidelityCrosstalk(df):
-    df['fidelity_ct'] = pow(0.999, df['g1']) * pow(args.twoErr, (df['g2']-df['crosstalk'])) * pow(args.twoErrCrosstalk, df['crosstalk']) * np.exp(-(df['M'] * df['D'] - 2 * df['g2'] - df['g1'])/args.co_t)
-    # df['fidelity_ct'] = pow(args.twoErr, (df['g2']-df['crosstalk'])) * pow(args.twoErrCrosstalk, df['crosstalk']) * np.exp(-(df['M'] * df['D'] - 2 * df['g2'] - df['g1'])/args.co_t)
-    # df['fidelity'] = pow(df['fidelity'],5)
 
 def calculateFidelityDicrease(df):
     df['fidelity_dec_ratio'] = (df['fidelity']-df['fidelity_ct'])/df['fidelity']
 
-def calculateCostCrosstalk(df):
-    df['cost-scaled fidelity_ct'] = df['fidelity_ct'] / df['cost']
-
-def calculateCost(df):
-    cost = [calCost(device) for device in df['device']]
-    df['cost'] = cost
-    df['cost-scaled fidelity'] = df['fidelity'] / df['cost']
-
 def calculateCrosstalkRatio(df):
     df['ct_ratio'] = df['crosstalk'] / df['g2']
-
-def calCost(device: int):
-    cost = 56  # 2×16+24
-    if args.ifdevice == True:
-        if device <= 5:
-            return 57
-        else:
-            return 58
-    tmp = device
-    if tmp % 2 == 1:
-        cost += 4
-    tmp = tmp // 2
-    if tmp % 2 == 1:
-        cost += 4
-    tmp = tmp // 2
-    if tmp % 2 == 1:
-        cost += 2
-    tmp = tmp // 2
-    if tmp % 2 == 1:
-        cost += 2
-    tmp = tmp // 2
-    if tmp % 2 == 1:
-        cost += 2
-    tmp = tmp // 2
-    if tmp % 2 == 1:
-        cost += 2
-    tmp = tmp // 2
-    if tmp % 2 == 1:
-        cost += 1
-    tmp = tmp // 2
-    if tmp % 2 == 1:
-        cost += 1
-    return cost
-
 
 def calculateImproRatio(df, case):
     baseLine = df.iloc[0]['fidelity']
     df['f_improve_r'] = (df['fidelity']-baseLine) / baseLine
     # df['cost-scaled fidelity'] = (100 * df['f_improve_r']) / df['cost']
-
-def groupSameTopoDevice(df):
-    ls_device = [[4,8,16,32], [5,9,17,33], [6,10,18,34], [7,11,19,35], [12,48], [13,49],
-                [14,50], [15,51], [20,24,36,40], [21,25,37,41], [22,26,38,42], [23,27,39,43], [28,44,52,56],
-                [29,45,53,57], [30,46,54,58], [31,47,55,59], [64,128], [65,129], [66,130],
-                [67,131], [68,72,80,96,132,136,144,160], [69,73,81,97], [70,74,82,98], [71,75,83,99,163],
-                [76,112,140,176], [77,113,141,177], [78,114,142,178], [84,104,152,164], [88,100,148,168],
-                [196,200,208,224]]
-    for s_device in ls_device:
-        # print(s_device)
-        same_group_cfidelity = np.array([])
-        for device in s_device:
-            if args.benchmark == "qaoa":
-                if args.ifcrosstalk:
-                    same_group_cfidelity = np.append(same_group_cfidelity,df.iloc[device,11])
-                else:
-                    same_group_cfidelity = np.append(same_group_cfidelity,df.iloc[device,8])
-            else:
-                if args.ifcrosstalk:
-                    # print("df.iloc[device,10]")
-                    # print(df.iloc[device,10])
-                    same_group_cfidelity = np.append(same_group_cfidelity,df.iloc[device,10])
-                else:
-                    # print("df.iloc[device,7]")
-                    # print(df.iloc[device,7])
-                    same_group_cfidelity = np.append(same_group_cfidelity,df.iloc[device,7])
-                # print(same_group_cfidelity)
-                # input()
-        device_order = np.argsort(same_group_cfidelity)
-        # print(df)
-        for device in s_device:
-            df.loc[device] =  df.loc[s_device[device_order[-1]]]
-            df.loc[device,['device']] = device
-        # print(s_device[1:])
-        # input()
-    
-        # print(df)
-        # df = df.drop(s_device[1:])
-        # print(df)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

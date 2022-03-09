@@ -210,6 +210,9 @@ def calculateCostScaledFidelity(info):
     info['cost-scaled fidelity'] = info['fidelity'] / info['cost']
     info['cost-scaled fidelity_ct'] = info['fidelity_ct'] / info['cost']
 
+def calCost(num_extra_connection: int):
+    cost = 56 + num_extra_connection  # 2×16+24
+    return cost
 
 def calQCNNDepthG2G1(gates:list,gate_spec:list,num_qubit:int):
     d = [0] * num_qubit
