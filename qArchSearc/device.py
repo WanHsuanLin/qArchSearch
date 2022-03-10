@@ -114,7 +114,7 @@ def get_char_graph(coupling:list):
         graph += line + "\n"
     return graph
 
-def get_device(device: int, benchmark:str):
+def get_device_set(benchmark:str):
     # basic couplings, i.e., edges, of a 4*4 grid, i.e., device0
     my_coupling = [(0,1), (1,2), (2,3), (4,5), (5,6), (6,7), (8,9),
         (9,10), (10,11), (12,13), (13,14), (14,15), (0,4), (4,8),
@@ -132,7 +132,7 @@ def get_device(device: int, benchmark:str):
     if benchmark == "arith":
         my_swap_duration = 3
 
-    return qcDeviceSet(name=str(device), nqubits=16,
+    return qcDeviceSet(name="4by4_full", nqubits=16,
         connection=my_coupling, extra_connection = extra_coupling, swap_duration=my_swap_duration)
 
 def get_coupling(device: int):

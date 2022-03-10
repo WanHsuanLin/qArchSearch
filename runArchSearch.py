@@ -4,7 +4,7 @@ import argparse
 import json
 import math
 
-from qArchSearc.device import get_device
+from qArchSearc.device import get_device_set
 from qArchSearc.util import get_qaoa_graph
 
 
@@ -21,23 +21,18 @@ parser.add_argument("--trial", dest="trial", type=int,
     help="The index of qaoa circuit: from 0 to 9")
 parser.add_argument("--filename", dest="filename", type=str,
     help="The file name of the arith circuit")
-parser.add_argument("--normal", dest="ifnormal", action='store_true',
-    help="if you want to use OLSQ rather than TB-OLSQ")
-parser.add_argument("--solve_opt", dest="solve_opt", type=int,
-    help="use 1: optmization solve; 2: binary search SAT check; 3: incremental search; 4: incremental adding constraints")
-parser.add_argument("--comment", dest="comment", type=str,
-    help="if you want to comment this run in any way")
+parser.add_argument("--tran", dest="iftran", action='store_true',
+    help="if you want to use TB-OLSQ rather than OLSQ")
 args = parser.parse_args()
 
 # defulat using TB-OLSQ 
-my_mode = "transition"
-if args.ifnormal:
-    my_mode = "normal"
+my_mode = "normal"
+if args.iftran:
+    my_mode = "transition"
 
 lsqc_searcher = qArchEval(mode=my_mode)
 
-lsqc_searcher.setdevice(
-    get_device(device=args.device, benchmark=args.benchmark))
+lsqc_searcher.setdevice(get_device_set(benchmark=args.benchmark))
 
 if args.benchmark == "qaoa":
     program = [args.size,
@@ -48,7 +43,6 @@ else:
     file = open(args.filename)
     lsqc_searcher.setprogram(file.read())
     file.close()
-
 
 results = lsqc_searcher.search(output_mode="IR")
 
