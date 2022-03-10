@@ -1,4 +1,4 @@
-from qArchSearc.util import calQCNNDepthG2G1, calQAOADepth
+from qArchSearc.util import cal_QCNN_depth_g2_g1, cal_QAOA_depth
 
 def compactify(gate_qubits, gate_specs, edges, num_qubits):
     gate_qubits_tmp = list()
@@ -286,11 +286,11 @@ def run_gate_absorption(benchmark:str, data, coupling_graph:list):
     data["gates"] = u4gate_qubits
     data["gate_spec"] = u4gate_params
     if benchmark == "qaoa":
-        data["D"] = calQAOADepth(data["gates"], data["gate_spec"], num_qubit)
+        data["D"] = cal_QAOA_depth(data["gates"], data["gate_spec"], num_qubit)
         nZZ = (len(tmp1_params)-swap_count)
         data["g2"] = nZZ*2 + swap_count*3
         data["g1"] = nZZ
     elif benchmark == "qcnn":
-        data["D"], data["g2"], data["g1"] = calQCNNDepthG2G1(data["gates"], data["gate_spec"], num_qubit)
+        data["D"], data["g2"], data["g1"] = cal_QCNN_depth_g2_g1(data["gates"], data["gate_spec"], num_qubit)
 
     

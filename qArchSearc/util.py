@@ -3,6 +3,11 @@ import numpy as np
 from olsq.device import qcdevice
 from device import getNeighboringQubit
 
+SINGLE_QUBIT_GATE_FID = 0.999
+TWO_QUBIT_GATE_FID = 0.99
+CT_TWO_QUBIT_GATE_FID = 0.985
+COHERENCE_TIME = 1000
+
 def get_list_of_json_files(folder):
     # list_of_files = os.listdir(args.folder)
     list_of_files = []
@@ -11,7 +16,6 @@ def get_list_of_json_files(folder):
             fullpath = os.path.join(root, f)
             list_of_files.append(fullpath)
     return list_of_files
-
 
 def get_qaoa_graph(size:int, trial:int):
     qaoa = {
@@ -78,21 +82,6 @@ def get_qaoa_graph(size:int, trial:int):
 
     return qaoa[str(size)][trial]
 
-def get_qv_cir(size:int):
-    qv = {
-        "128": [(3, 1), (4, 2), (0, 6), (1, 5), (0, 2), (6, 3), (2, 1), (5, 0), (4, 6), (0, 3), 
-        (1, 6), (4, 5), (0, 4), (1, 6), (5, 2), (4, 2), (3, 5), (6, 0), (5, 1), (0, 3), (6, 4)],
-        "256": [(7, 1), (2, 3), (4, 5), (0, 6), (2, 5), (7, 3), (6, 4), (1, 0), (1, 2), (0, 4), 
-        (6, 7), (3, 5), (0, 4), (2, 3), (5, 1), (7, 6), (7, 6), (1, 3), (4, 0), (5, 2), (1, 4), 
-        (6, 2), (5, 3), (0, 7), (4, 6), (2, 1), (0, 5), (3, 7), (2, 3), (0, 7), (5, 1), (4, 6)],
-        "512": [(8, 4), (5, 1), (0, 2), (3, 7), (2, 7), (8, 6), (1, 0), (5, 4), (0, 4), (1, 3), 
-        (8, 7), (6, 2), (6, 3), (8, 7), (5, 1), (2, 4), (8, 1), (4, 7), (0, 6), (2, 3), (8, 5), 
-        (4, 3), (2, 7), (1, 0), (3, 6), (0, 4), (1, 7), (8, 5), (4, 8), (3, 1), (7, 0), (5, 2), 
-        (6, 0), (4, 7), (1, 5), (2, 8)]
-    }
-
-    return qv[str(size)]
-
 def get_nnGrid(n: int, benchmark:str):
     if n == 2:
         my_coupling = [(0,1), (0,2), (1,3), (2,3)]
@@ -126,13 +115,13 @@ def get_nnGrid(n: int, benchmark:str):
     return qcdevice(name=str(n*n), nqubits=16,
         connection=my_coupling, swap_duration=my_swap_duration)
 
-def checkCrosstalk2g(g1_pos, g2_pos, dict_qubit_neighboringQubit):
+def is_crosstalk(g1_pos, g2_pos, dict_qubit_neighboringQubit):
     if g1_pos[0] in dict_qubit_neighboringQubit[g2_pos[0]] or (g1_pos[0] in dict_qubit_neighboringQubit[g2_pos[1]]) or (g1_pos[1] in dict_qubit_neighboringQubit[g2_pos[0]]) or (g1_pos[1] in dict_qubit_neighboringQubit[g2_pos[1]]):
                                 return True
     else:
         return False
 
-def calculateCrosstalk(data:dict, b):
+def cal_crosstalk(data:dict, b):
     device = data["device"]
     gate_pos = data["gates"]
     gate_spec = data["gate_spec"]
@@ -157,7 +146,7 @@ def calculateCrosstalk(data:dict, b):
                         # if gate_names[i] == gate_names[j]:
                             # if (time_slot[j][0] in dict_qubit_neighboringQubit[time_slot[i][0]]) or (time_slot[j][0] in dict_qubit_neighboringQubit[time_slot[i][1]]) \
                             #     or (time_slot[j][1] in dict_qubit_neighboringQubit[time_slot[i][0]]) or (time_slot[j][1] in dict_qubit_neighboringQubit[time_slot[i][1]]):
-                        if checkCrosstalk2g(time_slot[j], time_slot[i], dict_qubit_neighboringQubit):
+                        if is_crosstalk(time_slot[j], time_slot[i], dict_qubit_neighboringQubit):
                             # num_crosstalk += 2
                             crosstalk_g.add(t * 100 + j)
                             # print("g",t * 100 + i, gate_names[i], time_slot[i]," and g", t * 100 + j, gate_names[j], time_slot[j], "have crosstalk effects")
@@ -171,50 +160,21 @@ def calculateCrosstalk(data:dict, b):
         return len(crosstalk_g)*3
     return len(crosstalk_g)
 
+def cal_fidelity(info):
+    fidelity = pow(SINGLE_QUBIT_GATE_FID, info['g1']) * pow(TWO_QUBIT_GATE_FID, info['g2']) * np.exp(-(info['M'] * info['D'] - 2 * info['g2'] - info['g1'])/COHERENCE_TIME)
+    fidelity_ct = pow(SINGLE_QUBIT_GATE_FID, info['g1']) * pow(TWO_QUBIT_GATE_FID, (info['g2']-info['crosstalk'])) * pow(CT_TWO_QUBIT_GATE_FID, info['crosstalk']) * np.exp(-(info['M'] * info['D'] - 2 * info['g2'] - info['g1'])/COHERENCE_TIME)
+    return fidelity, fidelity_ct
 
-def calExactDepth(data:dict):
-    d = [0] * 16
-    cg = ["SWAP"] * 16
-    for gate_pos, gate_type in zip(data["gates"],data["gate_spec"]):
-        for pos, gtype in zip(gate_pos, gate_type):
-            if gtype == "SWAP":
-                d[pos[0]] = max(d[pos[0]],d[pos[1]])+3
-            elif gtype == "u4":
-                if cg[pos[0]] == cg[pos[1]]:
-                    if cg[pos[0]] == "SWAP":
-                        d[pos[0]] = max(d[pos[0]],d[pos[1]])+7
-                    elif cg[pos[0]] == "u4":
-                        d[pos[0]] = max(d[pos[0]],d[pos[1]])+6
-                    else:
-                        assert(False)
-                elif (cg[pos[0]] == "SWAP") and (cg[pos[1]] == "u4"):
-                    d[pos[0]] = max(d[pos[0]]+7,d[pos[1]]+6)
-                elif (cg[pos[0]] == "u4") and (cg[pos[1]] == "SWAP"):
-                    d[pos[0]] = max(d[pos[0]]+6,d[pos[1]]+7)
-                else:
-                    assert (False)    
-            else:
-                assert (False)
-            d[pos[1]] = d[pos[0]]
-            cg[pos[0]] = gtype
-            cg[pos[1]] = gtype
-    data["D"] = max(d)
+def cal_cost_scaled_fidelity(info):
+    cft = info['fidelity'] / info['cost']
+    cft_ct = info['fidelity_ct'] / info['cost']
+    return cft, cft_ct
 
-def calculateFidelity(info):
-    info['fidelity'] = pow(0.999, info['g1']) * pow(0.99, info['g2']) * np.exp(-(info['M'] * info['D'] - 2 * info['g2'] - info['g1'])/1000)
-    info['fidelity_ct'] = pow(0.999, info['g1']) * pow(0.99, (info['g2']-info['crosstalk'])) * pow(0.985, info['crosstalk']) * np.exp(-(info['M'] * info['D'] - 2 * info['g2'] - info['g1'])/1000)
-    # df['fidelity'] = pow(args.twoErr, df['g2']) * np.exp(-(df['M'] * df['D'] - 2 * df['g2'] - df['g1'])/args.co_t)
-    # df['fidelity'] = pow(df['fidelity'],5)
-
-def calculateCostScaledFidelity(info):
-    info['cost-scaled fidelity'] = info['fidelity'] / info['cost']
-    info['cost-scaled fidelity_ct'] = info['fidelity_ct'] / info['cost']
-
-def calCost(num_extra_connection: int):
+def cal_cost(num_extra_connection: int):
     cost = 56 + num_extra_connection  # 2×16+24
     return cost
 
-def calQCNNDepthG2G1(gates:list,gate_spec:list,num_qubit:int):
+def cal_QCNN_depth_g2_g1(gates:list,gate_spec:list,num_qubit:int):
     d = [0] * num_qubit
     cg = ["swap"] * num_qubit
     g2 = 0
@@ -261,7 +221,7 @@ def calQCNNDepthG2G1(gates:list,gate_spec:list,num_qubit:int):
             cg[pos[1]] = gtype
     return [max(d), g2, g1]
 
-def calQAOADepth(gates:list,gate_spec:list,num_qubit:int):
+def cal_QAOA_depth(gates:list,gate_spec:list,num_qubit:int):
     d = [0] * num_qubit
     cg = ["swap"] * num_qubit
     for gate_pos, gate_type in zip(gates,gate_spec):

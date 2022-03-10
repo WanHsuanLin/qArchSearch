@@ -5,7 +5,7 @@ import json
 import math
 
 from qArchSearc.device import get_device
-from qArchSearc.util import get_qaoa_graph, get_qv_cir
+from qArchSearc.util import get_qaoa_graph
 
 
 # Initialize parser
@@ -44,15 +44,6 @@ if args.benchmark == "qaoa":
         get_qaoa_graph(size=args.size, trial=args.trial),
         ["ZZ" for _ in range( (args.size * 3) // 2 )] ]
     lsqc_searcher.setprogram(program, "IR")
-elif args.benchmark == "qv":
-    lsqc_searcher.setdependency([])
-    cir = get_qv_cir(size=args.size)
-    # print(math.log(args.size,2))
-    program = [int(math.log(args.size,2)),
-        cir,
-        ['u4' for _ in range(len(cir))] ]
-    lsqc_searcher.setprogram(program, "IR")
-    lsqc_searcher.setdependency([])
 else:
     file = open(args.filename)
     lsqc_searcher.setprogram(file.read())

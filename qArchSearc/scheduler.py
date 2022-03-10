@@ -17,9 +17,13 @@ import argparse
 import json
 dir_path = os.getcwd()
 sys.path.append(dir_path)
-from qArchSearc.writeCSV import calculateCrosstalk
+from qArchSearc.writeCSV import cal_crosstalk
 from qArchSearc.device import getNeighboringQubit
-from qArchSearc.util import get_list_of_json_files, calculateCrosstalk
+from qArchSearc.util import get_list_of_json_files, cal_crosstalk
+
+TWO_QUBIT_GATE_FID = 0.99
+CT_TWO_QUBIT_GATE_FID = 0.985
+COHERENCE_TIME = 1000
 
 # import warnings
 # warnings.filterwarnings('ignore' , 'DeprecationWarning')
@@ -590,9 +594,9 @@ class CrosstalkAdaptiveSchedule(TransformationPass):
         # print(maxDepth)
         return result, self.model[self.count_ct_num].as_long(), maxDepth
 
-    def calculateFidelityCrosstalk(self, ct_num, depth):
+    def cal_fidelity_ct(self, ct_num, depth):
         num_g = len(self.gate_id)
-        fid = pow(0.985, (ct_num)) * pow(0.99, (self.g2 - ct_num)) * math.exp(-(self.M * depth - self.g2 - num_g )/1000)
+        fid = pow(CT_TWO_QUBIT_GATE_FID, (ct_num)) * pow(TWO_QUBIT_GATE_FID, (self.g2 - ct_num)) * math.exp(-(self.M * depth - self.g2 - num_g )/COHERENCE_TIME)
         return fid
   
     def solve_optimization(self):
@@ -615,7 +619,7 @@ class CrosstalkAdaptiveSchedule(TransformationPass):
         best_result = None
         best_crosstalkNum = None
         best_depth = None
-        best_fid = self.calculateFidelityCrosstalk(self.max_ct_num, self.min_detph)
+        best_fid = self.cal_fidelity_ct(self.max_ct_num, self.min_detph)
         print("     Initial solution: ct num->%i, depth->%i, and best_fid: %.4f" % (self.max_ct_num, self.min_detph, best_fid))
         for d in range(self.min_detph, self.max_detph, 3):
             # minimize crosstalk           
@@ -640,7 +644,7 @@ class CrosstalkAdaptiveSchedule(TransformationPass):
                         self.model = model
                         # Extract the schedule computed by Z3
                         result, crosstalkNum, depth = self.extract_solution()
-                        cur_fid = self.calculateFidelityCrosstalk(crosstalkNum, depth)
+                        cur_fid = self.cal_fidelity_ct(crosstalkNum, depth)
                         if best_fid < cur_fid:
                             print("             FIND BETTER SOLUTION with cur_fid %.6f" % (cur_fid))
                             best_result = result
@@ -872,7 +876,7 @@ class CrosstalkAdaptiveSchedule(TransformationPass):
         else:
             new_dag = self.enforce_schedule_on_dag(z3_result)
         # print("crosstalkNum: ",crosstalkNum)
-        # numCrosstalk = self.calculateCrosstalk(z3_result)
+        # numCrosstalk = self.cal_crosstalk(z3_result)
         self.reset()
 
         return new_dag, crosstalkNum, depth
@@ -991,7 +995,7 @@ def decideWeight(data):
 
 def calculate_fidelity_bound(data):
     max_fid = data['g2'] * math.log(0.99) - math.log(math.e) * data['D'] * data["M"] / 1000
-    crosstalk = calculateCrosstalk(data, "qcnn")
+    crosstalk = cal_crosstalk(data, "qcnn")
     min_fid = (data['g2'] - crosstalk) * math.log(0.99) + crosstalk * math.log(0.985) - math.log(math.e) * data['D'] * data["M"] / 1000
     return max_fid, min_fid
 
@@ -1015,7 +1019,7 @@ if __name__ == "__main__":
             print("Start solve device %i" % data["device"])
             data = json.load(f)
             start_time = time.time()
-            max_ct = calculateCrosstalk(data, "qcnn") 
+            max_ct = cal_crosstalk(data, "qcnn") 
             max_depth = calculate_max_depth(data["M"], max_ct, data["D"])
             # print("max_depth is ", max_depth)
             scheduler(data, max_depth, data["D"], max_ct)
