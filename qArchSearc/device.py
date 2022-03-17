@@ -2,9 +2,7 @@ import os
 import sys
 import argparse
 import json
-dir_path = os.getcwd()
-sys.path.append(dir_path)
-from olsq.device import qcDeviceSet
+from qArchSearc.olsq.device import qcDeviceSet
 
 
 def get_char_graph(coupling:list):
@@ -116,13 +114,10 @@ def get_char_graph(coupling:list):
 
 def get_device_set(benchmark:str):
     # basic couplings, i.e., edges, of a 4*4 grid, i.e., device0
-    my_coupling = [(0,1), (1,2), (2,3), (4,5), (5,6), (6,7), (8,9),
+    basic_coupling = [(0,1), (1,2), (2,3), (4,5), (5,6), (6,7), (8,9),
         (9,10), (10,11), (12,13), (13,14), (14,15), (0,4), (4,8),
         (8,12), (1,5), (5,9), (9,13), (2,6), (6,10), (10,14),
-        (3,7), (7,11), (11,15),
-        (0,5), (3,6), (9,12), (10,15), (1,4), (2,7), (8,13), (11,14),
-        (1,6), (10, 13), (2,5), (9,14), (4,9), (7,10), (5,8), (6,11),
-        (5,10), (6,9)]
+        (3,7), (7,11), (11,15)]
     extra_coupling = [(0,5), (3,6), (9,12), (10,15), (1,4), (2,7), (8,13), (11,14),
         (1,6), (10, 13), (2,5), (9,14), (4,9), (7,10), (5,8), (6,11),
         (5,10), (6,9)]
@@ -133,7 +128,7 @@ def get_device_set(benchmark:str):
         my_swap_duration = 3
 
     return qcDeviceSet(name="4by4_full", nqubits=16,
-        connection=my_coupling, extra_connection = extra_coupling, swap_duration=my_swap_duration)
+        connection=basic_coupling, extra_connection = extra_coupling, swap_duration=my_swap_duration)
 
 def get_coupling(device: int):
     # basic couplings, i.e., edges, of a 4*4 grid, i.e., device0
@@ -147,7 +142,7 @@ def get_coupling(device: int):
 
     return my_coupling
 
-def getNeighboringQubit(device):
+def getNeighboringQubit(extra_edge_list):
     # construct dict: qubit->list of neighboring qubit
     dict_qubit_neighboringQubit = {0:[1,4],
                                     1:[0,2,5],
@@ -165,33 +160,8 @@ def getNeighboringQubit(device):
                                     13:[12,14,9],
                                     14:[13,15,10],
                                     15:[14,11]}
-    tmp = device
-    edge_list = []
-    if tmp % 2 == 1:
-        edge_list += [(0,5), (3,6), (9,12), (10,15)]
-    tmp = tmp // 2
-    if tmp % 2 == 1:
-        edge_list += [(1,4), (2,7), (8,13), (11,14)]
-    tmp = tmp // 2
-    if tmp % 2 == 1:
-        edge_list += [(1,6), (10, 13)]
-    tmp = tmp // 2
-    if tmp % 2 == 1:
-        edge_list += [(2,5), (9,14)]
-    tmp = tmp // 2
-    if tmp % 2 == 1:
-        edge_list += [(4,9), (7,10)]
-    tmp = tmp // 2
-    if tmp % 2 == 1:
-        edge_list += [(5,8), (6,11)]
-    tmp = tmp // 2
-    if tmp % 2 == 1:
-        edge_list += [(5,10)]
-    tmp = tmp // 2
-    if tmp % 2 == 1:
-        edge_list += [(6,9)]
 
-    for edge in edge_list:
+    for edge in extra_edge_list:
             dict_qubit_neighboringQubit[edge[0]].append(edge[1])
             dict_qubit_neighboringQubit[edge[1]].append(edge[0])
     return dict_qubit_neighboringQubit

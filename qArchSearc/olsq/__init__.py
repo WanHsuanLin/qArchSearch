@@ -1,2 +1,2 @@
-from olsq.solve import OLSQ
-from olsq.device import qcDeviceSet
+from qArchSearc.olsq.search import qArchEval
+from qArchSearc.olsq.device import qcDeviceSet

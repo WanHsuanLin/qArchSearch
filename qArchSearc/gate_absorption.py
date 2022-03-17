@@ -38,7 +38,6 @@ def compactify(gate_qubits, gate_specs, edges, num_qubits):
             if other_qubit == q0:
                 other_qubit = last_edge[q0][1]
             last_edge[other_qubit] = (other_qubit, other_qubit)
-        
         if last_edge[q0] == (q0,q0) and last_edge[q1] != (q1,q1):
             result_qubits.append(last_edge[q1])
             result_specs.append(accu_specs[last_edge[q1]])
@@ -204,65 +203,8 @@ def correct_bug(gate_qubits, gate_specs, edges, initial_mapping):
     results.append(gate_qubits)
     return results     
 
-
-def example():
-    from olsq import OLSQ
-    from olsq.device import qcdevice
-
-    coupling_graph = [(0,1), (1,2), (2,3), (4,5), (5,6), (6,7), (8,9),
-            (9,10), (10,11), (12,13), (13,14), (14,15), (0,4), (4,8),
-            (8,12), (1,5), (5,9), (9,13), (2,6), (6,10), (10,14),
-            (3,7), (7,11), (11,15)]
-    qv_num = 5
-    u4_qubits = [(0,1), (2,3), (0,3), (1,4), (4,1), (2,0), (2,4), (1,3), (2,3), (1,4)]
-
-    # solve qubit mapping for the circuit
-    lsqc_solver = OLSQ(objective_name='swap', mode='transition')
-
-    lsqc_solver.setdevice(qcdevice(name='arch0', nqubits=16,
-    connection=coupling_graph, swap_duration=1))
-
-    program = [qv_num, u4_qubits, ['U4' for _ in range(len(u4_qubits))]]
-    lsqc_solver.setprogram(program, "IR")
-
-    results = lsqc_solver.solve(output_mode="IR")
-    # print(results)
-    tmp_qubits = list()
-    tmp_params = list()
-    for i in range(results[0]):
-        tmp_qubits += results[2][i]
-        for param in results[1][i]:
-            if param == 'SWAP':
-                tmp_params.append('swap')
-            else:
-                tmp_params.append(param)
-
-    tmp1_qubits, tmp1_params = compactify(tmp_qubits, tmp_params, coupling_graph, 16)
-    depth, _, u4gate_qubits, u4gate_params = push_left_layers(tmp1_qubits, tmp1_params, 16, True)
-    return 0
-
-# example()
-# QV-128: [(3, 1), (4, 2), (0, 6), (1, 5), (0, 2), (6, 3), (2, 1), (5, 0), (4, 6), (0, 3), (1, 6), (4, 5), (0, 4), (1, 6), (5, 2), (4, 2), (3, 5), (6, 0), (5, 1), (0, 3), (6, 4)]
-# QV-256: [(7, 1), (2, 3), (4, 5), (0, 6), (2, 5), (7, 3), (6, 4), (1, 0), (1, 2), (0, 4), (6, 7), (3, 5), (0, 4), (2, 3), (5, 1), (7, 6), (7, 6), (1, 3), (4, 0), (5, 2), (1, 4), (6, 2), (5, 3), (0, 7), (4, 6), (2, 1), (0, 5), (3, 7), (2, 3), (0, 7), (5, 1), (4, 6)]
-# QV-512: [(8, 4), (5, 1), (0, 2), (3, 7), (2, 7), (8, 6), (1, 0), (5, 4), (0, 4), (1, 3), (8, 7), (6, 2), (6, 3), (8, 7), (5, 1), (2, 4), (8, 1), (4, 7), (0, 6), (2, 3), (8, 5), (4, 3), (2, 7), (1, 0), (3, 6), (0, 4), (1, 7), (8, 5), (4, 8), (3, 1), (7, 0), (5, 2), (6, 0), (4, 7), (1, 5), (2, 8)]
-
-
-# correcting bug example
-# coupling_graph = [(0,1), (1,2), (2,3), (4,5), (5,6), (6,7), (8,9),
-#         (9,10), (10,11), (12,13), (13,14), (14,15), (0,4), (4,8),
-#         (8,12), (1,5), (5,9), (9,13), (2,6), (6,10), (10,14),
-#         (3,7), (7,11), (11,15)] + [(1,6), (10, 13)]
-
-# result = correct_bug([[[5, 4], [10, 9]], [[5, 1], [10, 6], [4, 0]], [[1, 2], [5, 9]], [[9, 10], [5, 4], [2, 0]], [[5, 6], [1, 2]], [[1, 0]], [[1, 6]]],
-# [["ZZ", "ZZ"], ["ZZ", "ZZ", "ZZ"], ["ZZ", "SWAP"], ["ZZ", "ZZ", "ZZ"], ["ZZ", "SWAP"], ["ZZ"], ["ZZ"]],
-# coupling_graph, [4, 6, 5, 9, 10, 1, 0, 2])
-
-# print("finish fixing")
-# print(result[0])
-# print(result[1])
-
 def run_gate_absorption(benchmark:str, data, coupling_graph:list):
-    num_qubit = data["M"]
+    num_qubit = 16
     # print('finish correction')
     # print(result[1])
     # print('---')

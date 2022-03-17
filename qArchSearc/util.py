@@ -1,7 +1,7 @@
 import os
 import numpy as np
-from olsq.device import qcdevice
-from device import getNeighboringQubit
+from qArchSearc.olsq.device import qcDeviceSet
+from qArchSearc.device import getNeighboringQubit
 
 SINGLE_QUBIT_GATE_FID = 0.999
 TWO_QUBIT_GATE_FID = 0.99
@@ -122,11 +122,10 @@ def is_crosstalk(g1_pos, g2_pos, dict_qubit_neighboringQubit):
         return False
 
 def cal_crosstalk(data:dict, b):
-    device = data["device"]
     gate_pos = data["gates"]
     gate_spec = data["gate_spec"]
     # construct dict: qubit->list of neighboring qubit
-    dict_qubit_neighboringQubit = getNeighboringQubit(device)
+    dict_qubit_neighboringQubit = getNeighboringQubit(data["extra_edge"])
     
     # calculate the number of gates effected by crosstalk
     num_crosstalk = 0

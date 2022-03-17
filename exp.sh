@@ -1,5 +1,5 @@
 #!/bin/bash
-# ./exp qcnn qcnn_circuits/8-4-2.qasm
+# ./exp.sh qcnn qcnn/8-4-2.qasm
 trap "exit" INT
 
 benchmarks=$1
@@ -18,6 +18,6 @@ if [ ! -d $folderName    ]; then
     mkdir $folderName   
 fi
 
-python3 runArchSearch.py $benchmarks $folderName --filename $circuit
+python3 -u runArchSearch.py $benchmarks $folderName --filename $circuit | tee "$folderName/output.log"
 
 echo "all done"

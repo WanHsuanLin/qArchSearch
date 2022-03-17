@@ -58,7 +58,13 @@ def draw_groupBy(title:str, titleAvg:str, list_of_files, label, group:str, featu
         df_cf = df.groupby(group).agg([np.max])
         if feature == "f_improve_r":
             df_cf = df_cf["fidelity"]
+        elif feature == "fct_improve_r":
+            df_cf = df_cf["fidelity_ct"]
         else:
+            if feature == 'cost-scaled fidelity':
+                df_tmp = df_cf["fidelity"]
+            elif feature == "cost-scaled fidelity_ct":
+                df_tmp = df_cf["fidelity_ct"]
             df_cf = df_cf[feature]
         sorted_df = df_cf.sort_values(by=[sort])
         sorted_df.fillna(0)
@@ -66,13 +72,19 @@ def draw_groupBy(title:str, titleAvg:str, list_of_files, label, group:str, featu
         data = np.array(sorted_df)
         ###
         if feature == 'cost-scaled fidelity' or feature == "cost-scaled fidelity_ct":
-            # print("For benchmark ", file)
             # new_df = df.groupby(group,as_index=False).apply(get_bestCf)
             # print(new_df)
             data[:,1] = data[:,1]/data[0,1]
+            max_idx = np.argmax(data[:,1])
+            tmp_sorted_df = df_tmp.sort_values(by=[sort])
+            tmp_sorted_df.fillna(0)
+            tmp_sorted_df.reset_index(inplace=True)
+            tmp_data = np.array(tmp_sorted_df)
+            tmp_data[:,1] = tmp_data[:,1]
+            print("For benchmark {}, the maximal cfct occurs on device {} with value {}, where the fidelity is {} and improvement is {}".format(file, max_idx, data[max_idx,1], tmp_data[max_idx,1], tmp_data[max_idx,1]/tmp_data[0,1]))
         ###
         # plot
-        elif feature == 'f_improve_r':
+        elif feature == 'f_improve_r' or feature == "fct_improve_r":
             data[:,1] = data[:,1]/data[0,1]
         if len(average) != len(data[:,1]):
             average = np.zeros(len(data[:,1]))
@@ -199,6 +211,15 @@ def draw_f_improve_r_rankCost_group(list_of_files,label):
     group = 'cost'
     fileName = 'fig/' + args.titleName + '_rfi_rankCost_gp' + file_type
     fileNameAvg = 'fig/' + args.titleName + '_avg_rfi_rankCost_gp' + file_type
+    draw_groupBy(title, titleAvg, list_of_files, label, group, feature, group, fileName, fileNameAvg)
+
+def draw_fct_improve_r_rankCost_group(list_of_files,label):
+    title = args.titleName+' ratio of fidelity improvement'
+    titleAvg = args.titleName+' average ratio of fidelity improvement'
+    feature = 'fct_improve_r'
+    group = 'cost'
+    fileName = 'fig/' + args.titleName + '_rfi_ct_rankCost_gp' + file_type
+    fileNameAvg = 'fig/' + args.titleName + '_avg_rfi_ct_rankCost_gp' + file_type
     draw_groupBy(title, titleAvg, list_of_files, label, group, feature, group, fileName, fileNameAvg)
 
 def draw_cost_fidelity(list_of_files, label):
@@ -443,9 +464,6 @@ if __name__ == "__main__":
         draw_g2(list_of_files,label)
         draw_D(list_of_files,label)
     else:
-        # if args.benchmark == "qcnn" or args.benchmark == "QCNN" or args.benchmark == "qaoa":
-        #     draw_f_improve_r(list_of_files,label)
-            # draw_f_improve_r_rankCost_group(list_of_files,label)
         if args.ifcomp == True:
             width = 8
         # draw_fidelity_rankCost(list_of_files,label)
@@ -455,6 +473,7 @@ if __name__ == "__main__":
             draw_fidelity_dec_rankCost_group(list_of_files,label)
             draw_ct_rankCost_group(list_of_files,label)
             draw_ctr_rankCost_group(list_of_files,label)
+            draw_fct_improve_r_rankCost_group(list_of_files,label)
             analysis_cfct(list_of_files)
         else:
             draw_fidelity_rankCost_group(list_of_files,label)
@@ -468,7 +487,7 @@ if __name__ == "__main__":
             analysis_cf(list_of_files)
 
         # if not args.ifcrosstalk:
-        draw_f_improve_r_rankCost_group(list_of_files,label)
+            draw_f_improve_r_rankCost_group(list_of_files,label)
     # if not args.ifcrosstalk:
     #     analysis_fidelity(list_of_files)
 

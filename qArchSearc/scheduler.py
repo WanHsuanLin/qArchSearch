@@ -942,7 +942,7 @@ def getCtProp(data):
     ct_err = 0.015
     # ct_err = 0.15
     crosstalk_prop = dict()  
-    neighboringQubit = getNeighboringQubit(data["device"])
+    neighboringQubit = getNeighboringQubit(data["extra_edge"])
     flat_gates = [pos for gate_pos in data["gates"] for pos in gate_pos]
     for gate in flat_gates:
         if len(gate) == 2:

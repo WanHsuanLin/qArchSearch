@@ -5,8 +5,8 @@ from numpy import insert
 
 from z3 import Int, IntVector, Bool, Optimize, Implies, And, Or, If, sat, Solver
 
-from olsq.input import input_qasm
-from olsq.device import qcDeviceSet
+from qArchSearc.olsq.input import input_qasm
+from qArchSearc.olsq.device import qcDeviceSet
 from qArchSearc.util import cal_crosstalk, cal_fidelity, cal_cost_scaled_fidelity, cal_cost
 from qArchSearc.device import get_char_graph
 from qArchSearc.gate_absorption import run_gate_absorption
@@ -100,9 +100,11 @@ class qArchEval:
         self.count_physical_qubit = 0
         self.list_qubit_edge = []
         self.list_extra_qubit_edge = []
+        self.list_basic_qubit_edge = []
         self.swap_duration = 0
         self.dict_gate_duration = dict()
         self.list_gate_duration = []
+        self.list_extra_qubit_edge_idx = []
 
         # These values should be updated in setprogram(...)
         self.list_gate_qubits = []
@@ -129,11 +131,17 @@ class qArchEval:
 
         self.device = device
         self.count_physical_qubit = device.count_physical_qubit
-        self.list_qubit_edge = device.list_qubit_edge
+        self.list_basic_qubit_edge = device.list_qubit_edge
         self.list_extra_qubit_edge = device.list_extra_qubit_edge
+        self.list_qubit_edge = self.list_basic_qubit_edge + self.list_extra_qubit_edge
+        # print("device basic edge: ", self.list_basic_qubit_edge)
+        # print("device extra edge: ", self.list_extra_qubit_edge)
+        # print("device all edge: ", self.list_qubit_edge)
         self.swap_duration = device.swap_duration
         if self.if_transition_based:
             self.swap_duration = 1
+        for e in self.list_extra_qubit_edge:
+            self.list_extra_qubit_edge_idx.append(self.list_qubit_edge.index(e))
 
     def setprogram(self, benchmark, program, input_mode: str = None, gate_duration: dict = None):
         """Translate input program to OLSQ IR, and set initial depth
@@ -212,7 +220,7 @@ class qArchEval:
                     push_forward_depth[qubits[1]] = tmp_depth + g_time
                     push_forward_depth[qubits[0]] = tmp_depth + g_time
             self.bound_depth = max(push_forward_depth)
-        print("bound_depth: ", self.bound_depth)
+        # print("bound_depth: ", self.bound_depth)
 
         count_gate = len(self.list_gate_qubits)
         for l in range(count_gate):
@@ -292,6 +300,7 @@ class qArchEval:
         list_gate_two = self.list_gate_two
         list_gate_single = self.list_gate_single
         list_extra_qubit_edge = self.list_extra_qubit_edge
+        list_extra_qubit_edge_idx = self.list_extra_qubit_edge_idx
 
         # list_adjacency_qubit takes in a physical qubit index _p_, and
         # returns the list of indices of physical qubits adjacent to _p_
@@ -359,7 +368,7 @@ class qArchEval:
         # bound_depth: generate constraints until t = bound_depth
         bound_depth = 2 * self.bound_depth
         while not_solved:
-
+            print("start adding constraints...")
             # variable setting 
 
             # at cycle t, logical qubit q is mapped to pi[q][t]
@@ -377,7 +386,7 @@ class qArchEval:
                 for j in range(bound_depth)] for i in range(count_qubit_edge)]
 
             # if an extra edge e is used, then u[e] = 1
-            u = [Bool("u_e{}".format(i)) for i in range(count_qubit_edge)]
+            u = [Bool("u_e{}".format(i)) for i in range(len(list_extra_qubit_edge))]
 
             # for swap optimization
             count_swap = Int('num_swap')
@@ -486,7 +495,9 @@ class qArchEval:
 
             # record the use of the extra edge
             for e in range(len(list_extra_qubit_edge)):
-                lsqc.add(Or([space[l] == list_extra_qubit_edge[e] for l in range(count_gate)] == u[e]))
+                all_gate = [space[l] == list_extra_qubit_edge_idx[e] for l in range(count_gate)]
+                swap_gate = [sigma[list_extra_qubit_edge_idx[e]][t] for t in range(bound_depth - 1)]
+                lsqc.add(Or(all_gate + swap_gate) == u[e])
             
             lsqc.add(
                 count_extra_edge == sum([If(u[e], 1, 0) for e in range(len(list_extra_qubit_edge))]))
@@ -563,9 +574,13 @@ class qArchEval:
                             # lsqc.pop()
                 results.append(self.write_results(model, time, pi, sigma, space, u))
                 print(f"Compilation time = {datetime.datetime.now() - per_start}.")
-                if results[-1]['cost-scaled fidelity_ct'] < results[-2]['cost-scaled fidelity_ct']:
-                    break
                 lsqc.pop()
+                if num_e == 0:
+                    continue
+                # if results[-1]['cost-scaled fidelity_ct'] < results[-2]['cost-scaled fidelity_ct'] and results[-1]['cost-scaled fidelity'] < results[-2]['cost-scaled fidelity'] :
+                #     break
+                if results[-1]['extra_edge_num'] <= results[-2]['extra_edge_num']:
+                    break
 
         print(f"Total compilation time = {datetime.datetime.now() - start_time}.")
         return results
@@ -581,6 +596,7 @@ class qArchEval:
         count_extra_edge = len(self.list_extra_qubit_edge)
         list_gate_name = self.list_gate_name
         count_program_qubit = self.count_program_qubit
+        list_extra_qubit_edge_idx = self.list_extra_qubit_edge_idx
         result_time = []
         result_depth = 0
         
@@ -658,18 +674,14 @@ class qArchEval:
             list_result_swap = list_real_swap
             # print(list_result_swap)
 
-        print(f"result additional SWAP count = {len(list_result_swap)}.")
-        print(f"result circuit depth = {result_depth}.")
+        result_depth += 1
+        print(f"result- additional SWAP count = {len(list_result_swap)}.")
+        print(f"result- circuit depth = {result_depth}.")
 
         list_scheduled_gate_qubits = [[] for i in range(result_depth)]
         list_scheduled_gate_name = [[] for i in range(result_depth)]
-        result_depth = 0
         for l in range(count_gate):
             t = result_time[l]
-
-            if result_depth < t + 1:
-                result_depth = t + 1
-
             list_scheduled_gate_name[t].append(list_gate_name[l])
             if l in list_gate_single:
                 q = model[space[l]].as_long()
@@ -715,7 +727,7 @@ class qArchEval:
         extra_edge = []
         for i in range(count_extra_edge):
             if model[u[i]]:
-                extra_edge.append(self.list_extra_qubit_edge[i])
+                extra_edge.append(list_qubit_edge[list_extra_qubit_edge_idx[i]])
 
         return (result_depth,
                 list_scheduled_gate_name,
@@ -748,18 +760,12 @@ class qArchEval:
         info["extra_edge_num"] = len(results[5])
         info["extra_edge"] = results[5]
         info["benchmark"] = self.benchmark
-        if self.benchmark == "qcnn":
-            info["size"] = self.filename.split('_')[0]
-        elif self.benchmark == "arith":
-            info["file"] = self.filename.split('.')[0]
-        else:
-            info["size"] = self.count_program_qubit
         info["gates"] = results[2]
         info["gate_spec"] = results[1]
         info["initial_mapping"] = results[3]
         info["final_mapping"] = results[4]
-        info["objective_value"] = results[5]
-        device_connection = info["extra_edge"] + self.device.list_qubit_edge 
+        device_connection = info["extra_edge"] + list(self.list_basic_qubit_edge )
+        print(device_connection)
         info["coupling_graph"] = get_char_graph(device_connection)
         if self.if_transition_based:
             info["olsq_mode"] = "transition"
@@ -768,7 +774,7 @@ class qArchEval:
         if self.benchmark == "qaoa" or self.benchmark == "qcnn":
             # run gate absorption
             run_gate_absorption(self.benchmark, info, device_connection)
-        info["cost"] = cal_cost(results[5])
+        info["cost"] = cal_cost(len(results[5]))
         info['crosstalk'] = cal_crosstalk(info, self.benchmark)
         info['fidelity'], info['fidelity_ct']  = cal_fidelity(info)
         info['cost-scaled fidelity'], info['cost-scaled fidelity_ct'] = cal_cost_scaled_fidelity(info)

@@ -6,7 +6,7 @@ import math
 
 from qArchSearc.device import get_device_set
 from qArchSearc.util import get_qaoa_graph
-
+#from memory_profiler import memory_usage
 
 # Initialize parser
 parser = argparse.ArgumentParser()
@@ -38,14 +38,22 @@ if args.benchmark == "qaoa":
     program = [args.size,
         get_qaoa_graph(size=args.size, trial=args.trial),
         ["ZZ" for _ in range( (args.size * 3) // 2 )] ]
-    lsqc_searcher.setprogram(program, "IR")
+    lsqc_searcher.setprogram(args.benchmark, program, "IR")
 else:
     file = open(args.filename)
-    lsqc_searcher.setprogram(file.read())
+    lsqc_searcher.setprogram(args.benchmark, file.read())
     file.close()
 
-results = lsqc_searcher.search(output_mode="IR")
+#mem_usage = memory_usage(f)
+print("start searching...")
+results = lsqc_searcher.search()
 
 for i, result in enumerate(results):
     with open(f"./{args.folder}/extra_edge_{i}.json", 'w') as file_object:
+        if args.benchmark == "qcnn":
+            result["size"] = args.filename.split('_')[0]
+        elif argsbenchmark == "arith":
+            result["file"] = args.filename.split('.')[0]
+        else:
+            result["size"] = args.size
         json.dump(result, file_object)
