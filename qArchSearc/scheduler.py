@@ -77,7 +77,7 @@ NUM_PREC = 10
 # TWOQ_XTALK_THRESH = 3
 TWOQ_XTALK_THRESH = 1
 ONEQ_XTALK_THRESH = 1
-timeout = 60*20
+TIMEOUT = 60*20
 
 class CrosstalkAdaptiveSchedule(TransformationPass):
     """Crosstalk mitigation through adaptive instruction scheduling."""
@@ -148,7 +148,7 @@ class CrosstalkAdaptiveSchedule(TransformationPass):
         self.qubit_lifetime = {}
         self.dag_overlap_set = {}
         self.xtalk_overlap_set = {}
-        self.opt = Optimize()
+        self.opt = Solver()
         self.measured_qubits = []
         self.measure_start = None
         self.last_gate_on_qubit = None
@@ -614,7 +614,7 @@ class CrosstalkAdaptiveSchedule(TransformationPass):
         self.setMaxLifetime()
         self.setMaxCtNum()
         # set timeout to be 20 min
-        self.opt.set("timeout", timeout)
+        set_param(timeout=TIMEOUT)
         # begin pop and push
         best_result = None
         best_crosstalkNum = None

@@ -5,6 +5,7 @@ trap "exit" INT
 benchmarks=$1
 circuit=$2
 substring=".qasm"
+max_memory_usage=$3
 
 # Iterate over some devices. Increasing the upper bound to 255 means all the devices.
 if [ ! -d "results/olsq/$benchmarks" ]; then 
@@ -18,6 +19,6 @@ if [ ! -d $folderName    ]; then
     mkdir $folderName   
 fi
 
-python3 -u runArchSearch.py $benchmarks $folderName --filename $circuit | tee "$folderName/output.log"
+python3 -u runArchSearch.py $benchmarks $folderName --filename $circuit --memory_max_size $max_memory_usage| tee "$folderName/output.log"
 
 echo "all done"

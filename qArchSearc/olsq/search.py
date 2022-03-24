@@ -3,7 +3,7 @@ import datetime
 from unittest import result
 from numpy import insert
 
-from z3 import Int, IntVector, Bool, Optimize, Implies, And, Or, If, sat, Solver
+from z3 import Int, IntVector, Bool, Optimize, Implies, And, Or, If, sat, Solver, SolverFor, set_option
 
 from qArchSearc.olsq.input import input_qasm
 from qArchSearc.olsq.device import qcDeviceSet
@@ -11,6 +11,9 @@ from qArchSearc.util import cal_crosstalk, cal_fidelity, cal_cost_scaled_fidelit
 from qArchSearc.device import get_char_graph
 from qArchSearc.gate_absorption import run_gate_absorption
 import pkgutil
+
+MEMORY_MAX_SIZE = 1000 * 60
+MAX_TREAD_NUM = 8
 
 def collision_extracting(list_gate_qubits):
     """Extract collision relations between the gates,
@@ -262,14 +265,14 @@ class qArchEval:
         self.list_gate_dependency = dependency
         self.inpput_dependency = True
 
-    def search(self, output_file_name: str = None):
+    def search(self, memory_max_size=MEMORY_MAX_SIZE):
         # using binary search to optimize swap
         """Formulate an SMT, pass it to z3 solver, and output results.
         CORE OF OLSQ, EDIT WITH CARE.
 
         Args:
             output_mode: "IR" or left to default.
-            output_file_name: a file to store the IR output or qasm.
+            memory_max_alloc_count: set hard upper limit for memory allocations in Z3 (G)
         
         Returns:
             a list of results depending on output_mode
@@ -393,7 +396,12 @@ class qArchEval:
 
             count_extra_edge = Int('num_extra_edge')
 
-            lsqc = Solver()
+            # lsqc = Solver()
+            lsqc = SolverFor("QF_BV")
+            set_option("parallel.enable", True)
+            set_option("parallel.threads.max", MAX_TREAD_NUM)
+            set_option("memory_max_size", memory_max_size)
+            set_option("verbose", 10)
 
             # constraint setting
             # Injective Mapping
