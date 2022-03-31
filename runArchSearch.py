@@ -23,8 +23,10 @@ parser.add_argument("--filename", dest="filename", type=str,
     help="The file name of the arith circuit")
 parser.add_argument("--tran", dest="iftran", action='store_true',
     help="if you want to use TB-OLSQ rather than OLSQ")
-parser.add_argument("--memory_max_size", dest="memory_max_size", type=int,
+parser.add_argument("--memory_max_size", dest="memory_max_size", type=int, default=0,
     help="set hard upper limit for memory consumption (G)")
+parser.add_argument("--verbose", dest="verbose", type=int, default=0,
+    help="verbose level for Z3")
 args = parser.parse_args()
 
 # defulat using TB-OLSQ 
@@ -48,7 +50,7 @@ else:
 
 #mem_usage = memory_usage(f)
 print("start searching...")
-results = lsqc_searcher.search(memory_max_size=args.memory_max_size*1000)
+results = lsqc_searcher.search(memory_max_size=args.memory_max_size*1000, verbose=args.verbose)
 
 for i, result in enumerate(results):
     with open(f"./{args.folder}/extra_edge_{i}.json", 'w') as file_object:

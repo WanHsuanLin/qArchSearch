@@ -14,6 +14,7 @@ import pkgutil
 
 MEMORY_MAX_SIZE = 1000 * 60
 MAX_TREAD_NUM = 8
+VERBOSE = 10
 
 def collision_extracting(list_gate_qubits):
     """Extract collision relations between the gates,
@@ -265,7 +266,7 @@ class qArchEval:
         self.list_gate_dependency = dependency
         self.inpput_dependency = True
 
-    def search(self, memory_max_size=MEMORY_MAX_SIZE):
+    def search(self, memory_max_size=MEMORY_MAX_SIZE, verbose = VERBOSE):
         # using binary search to optimize swap
         """Formulate an SMT, pass it to z3 solver, and output results.
         CORE OF OLSQ, EDIT WITH CARE.
@@ -369,7 +370,8 @@ class qArchEval:
         # tight_bound_depth: use for depth constraint
         tight_bound_depth = self.bound_depth
         # bound_depth: generate constraints until t = bound_depth
-        bound_depth = 2 * self.bound_depth
+        if self.if_transition_based:
+            bound_depth = 8 * self.bound_depth
         while not_solved:
             print("start adding constraints...")
             # variable setting 
@@ -396,12 +398,13 @@ class qArchEval:
 
             count_extra_edge = Int('num_extra_edge')
 
-            # lsqc = Solver()
-            lsqc = SolverFor("QF_BV")
-            set_option("parallel.enable", True)
-            set_option("parallel.threads.max", MAX_TREAD_NUM)
-            set_option("memory_max_size", memory_max_size)
-            set_option("verbose", 10)
+            lsqc = Solver()
+            # lsqc = SolverFor("QF_BV")
+            # set_option("parallel.enable", True)
+            # set_option("parallel.threads.max", MAX_TREAD_NUM)
+            if memory_max_size > 0:
+                set_option("memory_max_size", memory_max_size)
+            set_option("verbose", verbose)
 
             # constraint setting
             # Injective Mapping
@@ -607,7 +610,7 @@ class qArchEval:
         list_extra_qubit_edge_idx = self.list_extra_qubit_edge_idx
         result_time = []
         result_depth = 0
-        
+        tran_detph = 0
         for l in range(count_gate):
             result_time.append(model[time[l]].as_long())
             result_depth = max(result_depth, result_time[-1])
@@ -631,7 +634,7 @@ class qArchEval:
                 print(f"Gate {l}: {list_gate_name[l]} {qq}, {qqq} on qubits "\
                     + f"{model[pi[qq][tt]].as_long()} and "\
                     + f"{model[pi[qqq][tt]].as_long()} at time {tt}")
-
+        tran_detph = result_depth
 
         # transition based
         if self.if_transition_based:
@@ -709,7 +712,7 @@ class qArchEval:
         for m in range(count_program_qubit):
             tmp_depth = result_depth - 1
             if self.if_transition_based:
-                tmp_depth = result_depth - 1
+                tmp_depth = tran_detph 
             final_mapping.append(model[pi[m][tmp_depth]].as_long())
 
         initial_mapping = []
