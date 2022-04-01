@@ -2,7 +2,7 @@ import os
 import sys
 import argparse
 import json
-from qArchSearc.olsq.device import qcDeviceSet
+from qArchSearch.olsq.device import qcDeviceSet
 
 
 def get_char_graph(coupling:list):

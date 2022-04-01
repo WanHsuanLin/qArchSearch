@@ -5,11 +5,11 @@ from numpy import insert
 
 from z3 import Int, IntVector, Bool, Optimize, Implies, And, Or, If, sat, Solver, SolverFor, set_option
 
-from qArchSearc.olsq.input import input_qasm
-from qArchSearc.olsq.device import qcDeviceSet
-from qArchSearc.util import cal_crosstalk, cal_fidelity, cal_cost_scaled_fidelity, cal_cost
-from qArchSearc.device import get_char_graph
-from qArchSearc.gate_absorption import run_gate_absorption
+from qArchSearch.olsq.input import input_qasm
+from qArchSearch.olsq.device import qcDeviceSet
+from qArchSearch.util import cal_crosstalk, cal_fidelity, cal_cost_scaled_fidelity, cal_cost
+from qArchSearch.device import get_char_graph
+from qArchSearch.gate_absorption import run_gate_absorption
 import pkgutil
 
 MEMORY_MAX_SIZE = 1000 * 60

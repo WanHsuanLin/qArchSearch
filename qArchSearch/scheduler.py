@@ -17,9 +17,9 @@ import argparse
 import json
 dir_path = os.getcwd()
 sys.path.append(dir_path)
-from qArchSearc.writeCSV import cal_crosstalk
-from qArchSearc.device import getNeighboringQubit
-from qArchSearc.util import get_list_of_json_files, cal_crosstalk
+from qArchSearch.writeCSV import cal_crosstalk
+from qArchSearch.device import getNeighboringQubit
+from qArchSearch.util import get_list_of_json_files, cal_crosstalk
 
 TWO_QUBIT_GATE_FID = 0.99
 CT_TWO_QUBIT_GATE_FID = 0.985

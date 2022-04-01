@@ -1,4 +1,4 @@
-from qArchSearc.olsq.device import qcdevice
+from qArchSearch.olsq.device import qcdevice
 
 
 def output_qasm(device: qcdevice, result_depth: int,

@@ -21,7 +21,6 @@ height = 25
 linewidth = 14 #default 1.5
 markersize = 40
 
-num_device = 256
 file_type='.png'
 
 def get_list_of_json_files():
@@ -70,19 +69,6 @@ def draw_groupBy(title:str, titleAvg:str, list_of_files, label, group:str, featu
         sorted_df.fillna(0)
         sorted_df.reset_index(inplace=True)
         data = np.array(sorted_df)
-        ###
-        if feature == 'cost-scaled fidelity' or feature == "cost-scaled fidelity_ct":
-            # new_df = df.groupby(group,as_index=False).apply(get_bestCf)
-            # print(new_df)
-            data[:,1] = data[:,1]/data[0,1]
-            max_idx = np.argmax(data[:,1])
-            tmp_sorted_df = df_tmp.sort_values(by=[sort])
-            tmp_sorted_df.fillna(0)
-            tmp_sorted_df.reset_index(inplace=True)
-            tmp_data = np.array(tmp_sorted_df)
-            tmp_data[:,1] = tmp_data[:,1]
-            print("For benchmark {}, the maximal cfct occurs on device {} with value {}, where the fidelity is {} and improvement is {}".format(file, max_idx, data[max_idx,1], tmp_data[max_idx,1], tmp_data[max_idx,1]/tmp_data[0,1]))
-        ###
         # plot
         elif feature == 'f_improve_r' or feature == "fct_improve_r":
             data[:,1] = data[:,1]/data[0,1]
@@ -369,17 +355,6 @@ def analysis_fidelity(list_of_files):
     for file in list_of_files:
         df = pd.read_csv(file)
         data = np.array(df)
-        # fp.write("case : " + file + "\n")
-        # # fp.write("the average fidelity of 50 designs with the lowest cost : ", np.sum(data[0:50,5])/50)
-        # # fp.write("the average fidelity of 50 designs with the highest cost: ", np.sum(data[205:,5])/50)
-        # fp.write("the std fidelity of designs                             : %.4f \n" % np.std(data[:,5]))
-        # fp.write("the mean fidelity of designs                            : %.4f \n" % np.mean(data[:,5]))
-        # fp.write("the difference of fidelity over designs                 : %.4f \n" % (np.max(data[:,5]) - np.min(data[:,5]))) #/np.mean(data[:,5]))
-        # fp.write("the difference between max fidelity and mean fidelity   : %.4f \n" % (np.max(data[:,5]) - np.mean(data[:,5]))) #/np.mean(data[:,5]))
-        # fp.write("the ratio between max fidelity and mean fidelity        : %.2f% \n" % ((np.max(data[:,5]) - np.mean(data[:,5]))/np.mean(data[:,5])*100.0) ) #/np.mean(data[:,5]))
-        # fp.write("the difference between min fidelity and mean fidelity   : %.4f \n" % (np.mean(data[:,5]) - np.min(data[:,5]))) #/np.mean(data[:,5]))
-        # fp.write("the ratio between min fidelity and mean fidelity        : %.2f% \n" % ((np.min(data[:,5]) - np.mean(data[:,5]))/np.mean(data[:,5])*100.0)) #/np.mean(data[:,5]))
-        # fp.write("the ratio between max fidelity and min fidelity         : %.2f% \n" % ((np.max(data[:,5]) - np.min(data[:,5]))/np.min(data[:,5])*100.0)) #/np.mean(data[:,5]))
         dictTmp = { "case" : 1,
                     "the std fidelity of designs" : round(np.std(data[:,5]),2),
                     "the mean fidelity of designs" : round(np.mean(data[:,5]),2),
@@ -412,12 +387,6 @@ def analysis_cfct(list_of_files):
         print(file)
         for i in range(20):
             print("the ",i," best device is ", device_ind[num_device-i-1], " with cfct ", curValue[device_ind[num_device-i-1]])
-        
-    # average /= len(list_of_files)
-    # device_ind = np.argsort(average)
-    # for i in range(20):
-    #     print("the ",i," best device is ", device_ind[num_device-i-1], " with cfct ", average[device_ind[num_device-i-1]])
-    
 
 def analysis_cf(list_of_files):
     average = np.zeros(num_device)
@@ -430,8 +399,6 @@ def analysis_cf(list_of_files):
     device_ind = np.argsort(average)
     for i in range(20):
         print("the ",i," best device is ", device_ind[num_device-i-1], " with cf ", average[device_ind[num_device-i-1]])
-    
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

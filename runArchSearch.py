@@ -1,11 +1,11 @@
-from qArchSearc.olsq import qArchEval
-from qArchSearc.olsq.device import qcDeviceSet
+from qArchSearch.olsq import qArchEval
+from qArchSearch.olsq.device import qcDeviceSet
 import argparse
 import json
 import math
 
-from qArchSearc.device import get_device_set
-from qArchSearc.util import get_qaoa_graph
+from qArchSearch.device import get_device_set
+from qArchSearch.util import get_qaoa_graph
 #from memory_profiler import memory_usage
 
 if __name__ == "__main__":

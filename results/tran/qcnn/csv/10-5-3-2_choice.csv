@@ -1,0 +1,12 @@
+choose by best csf
+#e,edge list,f,f_imp_r,csf_imp_r
+3,"[[1, 4], [1, 6], [5, 10]]",0.4581250215882075,0.25127122377953837,1.1876472632483623
+choose by best csf_ct
+#e,edge list,f_ct,f_imp_r_ct,csf_imp_r_ct
+1,"[[5, 10]]",0.3502819789962325,0.16558738664534484,1.1451384851252533
+choose by largest f_imp with csf > 1
+#e,edge list,f,f_imp_r,csf_imp_r
+3,"[[1, 4], [1, 6], [5, 10]]",0.4581250215882075,0.25127122377953837,1.1876472632483623
+choose by largest f_ct_imp with csf_ct > 1
+#e,edge list,f_ct,f_imp_r_ct,csf_imp_r_ct
+5,"[[3, 6], [8, 13], [2, 5], [5, 8], [6, 9]]",0.3683432535204848,0.22568752035057846,1.1252213301579082
