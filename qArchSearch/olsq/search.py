@@ -656,7 +656,7 @@ class qArchEval:
                                         time[l] == tt, space[l] == kk),
                                             sigma[k][t] == False       ))
 
-    def extract_results(self, model, time, pi, sigma, space, u):
+    def _extract_results(self, model, time, pi, sigma, space, u):
         # post-processing
         list_gate_two = self.list_gate_two
         list_gate_single = self.list_gate_single
@@ -670,7 +670,6 @@ class qArchEval:
         list_extra_qubit_edge_idx = self.list_extra_qubit_edge_idx
         result_time = []
         result_depth = 0
-        tran_detph = 0
         for l in range(count_gate):
             result_time.append(model[time[l]].as_long())
             result_depth = max(result_depth, result_time[-1])
@@ -697,7 +696,7 @@ class qArchEval:
         tran_detph = result_depth
 
         # transition based
-        if self.if_transition_based:
+        if self.mode == Mode.transition:
             self.swap_duration = self.device.swap_duration
             real_time = [0 for i in range(count_gate)]
             list_depth_on_qubit = [-1 for i in range(self.count_physical_qubit)]
@@ -769,10 +768,10 @@ class qArchEval:
                 raise ValueError("Expect single-qubit or two-qubit gate.")
 
         final_mapping = []
+        tmp_depth = result_depth - 1
+        if self.mode == Mode.transition:
+            tmp_depth = tran_detph 
         for m in range(count_program_qubit):
-            tmp_depth = result_depth - 1
-            if self.if_transition_based:
-                tmp_depth = tran_detph 
             final_mapping.append(model[pi[m][tmp_depth]].as_long())
 
         initial_mapping = []
@@ -808,7 +807,7 @@ class qArchEval:
                 extra_edge)
     
     def write_results(self, model, time, pi, sigma, space, u):
-        results = self.extract_results(model, time, pi, sigma, space, u)
+        results = self._extract_results(model, time, pi, sigma, space, u)
         D = results[0]
         program_out = ""
         g2 = 0
@@ -838,10 +837,12 @@ class qArchEval:
         device_connection = info["extra_edge"] + list(self.list_basic_qubit_edge )
         print(device_connection)
         info["coupling_graph"] = get_char_graph(device_connection)
-        if self.if_transition_based:
+        if self.mode == Mode.transition:
             info["olsq_mode"] = "transition"
-        else: 
+        elif self.mode == Mode.normal:
             info["olsq_mode"] = "normal"
+        else:
+            info["olsq_mode"] = "mix"
         if self.benchmark == "qaoa" or self.benchmark == "qcnn":
             # run gate absorption
             run_gate_absorption(self.benchmark, info, device_connection)
