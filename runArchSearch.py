@@ -22,8 +22,8 @@ if __name__ == "__main__":
         help="The index of qaoa circuit: from 0 to 9")
     parser.add_argument("--filename", dest="filename", type=str,
         help="The file name of the arith circuit")
-    parser.add_argument("--tran", dest="iftran", action='store_true',
-        help="if you want to use TB-OLSQ rather than OLSQ")
+    parser.add_argument("--mode", dest="mode", type=int,
+        help="mode: 1 TB-OLSQ, 2 OLSQ, 3 mix")
     parser.add_argument("--memory_max_size", dest="memory_max_size", type=int, default=0,
         help="set hard upper limit for memory consumption (G)")
     parser.add_argument("--verbose", dest="verbose", type=int, default=0,
@@ -31,9 +31,12 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # defulat using TB-OLSQ 
-    my_mode = "normal"
-    if args.iftran:
+    if args.mode == 1:
         my_mode = "transition"
+    elif args.mode == 2:
+        my_mode = "normal"
+    else:
+        my_mode = "mixed"
 
     lsqc_searcher = qArchEval(mode=my_mode)
 
@@ -57,7 +60,7 @@ if __name__ == "__main__":
         with open(f"./{args.folder}/extra_edge_{i}.json", 'w') as file_object:
             if args.benchmark == "qcnn":
                 result["size"] = args.filename.split('_')[0]
-            elif argsbenchmark == "arith":
+            elif args.benchmark == "arith":
                 result["file"] = args.filename.split('.')[0]
             else:
                 result["size"] = args.size

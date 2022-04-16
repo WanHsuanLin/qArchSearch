@@ -151,7 +151,7 @@ class qArchEval:
         # print("device extra edge: ", self.list_extra_qubit_edge)
         # print("device all edge: ", self.list_qubit_edge)
         self.swap_duration = device.swap_duration
-        if self.if_transition_based:
+        if self.mode == Mode.transition:
             self.swap_duration = 1
         for e in self.list_extra_qubit_edge:
             self.list_extra_qubit_edge_idx.append(self.list_qubit_edge.index(e))
@@ -334,7 +334,7 @@ class qArchEval:
         model = None
 
         # tight_bound_depth: use for depth constraint
-        tight_bound_depth = self.bound_depth
+
         # bound_depth: generate constraints until t = bound_depth
         if preprossess_only or self.mode == Mode.transition:
             bound_depth = 8 * self.bound_depth
@@ -343,7 +343,7 @@ class qArchEval:
         while not_solved:
             print("start adding constraints...")
             # variable setting 
-            pi, time, space, sigma, u, count_swap, count_extra_edge = self._construct_variable(self, bound_depth, len(list_qubit_edge))
+            pi, time, space, sigma, u, count_swap, count_extra_edge = self._construct_variable(bound_depth, len(list_qubit_edge))
 
             lsqc = Solver()
             # lsqc = SolverFor("QF_BV")
@@ -354,10 +354,10 @@ class qArchEval:
             set_option("verbose", verbose)
 
             # constraint setting
-            self._add_injective_mapping_constraints(bound_depth, pi, model)
+            self._add_injective_mapping_constraints(bound_depth, pi, lsqc)
 
             # Consistency between Mapping and Space Coordinates.
-            self._add_consistency_gate_constraints(bound_depth, list_qubit_edge, pi, space, time, model)
+            self._add_consistency_gate_constraints(bound_depth, list_qubit_edge, pi, space, time, lsqc)
             
             # Avoiding Collisions and Respecting Dependencies. 
             # Modify dependency constraint
@@ -374,10 +374,10 @@ class qArchEval:
 
             # # No swap for t<s
             # # swap gates can not overlap with swap
-            self._add_swap_constraints(bound_depth, list_qubit_edge, sigma, model, count_swap)
+            self._add_swap_constraints(bound_depth, list_qubit_edge, sigma, lsqc, count_swap)
             # Mapping Not Transformations by SWAP Gates.
             # Mapping Transformations by SWAP Gates.
-            self._add_transformation_constraints(bound_depth, list_qubit_edge, model, sigma, pi)
+            self._add_transformation_constraints(bound_depth, list_qubit_edge, lsqc, sigma, pi)
 
             if not preprossess_only:
                 # record the use of the extra edge
@@ -399,7 +399,7 @@ class qArchEval:
                     bound_depth *= 2
                     break
                 if preprossess_only:
-                    swap_bound = (tight_bound_depth , model[count_swap].as_long())
+                    swap_bound = (self.bound_depth , model[count_swap].as_long())
                     break
                 results.append(self.write_results(model, time, pi, sigma, space, u))
                 print(f"Compilation time = {datetime.datetime.now() - per_start}.")
@@ -413,7 +413,7 @@ class qArchEval:
         return swap_bound, results
 
     def _optimize_circuit(self, lsqc, preprossess_only, count_extra_edge, num_e, time, count_gate, count_swap, bound_depth, swap_bound):
-        if swap_bound == None:
+        if swap_bound != None:
             lower_b_swap = swap_bound[0]
             upper_b_swap = swap_bound[-1]
         else:
@@ -424,6 +424,7 @@ class qArchEval:
         lsqc.add(count_extra_edge <= num_e)
         find_min_depth = False
         # incremental solving use pop and push
+        tight_bound_depth = self.bound_depth
         while not find_min_depth:
             print("Trying maximal depth = {}...".format(tight_bound_depth))
             # for depth optimization
@@ -520,6 +521,7 @@ class qArchEval:
         # list_span_edge takes in a physical qubit index _p_,
         # and returns the list of edges spanned from _p_
         list_span_edge = list()
+        count_qubit_edge = len(list_qubit_edge)
         for n in range(self.count_physical_qubit):
             list_adjacent_qubit.append(list())
             list_span_edge.append(list())
@@ -541,7 +543,6 @@ class qArchEval:
                                 pi[m][t] == n), pi[m][t + 1] == n))
         
         # Mapping Transformations by SWAP Gates.
-        count_qubit_edge = len(list_qubit_edge)
         for t in range(bound_depth - 1):
             for k in range(count_qubit_edge):
                 for m in range(self.count_program_qubit):
@@ -563,10 +564,10 @@ class qArchEval:
     def _add_consistency_gate_constraints(self, bound_depth, list_qubit_edge, pi, space, time, model):
         # Consistency between Mapping and Space Coordinates.
         list_gate_qubits = self.list_gate_qubits
-        count_gate = len(list_gate_qubits)
+        count_qubit_edge = len(list_gate_qubits)
         list_gate_two = self.list_gate_two
         list_gate_single = self.list_gate_single
-        for l in range(count_gate):
+        for l in range(count_qubit_edge):
             model.add(time[l] >= 0, time[l] < bound_depth)
             if l in list_gate_single:
                 model.add(space[l] >= 0, space[l] < self.count_physical_qubit)
@@ -574,8 +575,8 @@ class qArchEval:
                     model.add(Implies(time[l] == t,
                         pi[list_gate_qubits[l][0]][t] == space[l]))
             elif l in list_gate_two:
-                model.add(space[l] >= 0, space[l] < self.count_qubit_edge)
-                for k in range(self.count_qubit_edge):
+                model.add(space[l] >= 0, space[l] < count_qubit_edge)
+                for k in range(count_qubit_edge):
                     for t in range(bound_depth):
                         model.add(Implies(And(time[l] == t, space[l] == k),
                             Or(And(list_qubit_edge[k][0] == \
@@ -616,7 +617,7 @@ class qArchEval:
 
         # No swap for t<s
         for t in range(min(self.swap_duration - 1, bound_depth)):
-            for k in range(self.count_qubit_edge):
+            for k in range(count_qubit_edge):
                 model.add(sigma[k][t] == False)
         # swap gates can not overlap with swap
         for t in range(self.swap_duration - 1, bound_depth):
@@ -759,7 +760,7 @@ class qArchEval:
             elif l in list_gate_two:
                 [q0, q1] = list_gate_qubits[l]
                 tmp_t = t
-                if self.if_transition_based:
+                if self.mode == Mode.transition:
                     tmp_t = model[time[l]].as_long()
                 q0 = model[pi[q0][tmp_t]].as_long()
                 q1 = model[pi[q1][tmp_t]].as_long()

@@ -1,4 +1,4 @@
-from cirq import Circuit, Moment, GateOperation, SWAP, CNOT
+from cirq import Circuit, GateOperation, SWAP, CNOT
 import networkx as nx
 
 from olsq.solve import OLSQ
