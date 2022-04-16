@@ -285,11 +285,17 @@ class qArchEval:
         if not self.inpput_dependency:
             self.list_gate_dependency = collision_extracting(self.list_gate_qubits)
         if self.mode == Mode.transition:
+            print("Using transition based mode...")
             _, results = self._search(False, None, memory_max_size, verbose)
         elif self.mode == Mode.normal:
+            print("Using normal mode...")
             _, results = self._search(False, None, memory_max_size, verbose)
         elif self.mode == Mode.mix:
+            print("Using mixed mode...")
+            print("Perform preprocessing to find swap bound...")
             swap_bound, _ = self._search(True, None, memory_max_size, verbose)
+            print(f"Finish proprocessing. SWAP bound is ({swap_bound[0]},{swap_bound[1]})")
+            print("Start normal searching...")
             _, results = self._search(False, swap_bound, memory_max_size, verbose)
         else:
             raise ValueError( ("Wrong type") )
@@ -425,6 +431,8 @@ class qArchEval:
         find_min_depth = False
         # incremental solving use pop and push
         tight_bound_depth = self.bound_depth
+        if preprossess_only:
+            tight_bound_depth = 1
         while not find_min_depth:
             print("Trying maximal depth = {}...".format(tight_bound_depth))
             # for depth optimization
