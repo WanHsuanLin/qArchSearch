@@ -30,7 +30,7 @@ if __name__ == "__main__":
         help="verbose level for Z3")
     args = parser.parse_args()
 
-    # defulat using TB-OLSQ 
+
     if args.mode == 1:
         my_mode = "transition"
     elif args.mode == 2:

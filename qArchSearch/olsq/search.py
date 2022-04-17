@@ -396,7 +396,6 @@ class qArchEval:
                     count_extra_edge == sum([If(u[e], 1, 0) for e in range(len(list_extra_qubit_edge))]))
 
             # TODO: iterate each swap num
-            swap_bound = None
             for num_e in range(len(list_extra_qubit_edge)):
                 per_start = datetime.datetime.now()
                 
@@ -407,6 +406,10 @@ class qArchEval:
                 if preprossess_only:
                     swap_bound = (self.bound_depth , model[count_swap].as_long())
                     break
+                if swap_bound != None:
+                    swap_bound = (swap_bound[0],model[count_swap].as_long())
+                else:
+                    swap_bound = (0,model[count_swap].as_long())
                 results.append(self.write_results(model, time, pi, sigma, space, u))
                 print(f"Compilation time = {datetime.datetime.now() - per_start}.")
                 lsqc.pop()
@@ -419,6 +422,8 @@ class qArchEval:
         return swap_bound, results
 
     def _optimize_circuit(self, lsqc, preprossess_only, count_extra_edge, num_e, time, count_gate, count_swap, bound_depth, swap_bound):
+        if swap_bound != None:
+            print(f"optimizing circuit with swap range ({swap_bound[0]},{swap_bound[1]}) ")
         if swap_bound != None:
             lower_b_swap = swap_bound[0]
             upper_b_swap = swap_bound[-1]
@@ -444,6 +449,8 @@ class qArchEval:
                 find_min_depth = True
                 model = lsqc.model()
                 upper_b_swap = min(model[count_swap].as_long(), upper_b_swap)
+                if self.mode == Mode.transition:
+                    lower_b_swap = tight_bound_depth
                 bound_swap_num = (upper_b_swap+lower_b_swap)//2
                 # lsqc.add(tight_bound_depth >= time[l] + 1)
             else:

@@ -3,10 +3,18 @@
 trap "exit" INT
 
 benchmarks=$1
-circuit=$2
-substring=".qasm"
-mode=$3
-max_memory_usage=$4
+
+if [ "$benchmarks" == "qcnn" ]; then
+    circuit=$2
+    substring=".qasm"
+    mode=$3
+    max_memory_usage=$4
+
+if [ "$benchmarks" == "qaoa" ]; then
+    size=$2
+    trial=$3
+    mode=$4
+    max_memory_usage=$5
 
 # Iterate over some devices. Increasing the upper bound to 255 means all the devices.
 if [ ! -d "results/$mode/$benchmarks" ]; then 
@@ -14,12 +22,20 @@ if [ ! -d "results/$mode/$benchmarks" ]; then
 fi
 
 # for circuit in $benchmarks/*; do
-# echo $circuit
-folderName="results/$mode/${circuit%"$substring"}"
-if [ ! -d $folderName    ]; then 
-    mkdir $folderName   
-fi
+# echo $circui
 
-python3 -u runArchSearch.py $benchmarks $folderName --filename $circuit --mode $mode --memory_max_size $max_memory_usage | tee "$folderName/output.log"
+if [ "$benchmarks" == "qcnn" ]; then
+    folderName="results/$mode/${circuit%"$substring"}"
+    if [ ! -d "$folderName"    ]; then 
+        mkdir $folderName   
+    fi
+    python3 -u runArchSearch.py $benchmarks $folderName --filename $circuit --mode $mode --memory_max_size $max_memory_usage | tee "$folderName/output.log"
+
+if [ "$benchmarks" == "qaoa" ]; then
+    folderName="results/$mode/$size_$trial"
+    if [ ! -d "$folderName"    ]; then 
+        mkdir $folderName   
+    fi
+    python3 -u runArchSearch.py $benchmarks $folderName --size $size --trial $trial --mode $mode --memory_max_size $max_memory_usage | tee "$folderName/output.log"
 
 echo "all done"
