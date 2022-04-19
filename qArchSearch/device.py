@@ -1,7 +1,3 @@
-import os
-import sys
-import argparse
-import json
 from qArchSearch.olsq.device import qcDeviceSet
 
 
@@ -112,7 +108,7 @@ def get_char_graph(coupling:list):
         graph += line + "\n"
     return graph
 
-def get_device_set(benchmark:str):
+def get_device_set_square_4by4(benchmark:str):
     # basic couplings, i.e., edges, of a 4*4 grid, i.e., device0
     basic_coupling = [(0,1), (1,2), (2,3), (4,5), (5,6), (6,7), (8,9),
         (9,10), (10,11), (12,13), (13,14), (14,15), (0,4), (4,8),
@@ -121,47 +117,54 @@ def get_device_set(benchmark:str):
     extra_coupling = [(0,5), (3,6), (9,12), (10,15), (1,4), (2,7), (8,13), (11,14),
         (1,6), (10, 13), (2,5), (9,14), (4,9), (7,10), (5,8), (6,11),
         (5,10), (6,9)]
+    conflict_coupling_set = [[(0,5), (1,4)],[(1,6), (2,5)], [(3,6), (2,7)], [(4,9), (5,8)], [(5,10), (6,9)], [(6,11), (7,10)], [(9,12), (8,13)], [(9,14), (10,13)], [(10,15), (11,14)], ]
     # qaoa and qcnn: swap_duration=1 since SWAP is comparable to the gates
     # for arith, use 3
     my_swap_duration = 1
     if benchmark == "arith":
         my_swap_duration = 3
 
-    return qcDeviceSet(name="4by4_full", nqubits=16,
-        connection=basic_coupling, extra_connection = extra_coupling, swap_duration=my_swap_duration)
+    return qcDeviceSet(name="square_4by4", nqubits=16,
+        connection=basic_coupling, extra_connection = extra_coupling, conflict_coupling_set=conflict_coupling_set, swap_duration=my_swap_duration)
 
-def get_coupling(device: int):
-    # basic couplings, i.e., edges, of a 4*4 grid, i.e., device0
-    my_coupling = [(0,1), (1,2), (2,3), (4,5), (5,6), (6,7), (8,9),
-        (9,10), (10,11), (12,13), (13,14), (14,15), (0,4), (4,8),
-        (8,12), (1,5), (5,9), (9,13), (2,6), (6,10), (10,14),
-        (3,7), (7,11), (11,15),
-        (0,5), (3,6), (9,12), (10,15), (1,4), (2,7), (8,13), (11,14),
-        (1,6), (10, 13), (2,5), (9,14), (4,9), (7,10), (5,8), (6,11),
-        (5,10), (6,9)]
+# def get_device_set_hsquare(benchmark:str):
+#     # basic couplings, i.e., edges, of a 4*4 grid, i.e., device0
+#     basic_coupling = [(0,1), (1,2), (2,3), (4,5), (5,6), (6,7), (8,9),
+#         (9,10), (10,11), (12,13), (13,14), (14,15), (0,4), (4,8),
+#         (8,12), (1,5), (5,9), (9,13), (2,6), (6,10), (10,14),
+#         (3,7), (7,11), (11,15)]
+#     extra_coupling = [(0,5), (3,6), (9,12), (10,15), (1,4), (2,7), (8,13), (11,14),
+#         (1,6), (10, 13), (2,5), (9,14), (4,9), (7,10), (5,8), (6,11),
+#         (5,10), (6,9)]
+#     # qaoa and qcnn: swap_duration=1 since SWAP is comparable to the gates
+#     # for arith, use 3
+#     my_swap_duration = 1
+#     if benchmark == "arith":
+#         my_swap_duration = 3
 
-    return my_coupling
+#     return qcDeviceSet(name="h4by4_full", nqubits=16,
+#         connection=basic_coupling, extra_connection = extra_coupling, swap_duration=my_swap_duration)
 
-def getNeighboringQubit(extra_edge_list):
+def get_device_set_hh(benchmark:str):
+    basic_coupling = [(0,4), (1,2), (2,3), (3,4), (4,5), (5,6), (6,7), (2,8), (6,9), (10,11), (8,11), (11,12), (12,13), (13,14), (14,15), (15,16), (9,15), (13,17)]
+    extra_coupling = [(3,8), (8,12), (3,12), (3,13), (4,12), (4,13), (4,14), (5,13), (5,14), (5,15), (6,14)]
+    conflict_coupling_set = [[(3,13), (4,12)], [(4,14), (5,13)], [(5,15), (6,14)]]
+    # qaoa and qcnn: swap_duration=1 since SWAP is comparable to the gates
+    # for arith, use 3
+    my_swap_duration = 1
+    if benchmark == "arith":
+        my_swap_duration = 3
+    
+    return qcDeviceSet(name="hh", nqubits=18,
+        connection=basic_coupling, extra_connection = extra_coupling, conflict_coupling_set=conflict_coupling_set, swap_duration=my_swap_duration)
+
+def getNeighboringQubit(list_qubit_edge, qubit_number):
     # construct dict: qubit->list of neighboring qubit
-    dict_qubit_neighboringQubit = {0:[1,4],
-                                    1:[0,2,5],
-                                    2:[1,3,6],
-                                    3:[2,7],
-                                    4:[5,0,8],
-                                    5:[4,6,1,9],
-                                    6:[5,7,2,10],
-                                    7:[6,3,11],
-                                    8:[9,4,12],
-                                    9:[8,10,5,13],
-                                    10:[9,11,6,14],
-                                    11:[10,7,15],
-                                    12:[13,8],
-                                    13:[12,14,9],
-                                    14:[13,15,10],
-                                    15:[14,11]}
+    dict_qubit_neighboringQubit = {}
+    for i in range(qubit_number):
+        dict_qubit_neighboringQubit[i] = []
 
-    for edge in extra_edge_list:
+    for edge in list_qubit_edge:
             dict_qubit_neighboringQubit[edge[0]].append(edge[1])
             dict_qubit_neighboringQubit[edge[1]].append(edge[0])
     return dict_qubit_neighboringQubit

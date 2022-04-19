@@ -82,50 +82,17 @@ def get_qaoa_graph(size:int, trial:int):
 
     return qaoa[str(size)][trial]
 
-def get_nnGrid(n: int, benchmark:str):
-    if n == 2:
-        my_coupling = [(0,1), (0,2), (1,3), (2,3)]
-    elif n == 3:
-        my_coupling = [(0,1), (1,2), (3,4), (4,5), (6,7), (7,8),
-            (0,3), (3,6), (1,4), (4,7), (2,5), (5,8)]
-    elif n == 4:
-        my_coupling = [(0,1), (1,2), (2,3), (4,5), (5,6), (6,7), (8,9),
-            (9,10), (10,11), (12,13), (13,14), (14,15), (0,4), (4,8),
-            (8,12), (1,5), (5,9), (9,13), (2,6), (6,10), (10,14),
-            (3,7), (7,11), (11,15)]
-    elif n == 5:
-        my_coupling = [(0,1), (1,2), (2,3), (3,4), (5,6), (6,7), (7,8), (8,9),
-            (10,11), (11,12), (12,13), (13,14), (15,16), (16,17), (17,18), (18,19),
-            (20,21), (21,22), (22,23), (23,24), (0,5), (5,10), (10,15), (15,20),
-            (1,6), (6,11), (11,16), (16,21), (2,7), (7,12), (12,17), (17,22),
-            (3,8), (8,13), (13,18), (18,23), (4,9), (9,14), (14,19), (19,24)]
-
-    # qaoa and qcnn: swap_duration=1 since SWAP is comparable to the gates
-    # for arith, use 3
-    my_swap_duration = 1
-    if benchmark == "arith":
-        my_swap_duration = 3
-
-
-    # if args.iffidelity:
-    #     my_ftwo = [0.99]*len(my_coupling)
-    #     return qcdevice(name=str(n*n), nqubits=16,
-    #         connection=my_coupling, swap_duration=my_swap_duration, ftwo = my_ftwo)
-    
-    return qcdevice(name=str(n*n), nqubits=16,
-        connection=my_coupling, swap_duration=my_swap_duration)
-
 def is_crosstalk(g1_pos, g2_pos, dict_qubit_neighboringQubit):
     if g1_pos[0] in dict_qubit_neighboringQubit[g2_pos[0]] or (g1_pos[0] in dict_qubit_neighboringQubit[g2_pos[1]]) or (g1_pos[1] in dict_qubit_neighboringQubit[g2_pos[0]]) or (g1_pos[1] in dict_qubit_neighboringQubit[g2_pos[1]]):
                                 return True
     else:
         return False
 
-def cal_crosstalk(data:dict, b):
+def cal_crosstalk(data:dict, b, coupling, device_qubit):
     gate_pos = data["gates"]
     gate_spec = data["gate_spec"]
     # construct dict: qubit->list of neighboring qubit
-    dict_qubit_neighboringQubit = getNeighboringQubit(data["extra_edge"])
+    dict_qubit_neighboringQubit = getNeighboringQubit(coupling, device_qubit)
     
     # calculate the number of gates effected by crosstalk
     num_crosstalk = 0

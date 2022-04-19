@@ -863,7 +863,7 @@ class qArchEval:
             # run gate absorption
             run_gate_absorption(self.benchmark, info, device_connection)
         info["cost"] = cal_cost(len(results[5]))
-        info['crosstalk'] = cal_crosstalk(info, self.benchmark)
+        info['crosstalk'] = cal_crosstalk(info, self.benchmark, self.list_qubit_edge, self.device.count_physical_qubit)
         info['fidelity'], info['fidelity_ct']  = cal_fidelity(info)
         info['cost-scaled fidelity'], info['cost-scaled fidelity_ct'] = cal_cost_scaled_fidelity(info)
         return info

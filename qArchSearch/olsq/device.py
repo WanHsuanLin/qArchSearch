@@ -8,7 +8,7 @@ class qcDeviceSet:
     """
 
     def __init__(self, name: str, nqubits: int = None, connection: list = None, extra_connection: list = None,
-                 swap_duration: int = None, fmeas: list = None, 
+                 conflict_coupling_set: list = None, swap_duration: int = None, fmeas: list = None, 
                  fsingle: list = None, ftwo: list = None):
         """ Create a QC device.
         The user can either input the device parameters, or use existing
@@ -140,6 +140,18 @@ class qcDeviceSet:
                     raise ValueError( (f"{edge[1]} is outside of range "
                                        f"[0, {self.count_physical_qubit}).") )
             self.list_extra_qubit_edge = tuple( tuple(edge) for edge in extra_connection)
+        
+        self.conflict_coupling_set = []
+        if conflict_coupling_set is not None:
+            for edge_set in conflict_coupling_set:
+                for edge in edge_set:
+                    if edge[0] < 0 or edge[0] >= self.count_physical_qubit:
+                        raise ValueError( (f"{edge[0]} is outside of range "
+                                        f"[0, {self.count_physical_qubit}).") )
+                    if edge[1] < 0 or edge[1] >= self.count_physical_qubit:
+                        raise ValueError( (f"{edge[1]} is outside of range "
+                                        f"[0, {self.count_physical_qubit}).") )
+                self.conflict_coupling_set.append(edge_set)
 
         if "list_qubit_edge" not in self.__dict__:
             raise AttributeError("No edge set is specified.")
