@@ -687,7 +687,7 @@ class qArchEval:
             if len(edge_set) == 2:
                 idx1 = list_extra_qubit_edge_idx.index(self.dict_extra_qubit_edge_idx[edge_set[0]])
                 idx2 = list_extra_qubit_edge_idx.index(self.dict_extra_qubit_edge_idx[edge_set[1]])
-                model.add(And(u[idx1], u[idx2]))
+                model.add(Not(And(u[idx1], u[idx2])))
             else:
                 idxs = []
                 for edge in edge_set:
@@ -886,8 +886,8 @@ class qArchEval:
         if self.benchmark == "qaoa" or self.benchmark == "qcnn":
             # run gate absorption
             run_gate_absorption(self.benchmark, info, device_connection)
-        info["cost"] = cal_cost(len(results[5]))
+        # info["cost"] = cal_cost(len(results[5]))
         info['crosstalk'] = cal_crosstalk(info, self.benchmark, self.list_qubit_edge, self.device.count_physical_qubit)
         info['fidelity'], info['fidelity_ct']  = cal_fidelity(info)
-        info['cost-scaled fidelity'], info['cost-scaled fidelity_ct'] = cal_cost_scaled_fidelity(info)
+        # info['cost-scaled fidelity'], info['cost-scaled fidelity_ct'] = cal_cost_scaled_fidelity(info)
         return info
