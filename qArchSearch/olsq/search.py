@@ -328,8 +328,6 @@ class qArchEval:
             list_qubit_edge = self.list_basic_qubit_edge
         else:
             list_qubit_edge = self.list_qubit_edge
-        list_extra_qubit_edge = self.list_extra_qubit_edge
-        list_extra_qubit_edge_idx = self.list_extra_qubit_edge_idx
         # pre-processing
         count_gate = len(self.list_gate_qubits)
         list_gate_duration = self.list_gate_duration
@@ -387,16 +385,10 @@ class qArchEval:
 
             if not preprossess_only:
                 # record the use of the extra edge
-                for e in range(len(list_extra_qubit_edge)):
-                    all_gate = [space[l] == list_extra_qubit_edge_idx[e] for l in range(count_gate)]
-                    swap_gate = [sigma[list_extra_qubit_edge_idx[e]][t] for t in range(bound_depth - 1)]
-                    lsqc.add(Or(all_gate + swap_gate) == u[e])
+                self._add_edge_constraints(count_gate, bound_depth, count_extra_edge, space, sigma, lsqc)
                 
-                lsqc.add(
-                    count_extra_edge == sum([If(u[e], 1, 0) for e in range(len(list_extra_qubit_edge))]))
-
             # TODO: iterate each swap num
-            for num_e in range(len(list_extra_qubit_edge)):
+            for num_e in range(len(self.list_extra_qubit_edge)):
                 per_start = datetime.datetime.now()
                 
                 not_solved, model = self._optimize_circuit(lsqc, preprossess_only, count_extra_edge, num_e, time, count_gate, count_swap, bound_depth, swap_bound)
@@ -671,6 +663,18 @@ class qArchEval:
                                     model.add(Implies(And(
                                         time[l] == tt, space[l] == kk),
                                             sigma[k][t] == False       ))
+
+    def _add_edge_constraints(self, count_gate, bound_depth, count_extra_edge, space, sigma, model):
+        # record the use of the extra edge
+        list_extra_qubit_edge = self.list_extra_qubit_edge
+        list_extra_qubit_edge_idx = self.list_extra_qubit_edge_idx
+        for e in range(len(list_extra_qubit_edge)):
+            all_gate = [space[l] == list_extra_qubit_edge_idx[e] for l in range(count_gate)]
+            swap_gate = [sigma[list_extra_qubit_edge_idx[e]][t] for t in range(bound_depth - 1)]
+            model.add(Or(all_gate + swap_gate) == u[e])
+        
+        model.add(
+            count_extra_edge == sum([If(u[e], 1, 0) for e in range(len(list_extra_qubit_edge))]))
 
     def _extract_results(self, model, time, pi, sigma, space, u):
         # post-processing
