@@ -16,7 +16,10 @@ if [ "$benchmarks" == "qaoa" ]; then
     mode=$4
     max_memory_usage=$5
 
-# Iterate over some devices. Increasing the upper bound to 255 means all the devices.
+if [ ! -d "results/$mode" ]; then 
+    mkdir "results/$mode"
+fi
+
 if [ ! -d "results/$mode/$benchmarks" ]; then 
     mkdir "results/$mode/$benchmarks"
 fi
