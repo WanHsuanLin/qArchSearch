@@ -3,6 +3,7 @@ import datetime
 from unittest import result
 from cv2 import FarnebackOpticalFlow
 from numpy import insert
+from sympy import Not
 
 from z3 import Int, IntVector, Bool, Optimize, Implies, And, Or, If, sat, Solver, set_option
 
@@ -114,10 +115,12 @@ class qArchEval:
         self.list_qubit_edge = []
         self.list_extra_qubit_edge = []
         self.list_basic_qubit_edge = []
+        self.list_conflict_edge_set = []
         self.swap_duration = 0
         self.dict_gate_duration = dict()
         self.list_gate_duration = []
         self.list_extra_qubit_edge_idx = []
+        self.dict_extra_qubit_edge_idx = dict()
 
         # These values should be updated in setprogram(...)
         self.list_gate_qubits = []
@@ -147,6 +150,7 @@ class qArchEval:
         self.list_basic_qubit_edge = device.list_qubit_edge
         self.list_extra_qubit_edge = device.list_extra_qubit_edge
         self.list_qubit_edge = self.list_basic_qubit_edge + self.list_extra_qubit_edge
+        self.list_conflict_edge_set = device.conflict_coupling_set
         # print("device basic edge: ", self.list_basic_qubit_edge)
         # print("device extra edge: ", self.list_extra_qubit_edge)
         # print("device all edge: ", self.list_qubit_edge)
@@ -154,7 +158,9 @@ class qArchEval:
         if self.mode == Mode.transition:
             self.swap_duration = 1
         for e in self.list_extra_qubit_edge:
-            self.list_extra_qubit_edge_idx.append(self.list_qubit_edge.index(e))
+            idx = self.list_qubit_edge.index(e)
+            self.list_extra_qubit_edge_idx.append(idx)
+            self.dict_extra_qubit_edge_idx[e] = idx
 
     def setprogram(self, benchmark, program, input_mode: str = None, gate_duration: dict = None):
         """Translate input program to OLSQ IR, and set initial depth
@@ -385,7 +391,7 @@ class qArchEval:
 
             if not preprossess_only:
                 # record the use of the extra edge
-                self._add_edge_constraints(count_gate, bound_depth, count_extra_edge, space, sigma, lsqc)
+                self._add_edge_constraints(count_gate, bound_depth, count_extra_edge, u, space, sigma, lsqc)
                 
             # TODO: iterate each swap num
             for num_e in range(len(self.list_extra_qubit_edge)):
@@ -664,7 +670,7 @@ class qArchEval:
                                         time[l] == tt, space[l] == kk),
                                             sigma[k][t] == False       ))
 
-    def _add_edge_constraints(self, count_gate, bound_depth, count_extra_edge, space, sigma, model):
+    def _add_edge_constraints(self, count_gate, bound_depth, count_extra_edge, u, space, sigma, model):
         # record the use of the extra edge
         list_extra_qubit_edge = self.list_extra_qubit_edge
         list_extra_qubit_edge_idx = self.list_extra_qubit_edge_idx
@@ -675,6 +681,20 @@ class qArchEval:
         
         model.add(
             count_extra_edge == sum([If(u[e], 1, 0) for e in range(len(list_extra_qubit_edge))]))
+
+        # add conflict edge use
+        for edge_set in self.list_conflict_edge_set:
+            if len(edge_set) == 2:
+                idx1 = list_extra_qubit_edge_idx.index(self.dict_extra_qubit_edge_idx[edge_set[0]])
+                idx2 = list_extra_qubit_edge_idx.index(self.dict_extra_qubit_edge_idx[edge_set[1]])
+                model.add(And(u[idx1], u[idx2]))
+            else:
+                idxs = []
+                for edge in edge_set:
+                    idxs.append(list_extra_qubit_edge_idx.index(self.dict_extra_qubit_edge_idx[edge]))
+                model.add(
+                    2 > sum([If(u[idx], 1, 0) for idx in idxs]))                    
+                
 
     def _extract_results(self, model, time, pi, sigma, space, u):
         # post-processing
