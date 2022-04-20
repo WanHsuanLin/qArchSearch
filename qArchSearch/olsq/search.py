@@ -406,7 +406,7 @@ class qArchEval:
                 results.append(self.write_results(model, time, pi, sigma, space, u))
                 print(f"Compilation time = {datetime.datetime.now() - per_start}.")
                 lsqc.pop()
-                if num_e == 0:
+                if num_e < 4:
                     continue
                 if results[-1]['extra_edge_num'] <= results[-2]['extra_edge_num']:
                     break
