@@ -203,8 +203,8 @@ def correct_bug(gate_qubits, gate_specs, edges, initial_mapping):
     results.append(gate_qubits)
     return results     
 
-def run_gate_absorption(benchmark:str, data, coupling_graph:list):
-    num_qubit = 16
+def run_gate_absorption(benchmark:str, data, coupling_graph:list, num_qubit):
+    # num_qubit = 16
     # print('finish correction')
     # print(result[1])
     # print('---')

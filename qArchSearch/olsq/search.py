@@ -885,7 +885,7 @@ class qArchEval:
             info["olsq_mode"] = "mix"
         if self.benchmark == "qaoa" or self.benchmark == "qcnn":
             # run gate absorption
-            run_gate_absorption(self.benchmark, info, device_connection)
+            run_gate_absorption(self.benchmark, info, device_connection, self.device.count_physical_qubit)
         # info["cost"] = cal_cost(len(results[5]))
         info['crosstalk'] = cal_crosstalk(info, self.benchmark, self.list_qubit_edge, self.device.count_physical_qubit)
         info['fidelity'], info['fidelity_ct']  = cal_fidelity(info)
