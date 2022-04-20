@@ -31,7 +31,7 @@ fi
 # echo $circui
 
 if [ "$benchmarks" == "qcnn" ]; then
-    folderName="results/$mode/${circuit%"$substring"}"
+    folderName="results/$device_set/$mode/${circuit%"$substring"}"
     if [ ! -d "$folderName"    ]; then 
         mkdir $folderName   
     fi
@@ -39,7 +39,7 @@ if [ "$benchmarks" == "qcnn" ]; then
 fi
 
 if [ "$benchmarks" == "qaoa" ]; then
-    folderName="results/$mode/$size_$trial"
+    folderName="results/$device_set/$mode/$size_$trial"
     if [ ! -d "$folderName"    ]; then 
         mkdir $folderName   
     fi

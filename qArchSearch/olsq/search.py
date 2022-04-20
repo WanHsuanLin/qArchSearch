@@ -152,10 +152,12 @@ class qArchEval:
         self.swap_duration = device.swap_duration
         if self.mode == Mode.transition:
             self.swap_duration = 1
+        print("show edge idx:")
         for e in self.list_extra_qubit_edge:
             idx = self.list_qubit_edge.index(e)
             self.list_extra_qubit_edge_idx.append(idx)
             self.dict_extra_qubit_edge_idx[e] = idx
+            print(f"edge {e}: {idx}")
 
     def setprogram(self, benchmark, program, input_mode: str = None, gate_duration: dict = None):
         """Translate input program to OLSQ IR, and set initial depth
@@ -572,7 +574,7 @@ class qArchEval:
     def _add_consistency_gate_constraints(self, bound_depth, list_qubit_edge, pi, space, time, model):
         # Consistency between Mapping and Space Coordinates.
         list_gate_qubits = self.list_gate_qubits
-        count_qubit_edge = len(list_gate_qubits)
+        count_qubit_edge = len(list_qubit_edge)
         list_gate_two = self.list_gate_two
         list_gate_single = self.list_gate_single
         for l in range(count_qubit_edge):
@@ -858,6 +860,7 @@ class qArchEval:
                         g1 += 1
 
         info = dict()
+        info["Device_set"] = self.device.name
         info["M"] = self.count_program_qubit
         info["D"] = D
         info["g1"] = g1
@@ -871,7 +874,7 @@ class qArchEval:
         info["final_mapping"] = results[4]
         device_connection = info["extra_edge"] + list(self.list_basic_qubit_edge )
         print(device_connection)
-        info["coupling_graph"] = get_char_graph(device_connection)
+        # info["coupling_graph"] = get_char_graph(device_connection)
         if self.mode == Mode.transition:
             info["olsq_mode"] = "transition"
         elif self.mode == Mode.normal:
