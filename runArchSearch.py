@@ -1,10 +1,9 @@
 from qArchSearch.olsq import qArchEval
-from qArchSearch.olsq.device import qcDeviceSet
 import argparse
 import json
 import math
 
-from qArchSearch.device import get_device_set
+from qArchSearch.device import get_device_set_hh, get_device_set_square_4by4
 from qArchSearch.util import get_qaoa_graph
 #from memory_profiler import memory_usage
 
@@ -12,6 +11,8 @@ if __name__ == "__main__":
     # Initialize parser
     parser = argparse.ArgumentParser()
     # Adding optional argument
+    parser.add_argument("device_set", metavar='DS', type=str,
+        help="Device base: hh: heavy-hexagonal (IBM), grid: sqaure")
     parser.add_argument("benchmark", metavar='B', type=str,
         help="Benchmark Set: arith or qaoa or qcnn or qv")
     parser.add_argument("folder", metavar='F', type=str,
@@ -40,7 +41,12 @@ if __name__ == "__main__":
 
     lsqc_searcher = qArchEval(mode=my_mode)
 
-    lsqc_searcher.setdevice(get_device_set(benchmark=args.benchmark))
+    if args.device_set == "hh":
+        lsqc_searcher.setdevice(
+            get_device_set_hh(benchmark=args.benchmark))
+    else:
+        lsqc_searcher.setdevice(
+            get_device_set_square_4by4(benchmark=args.benchmark))
 
     if args.benchmark == "qaoa":
         program = [args.size,
