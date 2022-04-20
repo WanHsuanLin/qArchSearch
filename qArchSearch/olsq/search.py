@@ -1,15 +1,11 @@
-import math
 import datetime
-from unittest import result
-from cv2 import FarnebackOpticalFlow
-from numpy import insert
 from sympy import Not
 
-from z3 import Int, IntVector, Bool, Optimize, Implies, And, Or, If, sat, Solver, set_option
+from z3 import Int, IntVector, Bool, Implies, And, Or, If, sat, Solver, set_option
 
 from qArchSearch.olsq.input import input_qasm
 from qArchSearch.olsq.device import qcDeviceSet
-from qArchSearch.util import cal_crosstalk, cal_fidelity, cal_cost_scaled_fidelity, cal_cost
+from qArchSearch.util import cal_crosstalk, cal_fidelity
 from qArchSearch.device import get_char_graph
 from qArchSearch.gate_absorption import run_gate_absorption
 import pkgutil
