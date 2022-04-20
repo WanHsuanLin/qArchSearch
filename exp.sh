@@ -9,11 +9,13 @@ if [ "$benchmarks" == "qcnn" ]; then
     circuit=$3
     substring=".qasm"
     mode=$4
+fi
 
 if [ "$benchmarks" == "qaoa" ]; then
     size=$3
     trial=$4
     mode=$5
+fi
 
 max_memory_usage=0
 
