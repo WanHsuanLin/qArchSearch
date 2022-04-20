@@ -1,7 +1,6 @@
 import datetime
-from sympy import Not
 
-from z3 import Int, IntVector, Bool, Implies, And, Or, If, sat, Solver, set_option
+from z3 import Int, IntVector, Bool, Implies, And, Or, If, sat, Solver, set_option, Not
 
 from qArchSearch.olsq.input import input_qasm
 from qArchSearch.olsq.device import qcDeviceSet
