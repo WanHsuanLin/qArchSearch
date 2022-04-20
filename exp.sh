@@ -19,12 +19,12 @@ fi
 
 max_memory_usage=0
 
-if [ ! -d "results/$mode" ]; then 
-    mkdir "results/$mode"
+if [ ! -d "results/$device_set" ]; then 
+    mkdir "results/$device_set"
 fi
 
-if [ ! -d "results/$mode/$benchmarks" ]; then 
-    mkdir "results/$mode/$benchmarks"
+if [ ! -d "results/$device_set/$mode" ]; then
+    mkdir "results/$device_set/$mode"
 fi
 
 # for circuit in $benchmarks/*; do
