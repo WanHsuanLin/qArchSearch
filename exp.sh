@@ -34,6 +34,7 @@ if [ "$benchmarks" == "qcnn" ]; then
         mkdir $folderName   
     fi
     python3 -u runArchSearch.py $device_set $benchmarks $folderName --filename $circuit --mode $mode --memory_max_size $max_memory_usage | tee "$folderName/output.log"
+fi
 
 if [ "$benchmarks" == "qaoa" ]; then
     folderName="results/$mode/$size_$trial"
@@ -41,5 +42,6 @@ if [ "$benchmarks" == "qaoa" ]; then
         mkdir $folderName   
     fi
     python3 -u runArchSearch.py $device_set $benchmarks $folderName --size $size --trial $trial --mode $mode --memory_max_size $max_memory_usage | tee "$folderName/output.log"
+fi
 
 echo "all done"
