@@ -152,12 +152,12 @@ class qArchEval:
         self.swap_duration = device.swap_duration
         if self.mode == Mode.transition:
             self.swap_duration = 1
-        print("show edge idx:")
+        # print("show edge idx:")
         for e in self.list_extra_qubit_edge:
             idx = self.list_qubit_edge.index(e)
             self.list_extra_qubit_edge_idx.append(idx)
             self.dict_extra_qubit_edge_idx[e] = idx
-            print(f"edge {e}: {idx}")
+            # print(f"edge {e}: {idx}")
 
     def setprogram(self, benchmark, program, input_mode: str = None, gate_duration: dict = None):
         """Translate input program to OLSQ IR, and set initial depth
@@ -388,7 +388,7 @@ class qArchEval:
 
             if not preprossess_only:
                 # record the use of the extra edge
-                self._add_edge_constraints(count_gate, bound_depth, count_extra_edge, u, space, sigma, lsqc)
+                self._add_edge_constraints(bound_depth, count_extra_edge, u, space, sigma, lsqc)
                 
             # TODO: iterate each swap num
             for num_e in range(len(self.list_extra_qubit_edge)):
@@ -574,10 +574,11 @@ class qArchEval:
     def _add_consistency_gate_constraints(self, bound_depth, list_qubit_edge, pi, space, time, model):
         # Consistency between Mapping and Space Coordinates.
         list_gate_qubits = self.list_gate_qubits
+        count_gate = len(list_gate_qubits)
         count_qubit_edge = len(list_qubit_edge)
         list_gate_two = self.list_gate_two
         list_gate_single = self.list_gate_single
-        for l in range(count_qubit_edge):
+        for l in range(count_gate):
             model.add(time[l] >= 0, time[l] < bound_depth)
             if l in list_gate_single:
                 model.add(space[l] >= 0, space[l] < self.count_physical_qubit)
@@ -667,8 +668,9 @@ class qArchEval:
                                         time[l] == tt, space[l] == kk),
                                             sigma[k][t] == False       ))
 
-    def _add_edge_constraints(self, count_gate, bound_depth, count_extra_edge, u, space, sigma, model):
+    def _add_edge_constraints(self, bound_depth, count_extra_edge, u, space, sigma, model):
         # record the use of the extra edge
+        count_gate = len(self.list_gate_qubits)
         list_extra_qubit_edge = self.list_extra_qubit_edge
         list_extra_qubit_edge_idx = self.list_extra_qubit_edge_idx
         for e in range(len(list_extra_qubit_edge)):
