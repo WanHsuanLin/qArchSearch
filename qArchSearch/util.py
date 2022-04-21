@@ -198,10 +198,11 @@ def cal_QAOA_depth(gates:list,gate_spec:list,num_qubit:int):
             
             if gtype == "swap" or gtype == "ZZ" or gtype == "ZZ ZZ":
                 d[pos[0]] = max(d[pos[0]],d[pos[1]])+3
-            elif gtype == "ZZ swap":
-                d[pos[0]] = max(d[pos[0]],d[pos[1]])+4
+            # elif gtype == "ZZ swap" or "swap ZZ":
             else:
-                assert(False)
+                d[pos[0]] = max(d[pos[0]],d[pos[1]])+4
+            # else:
+            #     assert(False)
             d[pos[1]] = d[pos[0]]
             cg[pos[0]] = gtype
             cg[pos[1]] = gtype
