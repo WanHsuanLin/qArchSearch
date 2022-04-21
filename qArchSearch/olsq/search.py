@@ -712,6 +712,7 @@ class qArchEval:
         for l in range(count_gate):
             result_time.append(model[time[l]].as_long())
             result_depth = max(result_depth, result_time[-1])
+        result_depth += 1
         list_result_swap = []
         for k in range(count_qubit_edge):
             for t in range(result_depth):
@@ -737,8 +738,8 @@ class qArchEval:
         # transition based
         if self.mode == Mode.transition:
             self.swap_duration = self.device.swap_duration
-            real_time = [0 for i in range(count_gate)]
-            list_depth_on_qubit = [-1 for i in range(self.count_physical_qubit)]
+            real_time = [0] * count_gate
+            list_depth_on_qubit = [-1] * self.count_physical_qubit
             list_real_swap = []
             for block in range(result_depth):
                 for tmp_gate in range(count_gate):
@@ -783,7 +784,6 @@ class qArchEval:
             list_result_swap = list_real_swap
             # print(list_result_swap)
 
-        result_depth += 1
         print(f"result- additional SWAP count = {len(list_result_swap)}.")
         print(f"result- circuit depth = {result_depth}.")
 
@@ -806,16 +806,12 @@ class qArchEval:
             else:
                 raise ValueError("Expect single-qubit or two-qubit gate.")
 
-        final_mapping = []
         tmp_depth = result_depth - 1
         if self.mode == Mode.transition:
-            tmp_depth = tran_detph 
-        for m in range(count_program_qubit):
-            final_mapping.append(model[pi[m][tmp_depth]].as_long())
+            tmp_depth = tran_detph - 1
+        final_mapping = [model[pi[m][tmp_depth]].as_long() for m in range(count_program_qubit)]
 
-        initial_mapping = []
-        for m in range(count_program_qubit):
-            initial_mapping.append(model[pi[m][0]].as_long())
+        initial_mapping = [model[pi[m][0]].as_long() for m in range(count_program_qubit)]
 
         for (k, t) in list_result_swap:
             q0 = list_qubit_edge[k][0]
