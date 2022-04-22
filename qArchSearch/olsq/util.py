@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from qArchSearch.olsq.device import qcDeviceSet
+# from qArchSearch.olsq.device import qcDeviceSet
 from qArchSearch.device import getNeighboringQubit
 
 SINGLE_QUBIT_GATE_FID = 0.999
@@ -114,16 +114,18 @@ def cal_crosstalk(data:dict, b, coupling, device_qubit):
                             #     or (time_slot[j][1] in dict_qubit_neighboringQubit[time_slot[i][0]]) or (time_slot[j][1] in dict_qubit_neighboringQubit[time_slot[i][1]]):
                         if is_crosstalk(time_slot[j], time_slot[i], dict_qubit_neighboringQubit):
                             # num_crosstalk += 2
-                            crosstalk_g.add(t * 100 + j)
+                            crosstalk_g.add(t * 100000 + j)
                             # print("g",t * 100 + i, gate_names[i], time_slot[i]," and g", t * 100 + j, gate_names[j], time_slot[j], "have crosstalk effects")
                             i_crosstalk = True
                 if i_crosstalk == True:
-                    crosstalk_g.add(t * 100 + i)
+                    crosstalk_g.add(t * 100000 + i)
         t += 1
     # print("number of crosstalk is ", (len(crosstalk_g)*3))
     # x = input()
-    if b == "qcnn" or b == "qaoa" or "qv":
+    if b == "qcnn":
         return len(crosstalk_g)*3
+    elif b == "qaoa":
+        return len(crosstalk_g)*2
     return len(crosstalk_g)
 
 def cal_fidelity(info):
