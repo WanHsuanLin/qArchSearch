@@ -4,7 +4,7 @@ from z3 import Int, IntVector, Bool, Implies, And, Or, If, sat, Solver, set_opti
 
 from qArchSearch.olsq.input import input_qasm
 from qArchSearch.olsq.device import qcDeviceSet
-from qArchSearch.olsq.util import cal_crosstalk, cal_fidelity
+from qArchSearch.olsq.util import cal_crosstalk, cal_fidelity, cal_QCNN_depth_g2_g1, cal_QAOA_depth
 from qArchSearch.gate_absorption import run_gate_absorption
 import pkgutil
 from enum import Enum
@@ -409,6 +409,12 @@ class qArchEval:
                 if folder != None:
                     import json
                     with open(f"./{folder}/extra_edge_{num_e}.json", 'w') as file_object:
+                        json.dump(results[num_e], file_object)
+                    with open(f"./{folder}_gs/extra_edge_{num_e}.json", 'w') as file_object:
+                        device_connection = results[num_e]["extra_edge"] + list(self.list_basic_qubit_edge )
+                        run_gate_absorption(self.benchmark, results[num_e], device_connection, self.device.count_physical_qubit)
+                        results[num_e]['crosstalk'] = cal_crosstalk(results[num_e], self.benchmark, self.list_qubit_edge, self.device.count_physical_qubit)
+                        results[num_e]['fidelity'], results[num_e]['fidelity_ct']  = cal_fidelity(results[num_e])
                         json.dump(results[num_e], file_object)
                 lsqc.pop()
                 if num_e < 4:
@@ -873,8 +879,6 @@ class qArchEval:
         info["gate_spec"] = results[1]
         info["initial_mapping"] = results[3]
         info["final_mapping"] = results[4]
-        device_connection = info["extra_edge"] + list(self.list_basic_qubit_edge )
-        print(device_connection)
         # info["coupling_graph"] = get_char_graph(device_connection)
         if self.mode == Mode.transition:
             info["olsq_mode"] = "transition"
@@ -882,9 +886,21 @@ class qArchEval:
             info["olsq_mode"] = "normal"
         else:
             info["olsq_mode"] = "mix"
-        if self.benchmark == "qaoa" or self.benchmark == "qcnn":
+        if self.benchmark == "qcnn":
+            info["D"], info["g2"], info["g1"] = cal_QCNN_depth_g2_g1(info["gates"], info["gate_spec"], info["M"])
+        elif self.benchmark == "qcnn":
+            info["D"] = cal_QAOA_depth(info["gates"], info["gate_spec"], info["M"])
+            nZZ = 0
+            nSwap = 0
+            for gate_type in info["gate_spec"]:
+                for gtype in gate_type:
+                    if gtype == "SWAP":
+                        nSwap += 1
+                    else:
+                        nZZ += 1
+            info["g2"] = nZZ*2 + nSwap*3
+            info["g1"] = nZZ
             # run gate absorption
-            run_gate_absorption(self.benchmark, info, device_connection, self.device.count_physical_qubit)
         # info["cost"] = cal_cost(len(results[5]))
         info['crosstalk'] = cal_crosstalk(info, self.benchmark, self.list_qubit_edge, self.device.count_physical_qubit)
         info['fidelity'], info['fidelity_ct']  = cal_fidelity(info)
