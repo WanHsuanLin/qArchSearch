@@ -1,0 +1,12 @@
+choose by best csf
+#e,edge list,f,f_imp_r,csf_imp_r
+0,[],0.2567762424516746,0.0,nan
+choose by best csf_ct
+#e,edge list,f_ct,f_imp_r_ct,csf_imp_r_ct
+0,[],0.2075861369871996,0.0,nan
+choose by largest f_imp with csf > 1
+#e,edge list,f,f_imp_r,csf_imp_r
+0,[],0.2567762424516746,0.0,nan
+choose by largest f_ct_imp with csf_ct > 1
+#e,edge list,f_ct,f_imp_r_ct,csf_imp_r_ct
+0,[],0.2075861369871996,0.0,nan

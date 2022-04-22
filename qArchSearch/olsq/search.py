@@ -4,8 +4,7 @@ from z3 import Int, IntVector, Bool, Implies, And, Or, If, sat, Solver, set_opti
 
 from qArchSearch.olsq.input import input_qasm
 from qArchSearch.olsq.device import qcDeviceSet
-from qArchSearch.util import cal_crosstalk, cal_fidelity
-from qArchSearch.device import get_char_graph
+from qArchSearch.olsq.util import cal_crosstalk, cal_fidelity
 from qArchSearch.gate_absorption import run_gate_absorption
 import pkgutil
 from enum import Enum
@@ -278,7 +277,7 @@ class qArchEval:
         self.list_gate_dependency = dependency
         self.inpput_dependency = True
 
-    def search(self, memory_max_size=MEMORY_MAX_SIZE, verbose = VERBOSE):
+    def search(self, folder = None, memory_max_size=MEMORY_MAX_SIZE, verbose = VERBOSE):
         """
         Args:
             output_mode: "IR" or left to default.
@@ -289,22 +288,22 @@ class qArchEval:
             self.list_gate_dependency = collision_extracting(self.list_gate_qubits)
         if self.mode == Mode.transition:
             print("Using transition based mode...")
-            _, results = self._search(False, None, memory_max_size, verbose)
+            _, results = self._search(False, None, folder, memory_max_size, verbose)
         elif self.mode == Mode.normal:
             print("Using normal mode...")
-            _, results = self._search(False, None, memory_max_size, verbose)
+            _, results = self._search(False, None, folder, memory_max_size, verbose)
         elif self.mode == Mode.mix:
             print("Using mixed mode...")
             print("Perform preprocessing to find swap bound...")
-            swap_bound, _ = self._search(True, None, memory_max_size, verbose)
+            swap_bound, _ = self._search(True, None, None, memory_max_size, verbose)
             print(f"Finish proprocessing. SWAP bound is ({swap_bound[0]},{swap_bound[1]})")
             print("Start normal searching...")
-            _, results = self._search(False, swap_bound, memory_max_size, verbose)
+            _, results = self._search(False, swap_bound, folder, memory_max_size, verbose)
         else:
             raise ValueError( ("Wrong type") )
         return results
 
-    def _search(self, preprossess_only, swap_bound, memory_max_size=MEMORY_MAX_SIZE, verbose = VERBOSE):
+    def _search(self, preprossess_only, swap_bound, folder = None, memory_max_size=MEMORY_MAX_SIZE, verbose = VERBOSE):
         """Formulate an SMT, pass it to z3 solver, and output results.
         CORE OF OLSQ, EDIT WITH CARE.
 
@@ -407,6 +406,10 @@ class qArchEval:
                     swap_bound = (0,model[count_swap].as_long())
                 results.append(self.write_results(model, time, pi, sigma, space, u))
                 print(f"Compilation time = {datetime.datetime.now() - per_start}.")
+                if folder != None:
+                    import json
+                    with open(f"./{folder}/extra_edge_{num_e}.json", 'w') as file_object:
+                        json.dump(results[num_e], file_object)
                 lsqc.pop()
                 if num_e < 4:
                     continue

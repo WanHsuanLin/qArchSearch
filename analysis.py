@@ -3,7 +3,7 @@ import json
 import csv
 import pandas as pd
 import numpy as np
-from qArchSearch.util import get_list_of_json_files
+from qArchSearch.olsq.util import get_list_of_json_files
 
 def create_list_from_json(jsonfile:str):
     with open(jsonfile) as f:
@@ -15,14 +15,11 @@ def create_list_from_json(jsonfile:str):
     data_list.append(data.get('D'))
     data_list.append(data.get('g1'))
     data_list.append(data.get('g2'))
-    data_list.append(data.get('extra_edge_num'))
-    data_list.append(data.get('extra_edge'))
-    data_list.append(data.get('cost'))
     data_list.append(data.get('fidelity'))
-    data_list.append(data.get('cost-scaled fidelity'))
     data_list.append(data.get('crosstalk'))
     data_list.append(data.get('fidelity_ct'))
-    data_list.append(data.get('cost-scaled fidelity_ct'))
+    data_list.append(data.get('extra_edge_num'))
+    data_list.append(data.get('extra_edge'))
     
     return data_list
 
@@ -31,8 +28,7 @@ def write_csv(csv_name):
 
     with open(csv_name, 'w+') as c:
         writer = csv.writer(c)
-        writer.writerow(['M', 'D', 'g1', 'g2', '#extra_e', \
-        'extra_edge', 'cost', 'f', 'csf', 'crosstalk', 'f_ct', 'csf_ct'])
+        writer.writerow(['M', 'D', 'g1', 'g2', 'f', 'crosstalk', 'f_ct', '#extra_e', 'extra_edge'])
     c.close()
     for file in list_of_files:
         # print(file)
