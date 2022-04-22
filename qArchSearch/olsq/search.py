@@ -887,9 +887,9 @@ class qArchEval:
         else:
             info["olsq_mode"] = "mix"
         if self.benchmark == "qcnn":
-            info["D"], info["g2"], info["g1"] = cal_QCNN_depth_g2_g1(info["gates"], info["gate_spec"], info["M"])
+            info["D"], info["g2"], info["g1"] = cal_QCNN_depth_g2_g1(info["gates"], info["gate_spec"], self.device.count_physical_qubit)
         elif self.benchmark == "qcnn":
-            info["D"] = cal_QAOA_depth(info["gates"], info["gate_spec"], info["M"])
+            info["D"] = cal_QAOA_depth(info["gates"], info["gate_spec"], self.device.count_physical_qubit)
             nZZ = 0
             nSwap = 0
             for gate_type in info["gate_spec"]:
