@@ -398,7 +398,7 @@ class qArchEval:
                     bound_depth *= 2
                     break
                 if preprossess_only:
-                    swap_bound = (self.bound_depth , model[count_swap].as_long())
+                    swap_bound = (self.bound_depth-1 , model[count_swap].as_long())
                     break
                 if swap_bound != None:
                     swap_bound = (swap_bound[0],model[count_swap].as_long())
@@ -448,7 +448,7 @@ class qArchEval:
                 model = lsqc.model()
                 upper_b_swap = min(model[count_swap].as_long(), upper_b_swap)
                 if self.mode == Mode.transition:
-                    lower_b_swap = tight_bound_depth
+                    lower_b_swap = tight_bound_depth - 1
                 bound_swap_num = (upper_b_swap+lower_b_swap)//2
                 # lsqc.add(tight_bound_depth >= time[l] + 1)
             else:
