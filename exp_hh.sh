@@ -20,7 +20,7 @@ fi
 
 for benchmarks in qaoa qcnn; do
     if [ "$benchmarks" == "qcnn" ]; then
-        circuit_set="qcnn/16-8-4-2.qasm"
+        circuit_set="qcnn/16-8-4-2.qasm qcnn/14-7-4-2.qasm "
         substring=".qasm"
     fi
 

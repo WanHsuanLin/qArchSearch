@@ -2,7 +2,7 @@
 # ./exp.sh qcnn qcnn/8-4-2.qasm
 trap "exit" INT
 
-device_set=$1
+device_set="grid"
 mode=1
 max_memory_usage=0
 
@@ -14,9 +14,9 @@ if [ ! -d "results/$device_set/$mode" ]; then
     mkdir "results/$device_set/$mode"
 fi
 
-for benchmarks in qcnn qaoa; do
+for benchmarks in qaoa qcnn; do
     if [ "$benchmarks" == "qcnn" ]; then
-        circuit_set="qcnn/8-4-2.qasm qcnn/10-5-3-2.qasm qcnn/12-6-3-2.qasm qcnn/14-7-4-2.qasm"
+        circuit_set="qcnn/16-8-4-2.qasm"
         substring=".qasm"
     fi
 
@@ -38,7 +38,7 @@ for benchmarks in qcnn qaoa; do
 
     if [ "$benchmarks" == "qaoa" ]; then
         for trial in 0 1 2 3 4; do
-            for size in 8 10 12 14; do
+            for size in 14; do
                 folderName="results/$device_set/$mode/qaoa/${size}_${trial}"
                 if [ ! -d "$folderName"    ]; then 
                     mkdir $folderName   
