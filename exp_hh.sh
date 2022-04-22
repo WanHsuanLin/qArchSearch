@@ -35,6 +35,7 @@ for benchmarks in qcnn qaoa; do
             folderName="results/$device_set/$mode/${circuit%"$substring"}"
             if [ ! -d "$folderName"    ]; then 
                 mkdir $folderName   
+                mkdir "${folderName}_gs"
             fi
             python3 -u runArchSearch.py $device_set $benchmarks $folderName --filename $circuit --mode $mode --memory_max_size $max_memory_usage | tee "$folderName/output.log"
         done
@@ -45,7 +46,8 @@ for benchmarks in qcnn qaoa; do
             for trial in 0 1 2 3 4; do
                 folderName="results/$device_set/$mode/qaoa/${size}_${trial}"
                 if [ ! -d "$folderName"    ]; then 
-                    mkdir $folderName   
+                    mkdir $folderName  
+                    mkdir "${folderName}_gs" 
                 fi
                 python3 -u runArchSearch.py $device_set $benchmarks $folderName --size $size --trial $trial --mode $mode --memory_max_size $max_memory_usage | tee "$folderName/output.log"
             done
