@@ -37,7 +37,7 @@ for benchmarks in qcnn qaoa; do
                 mkdir $folderName   
                 mkdir "${folderName}_gs"
             fi
-            python3 -u runArchSearch.py $device_set $benchmarks $folderName --filename $circuit --mode $mode --memory_max_size $max_memory_usage | tee "$folderName/output.log"
+            python3 -u run_qas.py $device_set $benchmarks $folderName --filename $circuit --mode $mode --memory_max_size $max_memory_usage | tee "$folderName/output.log"
         done
     fi
 
@@ -49,7 +49,7 @@ for benchmarks in qcnn qaoa; do
                     mkdir $folderName  
                     mkdir "${folderName}_gs" 
                 fi
-                python3 -u runArchSearch.py $device_set $benchmarks $folderName --size $size --trial $trial --mode $mode --memory_max_size $max_memory_usage | tee "$folderName/output.log"
+                python3 -u run_qas.py $device_set $benchmarks $folderName --size $size --trial $trial --mode $mode --memory_max_size $max_memory_usage | tee "$folderName/output.log"
             done
         done
     fi

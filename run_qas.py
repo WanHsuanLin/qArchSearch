@@ -1,6 +1,5 @@
 from qArchSearch.olsq import qArchEval
 import argparse
-import json
 
 from qArchSearch.device import get_device_set_hh, get_device_set_square_4by4
 from qArchSearch.olsq.util import get_qaoa_graph
