@@ -133,15 +133,6 @@ def cal_fidelity(info):
     fidelity_ct = pow(SINGLE_QUBIT_GATE_FID, info['g1']) * pow(TWO_QUBIT_GATE_FID, (info['g2']-info['crosstalk'])) * pow(CT_TWO_QUBIT_GATE_FID, info['crosstalk']) * np.exp(-(info['M'] * info['D'] - 2 * info['g2'] - info['g1'])/COHERENCE_TIME)
     return fidelity, fidelity_ct
 
-def cal_cost_scaled_fidelity(info):
-    cft = info['fidelity'] / info['cost']
-    cft_ct = info['fidelity_ct'] / info['cost']
-    return cft, cft_ct
-
-def cal_cost(num_extra_connection: int):
-    cost = 56 + num_extra_connection  # 2×16+24
-    return cost
-
 def cal_QCNN_depth_g2_g1(gates:list,gate_spec:list,num_qubit:int):
     d = [0] * num_qubit
     cg = ["swap"] * num_qubit
@@ -154,7 +145,7 @@ def cal_QCNN_depth_g2_g1(gates:list,gate_spec:list,num_qubit:int):
             gtype = gtype.lstrip().lstrip()
             # print(gtype)
             
-            if gtype == "swap":
+            if gtype == "swap" or gtype == "SWAP" :
                 d[pos[0]] = max(d[pos[0]],d[pos[1]])+3
             else:
                 gtype = "U4"
@@ -198,7 +189,7 @@ def cal_QAOA_depth(gates:list,gate_spec:list,num_qubit:int):
             gtype = gtype.lstrip().lstrip()
             # print(gtype)
             
-            if gtype == "swap" or gtype == "ZZ" or gtype == "ZZ ZZ":
+            if gtype == "swap" or gtype == "ZZ" or gtype == "ZZ ZZ" or gtype == "SWAP" :
                 d[pos[0]] = max(d[pos[0]],d[pos[1]])+3
             # elif gtype == "ZZ swap" or "swap ZZ":
             else:

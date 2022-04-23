@@ -2,7 +2,6 @@ import argparse
 import json
 import csv
 import pandas as pd
-import numpy as np
 from qArchSearch.olsq.util import get_list_of_json_files
 
 def create_list_from_json(jsonfile:str):

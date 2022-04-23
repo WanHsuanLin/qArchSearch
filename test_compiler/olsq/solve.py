@@ -4,15 +4,12 @@ from numpy import insert
 
 from z3 import Int, IntVector, Bool, Optimize, Implies, And, Or, If, sat, Solver, set_option
 
-from run.olsq.input import input_qasm
-from run.olsq.output import output_qasm
-from run.olsq.device import qcdevice
+from test_compiler.olsq.input import input_qasm
+from test_compiler.olsq.output import output_qasm
+from test_compiler.olsq.device import qcdevice
 import pkgutil
 from enum import Enum
 
-from run.util import cal_crosstalk, cal_fidelity
-from run.device import get_char_graph
-from run.gate_absorption import run_gate_absorption
 
 MEMORY_MAX_SIZE = 1000 * 60
 MAX_TREAD_NUM = 8
@@ -848,12 +845,6 @@ class OLSQ:
             info["olsq_mode"] = "normal"
         else:
             info["olsq_mode"] = "mix"
-        if self.benchmark == "qaoa" or self.benchmark == "qcnn":
-            # run gate absorption
-            run_gate_absorption(self.benchmark, info, self.list_qubit_edge, self.device.count_physical_qubit)
-        info['crosstalk'] = cal_crosstalk(info, self.benchmark, self.list_qubit_edge, self.device.count_physical_qubit)
-        info['fidelity'], info['fidelity_ct']  = cal_fidelity(info)
-        # info['cost-scaled fidelity'], info['cost-scaled fidelity_ct'] = cal_cost_scaled_fidelity(info)
         return info
 
 '''
