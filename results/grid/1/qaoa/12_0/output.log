@@ -1,0 +1,47 @@
+start searching...
+Using transition based mode...
+start adding constraints...
+Trying maximal depth = 1...
+Show UNSAT core
+[time__17 + 1 <= 1,
+ time__15 + 1 <= 1,
+ time__16 + 1 <= 1,
+ time__14 + 1 <= 1,
+ time__12 + 1 <= 1,
+ time__13 + 1 <= 1,
+ time__11 + 1 <= 1,
+ time__9 + 1 <= 1,
+ time__10 + 1 <= 1,
+ time__8 + 1 <= 1,
+ time__6 + 1 <= 1,
+ time__7 + 1 <= 1,
+ time__5 + 1 <= 1,
+ time__3 + 1 <= 1,
+ time__4 + 1 <= 1,
+ time__2 + 1 <= 1,
+ time__0 + 1 <= 1,
+ time__1 + 1 <= 1]
+Trying maximal depth = 2...
+Show UNSAT core
+[time__1 + 1 <= 2,
+ time__2 + 1 <= 2,
+ time__0 + 1 <= 2,
+ time__4 + 1 <= 2,
+ time__5 + 1 <= 2,
+ time__3 + 1 <= 2,
+ time__7 + 1 <= 2,
+ time__8 + 1 <= 2,
+ time__6 + 1 <= 2,
+ time__10 + 1 <= 2,
+ time__11 + 1 <= 2,
+ time__9 + 1 <= 2,
+ time__13 + 1 <= 2,
+ time__14 + 1 <= 2,
+ time__12 + 1 <= 2,
+ time__16 + 1 <= 2,
+ time__17 + 1 <= 2,
+ time__15 + 1 <= 2]
+Trying maximal depth = 3...
+Bound of Trying min swap = 10...
+Bound of Trying min swap = 6...
+Bound of Trying min swap = 4...
