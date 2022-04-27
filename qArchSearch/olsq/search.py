@@ -9,6 +9,7 @@ from qArchSearch.gate_absorption import run_gate_absorption
 import pkgutil
 from enum import Enum
 
+TIMEOUT = 90000
 MEMORY_MAX_SIZE = 1000 * 60
 MAX_TREAD_NUM = 8
 VERBOSE = 10
@@ -355,8 +356,9 @@ class qArchEval:
             # lsqc = SolverFor("QF_BV")
             # set_option("parallel.enable", True)
             # set_option("parallel.threads.max", MAX_TREAD_NUM)
-            if memory_max_size > 0:
-                set_option("memory_max_size", memory_max_size)
+            # if memory_max_size > 0:
+            set_option("memory_max_size", MEMORY_MAX_SIZE)
+            set_option("timeout", TIMEOUT)
             set_option("verbose", verbose)
 
             # constraint setting
