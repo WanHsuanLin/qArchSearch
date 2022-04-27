@@ -1,9 +1,10 @@
 import argparse
-from test_compiler.run_compiler import run_tket, run_sabre, run_olsq_tbolsq
 from test_compiler.best_device import get_best_coupling_hh, get_best_coupling_grid
 from qArchSearch.olsq.util import get_qaoa_graph
 from qArchSearch.olsq.util import cal_crosstalk, cal_fidelity
 from qArchSearch.gate_absorption import run_gate_absorption
+from test_compiler.olsq.solve import OLSQ
+from test_compiler.olsq.device import qcdevice
 import csv
 
 
@@ -25,6 +26,22 @@ def create_list_from_data(data, coupling, count_physical_qubit):
     data_list.append(data.get('gates'))
     data_list.append(data.get('gate_spec'))
 
+def run_olsq_tbolsq(benchmark, circuit_info, coupling, count_physical_qubit, mode):
+    lsqc_solver = OLSQ(objective_name="swap", mode=mode)
+    if benchmark == "qcnn":
+        file = open(circuit_info)
+        lsqc_solver.setprogram("qcnn", file.read())
+        file.close()
+    elif benchmark == "qaoa":
+        program = [circuit_info[0],
+            circuit_info[1],
+            ["ZZ" for _ in range( (circuit_info[0] * 3) // 2 )] ]
+        lsqc_solver.setprogram("qaoa", program, "IR")
+
+    device = qcdevice(name="none", nqubits=count_physical_qubit, connection=coupling, swap_duration=1)
+    lsqc_solver.setdevice(device)
+    result = lsqc_solver.solve(output_mode="IR", memory_max_size=0, verbose=0)
+    return result
 
 if __name__ == "__main__":
     # Initialize parser
@@ -47,10 +64,10 @@ if __name__ == "__main__":
     
     if args.benchmark == "qcnn":
         circuit_info = args.filename
-        csv_name = args.folder+"/"+args.device_set+"_"+args.filename[:-4]
+        csv_name = args.folder+"/"+args.device_set+"_optimal_"+args.filename[5:-4]
     elif args.benchmark == "qaoa":
         circuit_info = (args.size, get_qaoa_graph(args.size, args.trial), args.trial)
-        csv_name = args.folder+"/"+args.device_set+"_"+args.size+"_"+args.trial
+        csv_name = args.folder+"/"+args.device_set+"_optimal_"+args.size+"_"+args.trial
 
     if args.device_set == "hh":
         count_physical_qubit = 18
@@ -77,23 +94,9 @@ if __name__ == "__main__":
 
     data = dict()
     data["benchmark"] = args.benchmark
-
-    for objective in ["basic", "lookahead", "decay"]:
-        data["compiler"] = "sabre_"+objective
-        data["gates"], data["gate_spec"] = run_sabre(args.benchmark, circuit_info, coupling, objective)
-        data_list = create_list_from_data(data, coupling, count_physical_qubit)
-        with open(csv_name, 'a') as c:
-            writer = csv.writer(c)
-            writer.writerow(data_list)
-    
-    data["gates"], data["gate_spec"] = run_tket(args.benchmark, circuit_info, coupling)
-    data_list = create_list_from_data(data, coupling, count_physical_qubit)
-    with open(csv_name, 'a') as c:
-        writer = csv.writer(c)
-        writer.writerow(data_list)
     
     for mode in ["transition", 'mixed']:
-        data = run_olsq_tbolsq(args.benchmark, circuit_info, coupling, mode)
+        data = run_olsq_tbolsq(args.benchmark, circuit_info, coupling, count_physical_qubit, mode)
         data_list = create_list_from_data(data, coupling, count_physical_qubit)
         with open(csv_name, 'a') as c:
             writer = csv.writer(c)
