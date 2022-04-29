@@ -1,13 +1,19 @@
+from platform import architecture
 from qiskit.transpiler import CouplingMap
 from qiskit import QuantumCircuit
 from qiskit.transpiler import PassManager
 from qiskit.transpiler.passes import SabreSwap
 from qiskit.converters import *
-from olsq.solve import OLSQ
-from olsq.device import qcdevice
-from pytket.routing import Architecture
-from pytket.routing import route
+
+from pytket.architecture import Architecture
+from pytket.mapping import MappingManager
+from pytket.mapping import LexiLabellingMethod, LexiRouteRoutingMethod
 from pytket.extensions.qiskit import qiskit_to_tk, tk_to_qiskit
+
+# from pytket.routing import Architecture
+# from pytket.predicates import CompilationUnit, ConnectivityPredicate
+# from pytket.passes import SequencePass, RoutingPass, DecomposeSwapsToCXs
+# from pytket.routing import GraphPlacement
 
 def run_sabre(benchmark, circuit_info, coupling, objective):
     # read qasm
@@ -17,7 +23,7 @@ def run_sabre(benchmark, circuit_info, coupling, objective):
         qc = QuantumCircuit(circuit_info[0])
         for gate in circuit_info[1]:
             qc.rzz(1.0, gate[0], gate[1])
-    qc.draw(scale=0.7, filename = "qc.png", output='mpl', style='color')
+    qc.draw(scale=0.7, filename = "cir.png", output='mpl', style='color')
     device = CouplingMap(couplinglist = coupling, description="sabre_test")
     # initialize sabre
     sb = SabreSwap(coupling_map = device, heuristic = objective, seed = 0)
@@ -27,12 +33,16 @@ def run_sabre(benchmark, circuit_info, coupling, objective):
     gates = []
     gate_spec = []
     for gate in sabre_cir.data:
-        gate_spec += [(gate[0].name)]
-        gates += [(gate[1][0].index, gate[1][1].index)]
+        if gate[0].name == 'u4' or gate[0].name == 'U4' :
+            gate_spec.append(["u4"])
+        else:
+            gate_spec.append(["SWAP"])
+        gates.append([(gate[1][0].index, gate[1][1].index)])
 
     return (gates,gate_spec)
 
 def run_tket(benchmark, circuit_info, coupling):
+    # https://github.com/CQCL/pytket/blob/main/examples/mapping_example.ipynb
     # read qasm
     if benchmark == "qcnn":
         qc = QuantumCircuit.from_qasm_file(circuit_info)
@@ -40,32 +50,24 @@ def run_tket(benchmark, circuit_info, coupling):
         qc = QuantumCircuit(circuit_info[0])
         for gate in circuit_info[1]:
             qc.rzz(1.0, gate[0], gate[1])
-    
+    qc.draw(scale=0.7, filename = "cir_for_tket.png", output='mpl', style='color')
     circuit = qiskit_to_tk(qc)
-    tket_cir = route(circuit, Architecture(coupling))
-    qc_qikit = tk_to_qiskit(tket_cir)
+    architecture = Architecture(coupling)
+    mapping_manager = MappingManager(architecture)
+    lexi_label = LexiLabellingMethod()
+    lexi_route = LexiRouteRoutingMethod(10)
+    mapping_manager.route_circuit(circuit, [lexi_label, lexi_route])
 
+    qc_qikit = tk_to_qiskit(circuit)
+    qc_qikit.draw(scale=0.7, filename = "tketcir.png", output='mpl', style='color')
     gates = []
     gate_spec = []
     for gate in qc_qikit.data:
-        gate_spec += [(gate[0].name)]
-        gates += [(gate[1][0].index, gate[1][1].index)]
-
+        if gate[0].name == 'cx':
+            gate_spec.append(["u4"])
+        else:
+            gate_spec.append(["SWAP"])
+        gates.append([(gate[1][0].index, gate[1][1].index)])
+    # print(gate_spec)
     return (gates,gate_spec)
 
-def run_olsq_tbolsq(benchmark, circuit_info, coupling, mode):
-    lsqc_solver = OLSQ(objective_name="swap", mode=mode)
-    if benchmark == "qcnn":
-        file = open(circuit_info)
-        lsqc_solver.setprogram("qcnn", file.read())
-        file.close()
-    elif benchmark == "qaoa":
-        program = [circuit_info[0],
-            circuit_info[1],
-            ["ZZ" for _ in range( (circuit_info[0] * 3) // 2 )] ]
-        lsqc_solver.setprogram("qaoa", program, "IR")
-
-    device = qcdevice(name="none", nqubits=33, connection=coupling, swap_duration=1)
-    lsqc_solver.setdevice(device)
-    result = lsqc_solver.solve(output_mode="IR", memory_max_size=0, verbose=0)
-    return result
