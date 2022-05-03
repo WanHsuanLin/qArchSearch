@@ -1,171 +1,290 @@
-layer 0---------------------------------
-gate ( U4) on qubits (2 3)
-gate ( U4) on qubits (4 5)
-gate ( U4) on qubits (6 7)
-layer 1---------------------------------
-gate ( swap) on qubits (1 2)
-gate ( U4) on qubits (3 4)
-gate ( U4 swap) on qubits (5 6)
-layer 2---------------------------------
-gate ( U4) on qubits (4 5)
-gate ( swap) on qubits (2 3)
-layer 3---------------------------------
-gate ( swap) on qubits (0 4)
-layer 4---------------------------------
-gate ( U4) on qubits (3 4)
-layer 5---------------------------------
-gate ( swap) on qubits (2 3)
-layer 6---------------------------------
-gate ( U4) on qubits (1 2)
-gate ( swap) on qubits (3 4)
-layer 7---------------------------------
-gate ( swap) on qubits (2 3)
-gate ( swap) on qubits (0 4)
-layer 8---------------------------------
-gate ( U4 swap) on qubits (1 2)
-layer 9---------------------------------
-gate ( swap) on qubits (2 3)
-layer 10---------------------------------
-gate ( U4 swap) on qubits (3 4)
-layer 11---------------------------------
-gate ( swap) on qubits (2 3)
-layer 12---------------------------------
-gate ( U4) on qubits (1 2)
-metric-----------------------------------
-depth 13
-#swap 9
-layer 0---------------------------------
-gate ( U4) on qubits (2 3)
-gate ( U4) on qubits (4 5)
-gate ( U4) on qubits (6 7)
-layer 1---------------------------------
-gate ( U4) on qubits (3 4)
-gate ( U4 swap) on qubits (5 6)
-layer 2---------------------------------
-gate ( U4) on qubits (4 5)
-layer 3---------------------------------
-gate ( swap) on qubits (0 4)
-layer 4---------------------------------
-gate ( swap) on qubits (3 4)
-layer 5---------------------------------
-gate ( swap) on qubits (2 3)
-gate ( swap) on qubits (0 4)
-layer 6---------------------------------
-gate ( U4) on qubits (1 2)
-layer 7---------------------------------
-gate ( swap) on qubits (2 3)
-layer 8---------------------------------
-gate ( U4) on qubits (1 2)
-layer 9---------------------------------
-gate ( U4) on qubits (2 3)
-layer 10---------------------------------
-gate ( swap) on qubits (3 4)
-layer 11---------------------------------
-gate ( U4) on qubits (2 3)
-layer 12---------------------------------
-gate ( U4) on qubits (3 4)
-metric-----------------------------------
-depth 13
-#swap 6
-layer 0---------------------------------
-gate ( U4) on qubits (2 3)
-gate ( U4) on qubits (4 5)
-gate ( U4) on qubits (6 7)
-layer 1---------------------------------
-gate ( U4) on qubits (3 4)
-gate ( U4 swap) on qubits (5 6)
-layer 2---------------------------------
-gate ( U4) on qubits (4 5)
-layer 3---------------------------------
-gate ( swap) on qubits (0 4)
-layer 4---------------------------------
-gate ( swap) on qubits (3 4)
-layer 5---------------------------------
-gate ( swap) on qubits (2 3)
-gate ( swap) on qubits (0 4)
-layer 6---------------------------------
-gate ( U4) on qubits (1 2)
-layer 7---------------------------------
-gate ( swap) on qubits (2 3)
-layer 8---------------------------------
-gate ( U4) on qubits (1 2)
-layer 9---------------------------------
-gate ( U4) on qubits (2 3)
-layer 10---------------------------------
-gate ( swap) on qubits (3 4)
-layer 11---------------------------------
-gate ( U4) on qubits (2 3)
-layer 12---------------------------------
-gate ( U4) on qubits (3 4)
-metric-----------------------------------
-depth 13
-#swap 6
-layer 0---------------------------------
-gate ( U4) on qubits (2 3)
-gate ( U4) on qubits (4 5)
-gate ( U4) on qubits (6 7)
-layer 1---------------------------------
-gate ( swap) on qubits (1 2)
-gate ( U4) on qubits (3 4)
-gate ( U4 swap) on qubits (5 6)
-layer 2---------------------------------
-gate ( U4) on qubits (4 5)
-gate ( swap) on qubits (2 3)
-layer 3---------------------------------
-gate ( swap) on qubits (0 4)
-layer 4---------------------------------
-gate ( U4) on qubits (3 4)
-layer 5---------------------------------
-gate ( swap) on qubits (2 3)
-layer 6---------------------------------
-gate ( U4) on qubits (1 2)
-gate ( swap) on qubits (3 4)
-layer 7---------------------------------
-gate ( swap) on qubits (2 3)
-gate ( swap) on qubits (0 4)
-layer 8---------------------------------
-gate ( U4 swap) on qubits (1 2)
-layer 9---------------------------------
-gate ( swap) on qubits (2 3)
-layer 10---------------------------------
-gate ( U4 swap) on qubits (3 4)
-layer 11---------------------------------
-gate ( swap) on qubits (2 3)
-layer 12---------------------------------
-gate ( U4) on qubits (1 2)
-metric-----------------------------------
-depth 13
-#swap 9
-layer 0---------------------------------
-gate ( U4) on qubits (2 3)
-gate ( U4) on qubits (4 5)
-gate ( U4) on qubits (6 7)
-layer 1---------------------------------
-gate ( U4) on qubits (3 4)
-gate ( U4 swap) on qubits (5 6)
-layer 2---------------------------------
-gate ( U4) on qubits (4 5)
-layer 3---------------------------------
-gate ( swap) on qubits (0 4)
-layer 4---------------------------------
-gate ( swap) on qubits (3 4)
-layer 5---------------------------------
-gate ( swap) on qubits (2 3)
-gate ( swap) on qubits (0 4)
-layer 6---------------------------------
-gate ( U4) on qubits (1 2)
-layer 7---------------------------------
-gate ( swap) on qubits (2 3)
-layer 8---------------------------------
-gate ( U4) on qubits (1 2)
-layer 9---------------------------------
-gate ( U4) on qubits (2 3)
-layer 10---------------------------------
-gate ( swap) on qubits (3 4)
-layer 11---------------------------------
-gate ( U4) on qubits (2 3)
-layer 12---------------------------------
-gate ( U4) on qubits (3 4)
-metric-----------------------------------
-depth 13
-#swap 6
+u4
+2
+u4
+2
+u4
+2
+u4
+2
+u4
+2
+measure
+1
+v2
+1
+swap
+2
+swap
+2
+measure
+1
+v3
+1
+measure
+1
+v4
+1
+swap
+2
+u4
+2
+swap
+2
+u4
+2
+swap
+2
+u4
+2
+measure
+1
+v1
+1
+barrier
+16
+swap
+2
+swap
+2
+u4
+2
+swap
+2
+swap
+2
+swap
+2
+u4
+2
+swap
+2
+swap
+2
+u4
+2
+u4
+2
+u4
+2
+u4
+2
+u4
+2
+u4
+2
+measure
+1
+v2
+1
+measure
+1
+v3
+1
+measure
+1
+v4
+1
+swap
+2
+u4
+2
+swap
+2
+swap
+2
+swap
+2
+u4
+2
+swap
+2
+u4
+2
+measure
+1
+v1
+1
+barrier
+16
+u4
+2
+swap
+2
+swap
+2
+u4
+2
+u4
+2
+u4
+2
+u4
+2
+u4
+2
+u4
+2
+u4
+2
+measure
+1
+v2
+1
+measure
+1
+v3
+1
+measure
+1
+v4
+1
+swap
+2
+u4
+2
+swap
+2
+swap
+2
+swap
+2
+u4
+2
+swap
+2
+u4
+2
+measure
+1
+v1
+1
+barrier
+16
+u4
+2
+swap
+2
+swap
+2
+u4
+2
+u4
+2
+u4
+2
+u4
+2
+u4
+2
+u4
+2
+u4
+2
+measure
+1
+v2
+1
+swap
+2
+swap
+2
+measure
+1
+v3
+1
+measure
+1
+v4
+1
+swap
+2
+u4
+2
+swap
+2
+u4
+2
+swap
+2
+u4
+2
+measure
+1
+v1
+1
+barrier
+16
+swap
+2
+swap
+2
+u4
+2
+swap
+2
+swap
+2
+swap
+2
+u4
+2
+swap
+2
+swap
+2
+u4
+2
+u4
+2
+u4
+2
+u4
+2
+u4
+2
+u4
+2
+measure
+1
+v2
+1
+measure
+1
+v3
+1
+measure
+1
+v4
+1
+swap
+2
+u4
+2
+swap
+2
+swap
+2
+swap
+2
+u4
+2
+swap
+2
+u4
+2
+measure
+1
+v1
+1
+barrier
+16
+u4
+2
+swap
+2
+swap
+2
+u4
+2
+u4
+2

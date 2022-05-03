@@ -101,8 +101,8 @@ def scheduling(measurement_pair, phy_qubit_num, data):
             qubit_last_time[g_pos[0]] = cur_time
             qubit_last_time[g_pos[1]] = cur_time
         elif g[-2] == "v":
-            assert(gate_spec[g_id-1][-2] == "m")
-            gate_start_time = max(qubit_last_time[g_pos[0]], measurement_pair[int(g[-1])][0]) + 1
+            q_m = gate_pos[measurement_pair[int(g[-1])][0]][0]
+            gate_start_time = max(qubit_last_time[g_pos[0]], qubit_last_time[q_m]) + 1
             for i in range(SINGLE_QUBIT_GATE_UNIT):
                 time_slot_matrix[g_pos[0]][gate_start_time+i] = g_id
         elif g[-2] == "m":
@@ -123,6 +123,7 @@ def merge_gate(phy_qubit_num, data):
     q_last_gate_list = [""]*phy_qubit_num
     measurement_pair = dict()
     # merge consecutive single qubit gates
+    g_id = 0
     for g_slot, g_pos_slot in zip(gate_spec, gate_pos):
         for g, g_pos in zip(g_slot, g_pos_slot):
             if g == " U4" or g == " U4 swap" or g == " swap U4" or g == " ZZ swap" or g == " swap ZZ":
@@ -158,25 +159,18 @@ def merge_gate(phy_qubit_num, data):
             else:   # measurement and v in qcnn
                 index = int(g_pos[-1])
                 if not isinstance(measurement_pair[index], list):
-                    measurement_pair[int(g_pos[-1])] = list()
-                    if g[-2] == "v":
-                        measurement_pair[0] = g_pos[0]
-                    elif g[-2] == "m":
-                        measurement_pair[1] = g_pos[0]
-                    else:
-                        raise ValueError("invalid gate name\n")
-                else:
-                    if g[-2] == "v":
-                        measurement_pair[0] = g_pos[0]
-                    elif g[-2] == "m":
-                        measurement_pair[1] = g_pos[0]
-                    else:
-                        raise ValueError("invalid gate name\n")
-                    # assert m is followed by v 
-                    new_gate_spec.append("m"+str(index))
+                    measurement_pair[index] = [0,0]
+                if g[-2] == "v":
+                    measurement_pair[index][0] = g_id
                     new_gate_spec.append("v"+str(index))
-                    new_gate_pos.append([measurement_pair[0],])
-                    new_gate_pos.append([measurement_pair[1],])
+                    new_gate_pos.append([g_pos[0],])
+                elif g[-2] == "m":
+                    measurement_pair[index][1] = g_id
+                    new_gate_spec.append("m"+str(index))
+                    new_gate_pos.append([g_pos[0],])
+                else:
+                    raise ValueError("invalid gate name\n")
+            g_id += 1
             
     data["gate_spec"] = new_gate_spec
     data["gates"] = new_gate_pos

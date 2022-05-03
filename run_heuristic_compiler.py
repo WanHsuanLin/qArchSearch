@@ -9,10 +9,12 @@ import json
 
 
 def create_list_from_data(data, coupling, count_physical_qubit):
-    run_gate_absorption(data["benchmark"], data, coupling, count_physical_qubit)
+    # run_gate_absorption(data["benchmark"], data, coupling, count_physical_qubit)
+    data['D'] = 1
+    data['g1'] = 1
+    data['g2'] = 1
     data['crosstalk'] = cal_crosstalk(data, data["benchmark"], coupling, count_physical_qubit)
     data['fidelity'], data['fidelity_ct']  = cal_fidelity(data)
-
     data_list = []  # create an empty list
     # append the items to the list in the same order.
     data_list.append(data.get('compiler'))

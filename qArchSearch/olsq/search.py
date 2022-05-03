@@ -1,6 +1,6 @@
 import datetime
 
-from z3 import Int, IntVector, Bool, Implies, And, Or, If, sat, Solver, set_option, Not
+from z3 import Int, IntVector, Bool, Implies, And, Or, If, sat, unsat, Solver, set_option, Not
 
 from qArchSearch.olsq.input import input_qasm
 from qArchSearch.olsq.device import qcDeviceSet
@@ -495,8 +495,9 @@ class qArchEval:
                     find_min_swap = True
                     not_solved = False
             else:
-                core = lsqc.unsat_core()
-                print(core)
+                if satisfiable == unsat:
+                    core = lsqc.unsat_core()
+                    print(core)
                 lower_b_swap = bound_swap_num + 1
                 if upper_b_swap <= lower_b_swap:
                     # lsqc.pop()
