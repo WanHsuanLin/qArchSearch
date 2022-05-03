@@ -1,31 +1,18 @@
 import argparse
 from test_compiler.run_compiler import run_tket, run_sabre
-# from test_compiler.best_device import get_best_coupling_hh, get_best_coupling_grid
 from qArchSearch.olsq.util import get_qaoa_graph
-from qArchSearch.olsq.util import cal_crosstalk, cal_fidelity
-from qArchSearch.gate_absorption import run_gate_absorption
+from qArchSearch.gate_absorption import run_only_gate_absorption
 import csv
 import json
 
 
 def create_list_from_data(data, coupling, count_physical_qubit):
-    # run_gate_absorption(data["benchmark"], data, coupling, count_physical_qubit)
-    data['D'] = 1
-    data['g1'] = 1
-    data['g2'] = 1
-    data['crosstalk'] = cal_crosstalk(data, data["benchmark"], coupling, count_physical_qubit)
-    data['fidelity'], data['fidelity_ct']  = cal_fidelity(data)
+    run_only_gate_absorption(data["benchmark"], data, coupling, count_physical_qubit)
     data_list = []  # create an empty list
     # append the items to the list in the same order.
     data_list.append(data.get('compiler'))
     data_list.append(data.get('#e'))
     data_list.append(data.get('M'))
-    data_list.append(data.get('D'))
-    data_list.append(data.get('g1'))
-    data_list.append(data.get('g2'))
-    data_list.append(data.get('fidelity'))
-    data_list.append(data.get('crosstalk'))
-    data_list.append(data.get('fidelity_ct'))
     data_list.append(data.get('gates'))
     data_list.append(data.get('gate_spec'))
     data_list.append(data.get('coupling'))
@@ -87,7 +74,7 @@ if __name__ == "__main__":
     csv_name1 = csv_name + "_sabre.csv" 
     with open(csv_name1, 'w+') as c:
         writer = csv.writer(c)
-        writer.writerow(['compiler', '#e','M', 'D', 'g1', 'g2', 'f', 'crosstalk', 'f_ct', '#gates', 'gate_spec', 'coupling'])
+        writer.writerow(['compiler', '#e','M', '#gates', 'gate_spec', 'coupling'])
 
     data = dict()
     data["benchmark"] = args.benchmark
@@ -109,7 +96,7 @@ if __name__ == "__main__":
     csv_name2 = csv_name + "_tket.csv" 
     with open(csv_name2, 'w+') as c:
         writer = csv.writer(c)
-        writer.writerow(['compiler','M', 'D', 'g1', 'g2', 'f', 'crosstalk', 'f_ct', '#gates', 'gate_spec'])
+        writer.writerow(['compiler', '#e','M', '#gates', 'gate_spec', 'coupling'])
 
     for key in device_spec:
         data["#e"] = int(key)

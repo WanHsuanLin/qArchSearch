@@ -129,33 +129,33 @@ def merge_gate(phy_qubit_num, data):
             if g == " U4" or g == " U4 swap" or g == " swap U4" or g == " ZZ swap" or g == " swap ZZ":
                 if q_last_gate_list[g_pos[0]] != "sg":
                     new_gate_spec.append("sg")
-                    new_gate_pos.append([g_pos[0],])
+                    new_gate_pos.append([g_pos[0]])
                 if q_last_gate_list[g_pos[1]] != "sg":
                     new_gate_spec.append("sg")
-                    new_gate_pos.append([g_pos[1],])
+                    new_gate_pos.append([g_pos[1]])
                 for _ in range(3):
                     new_gate_spec.append("syc")
                     new_gate_pos.append(g_pos)
                     new_gate_spec.append("sg")
-                    new_gate_pos.append([g_pos[0],])
+                    new_gate_pos.append([g_pos[0]])
                     new_gate_spec.append("sg")
-                    new_gate_pos.append([g_pos[1],])
+                    new_gate_pos.append([g_pos[1]])
             elif g == " ZZ":
                 new_gate_spec.append("syc")
                 new_gate_pos.append(g_pos)
                 new_gate_spec.append("sg")
-                new_gate_pos.append([g_pos[0],])
+                new_gate_pos.append([g_pos[0]])
                 new_gate_spec.append("sg")
-                new_gate_pos.append([g_pos[1],])
+                new_gate_pos.append([g_pos[1]])
                 new_gate_spec.append("syc")
             elif g == " swap":
                 for _ in range(3):
                     new_gate_spec.append("syc")
                     new_gate_pos.append(g_pos)
                     new_gate_spec.append("sg")
-                    new_gate_pos.append([g_pos[0],])
+                    new_gate_pos.append([g_pos[0]])
                     new_gate_spec.append("sg")
-                    new_gate_pos.append([g_pos[1],])
+                    new_gate_pos.append([g_pos[1]])
             else:   # measurement and v in qcnn
                 index = int(g_pos[-1])
                 if not isinstance(measurement_pair[index], list):
@@ -163,11 +163,11 @@ def merge_gate(phy_qubit_num, data):
                 if g[-2] == "v":
                     measurement_pair[index][0] = g_id
                     new_gate_spec.append("v"+str(index))
-                    new_gate_pos.append([g_pos[0],])
+                    new_gate_pos.append([g_pos[0]])
                 elif g[-2] == "m":
                     measurement_pair[index][1] = g_id
                     new_gate_spec.append("m"+str(index))
-                    new_gate_pos.append([g_pos[0],])
+                    new_gate_pos.append([g_pos[0]])
                 else:
                     raise ValueError("invalid gate name\n")
             g_id += 1

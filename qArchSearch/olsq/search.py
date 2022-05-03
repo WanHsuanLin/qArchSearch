@@ -393,10 +393,10 @@ class qArchEval:
                 self._add_edge_constraints(bound_depth, count_extra_edge, u, space, sigma, lsqc)
                 
             # TODO: iterate each swap num
+            tight_depth = None
             for num_e in range(len(self.list_extra_qubit_edge)):
                 per_start = datetime.datetime.now()
-                
-                not_solved, model = self._optimize_circuit(lsqc, preprossess_only, count_extra_edge, num_e, time, count_gate, count_swap, bound_depth, swap_bound)
+                tight_depth, not_solved, model = self._optimize_circuit(tight_depth, lsqc, preprossess_only, count_extra_edge, num_e, time, count_gate, count_swap, bound_depth, swap_bound)
                 if not_solved:
                     bound_depth *= 2
                     break
@@ -428,7 +428,7 @@ class qArchEval:
         print(f"Total compilation time = {datetime.datetime.now() - start_time}.")
         return swap_bound, results
 
-    def _optimize_circuit(self, lsqc, preprossess_only, count_extra_edge, num_e, time, count_gate, count_swap, bound_depth, swap_bound):
+    def _optimize_circuit(tight_depth, self, lsqc, preprossess_only, count_extra_edge, num_e, time, count_gate, count_swap, bound_depth, swap_bound):
         if swap_bound != None:
             print(f"optimizing circuit with swap range ({swap_bound[0]},{swap_bound[1]}) ")
         if swap_bound != None:
@@ -445,6 +445,9 @@ class qArchEval:
         tight_bound_depth = self.bound_depth
         if preprossess_only:
             tight_bound_depth = 1
+        if  tight_depth != None:
+            find_min_depth == True
+            tight_bound_depth = tight_depth
         while not find_min_depth:
             print("Trying maximal depth = {}...".format(tight_bound_depth))
             # for depth optimization
@@ -504,14 +507,14 @@ class qArchEval:
                     # lsqc.pop()
                     # lsqc.add(count_swap <= upper_b_swap)
                     satisfiable = lsqc.check(count_swap <= upper_b_swap)
-                    model = lsqc.model()
                     assert(satisfiable == sat)
+                    model = lsqc.model()
                     find_min_swap = True
                     not_solved = False
                 else:
                     bound_swap_num = (upper_b_swap + lower_b_swap)//2
                     # lsqc.pop()
-        return not_solved, model
+        return tight_bound_depth, not_solved, model
 
     def _construct_variable(self, bound_depth, count_qubit_edge):
         # at cycle t, logical qubit q is mapped to pi[q][t]

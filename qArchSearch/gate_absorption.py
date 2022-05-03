@@ -242,3 +242,50 @@ def run_gate_absorption(benchmark:str, data, coupling_graph:list, num_qubit):
         data["D"], data["g2"], data["g1"] = cal_QCNN_depth_g2_g1(data["gates"], data["gate_spec"], num_qubit)
 
     
+def run_only_gate_absorption(benchmark:str, data, coupling_graph:list, num_qubit):
+    # num_qubit = 16
+    # print('finish correction')
+    # print(result[1])
+    # print('---')
+
+    tmp_qubits = list()
+    tmp_params = list()
+    results_gate = list()
+    results_gate_spec = list()
+    print(data["gates"])
+    print(data["gate_spec"])
+    for gate_pos, gate_type in zip(data["gates"],data["gate_spec"]):
+        for g_pos, g_type in zip(gate_pos, gate_type):
+            if len(g_pos) == 1:
+                if (len(tmp_qubits) == 0):
+                    results_gate += [g_pos]
+                    results_gate_spec += [g_type]
+                    continue
+                print(tmp_qubits)
+                print(tmp_params)
+                tmp1_qubits, tmp1_params = compactify(tmp_qubits, tmp_params, coupling_graph, num_qubit)
+                depth, swap_count, u4gate_qubits, u4gate_params = push_left_layers(tmp1_qubits, tmp1_params, num_qubit, True)
+                results_gate += [g_pos]
+                results_gate += u4gate_qubits
+                results_gate_spec += [g_type]
+                results_gate_spec += u4gate_params
+                tmp_qubits = list()
+                tmp_params = list()
+            else:
+                tmp_qubits.append(g_pos)
+                if g_type == "SWAP":
+                    tmp_params.append('swap')
+                elif g_type == "u4":
+                    tmp_params.append("U4")
+                elif benchmark == "qaoa":
+                    tmp_params.append('ZZ') #U4
+                else:
+                    tmp_params.append(g_type) #U4
+
+    tmp1_qubits, tmp1_params = compactify(tmp_qubits, tmp_params, coupling_graph, num_qubit)
+    depth, swap_count, u4gate_qubits, u4gate_params = push_left_layers(tmp1_qubits, tmp1_params, num_qubit, True)
+    results_gate += u4gate_qubits
+    results_gate_spec += u4gate_params
+    data["gates"] = results_gate
+    data["gate_spec"] = results_gate_spec
+
