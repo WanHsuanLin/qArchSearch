@@ -24,7 +24,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     # Adding optional argument
     parser.add_argument("device_set", metavar='DS', type=str,
-        help="Device: hh: heavy-hexagonal (IBM), grid: sqaure, bhh, bgrid")
+        help="Device: hh: heavy-hexagonal (IBM), grid: sqaure")
     parser.add_argument("device_spec", metavar='DS', type=str,
         help="file to store device spec")
     parser.add_argument("benchmark", metavar='B', type=str,
@@ -52,22 +52,23 @@ if __name__ == "__main__":
         circuit_info_sabre = (args.size, get_qaoa_graph(args.size, args.trial), args.trial)
         circuit_info_tket = circuit_info_sabre
         csv_name = args.folder+"/"+args.device_set+"_heristic_"+args.size+"_"+args.trial
+    else:
+        raise ValueError("invalid benchmark name\n")
 
     if args.device_set == "hh":
         count_physical_qubit = 18
         coupling = [(0,4), (1,2), (2,3), (3,4), (4,5), (5,6), (6,7), 
                     (2,8), (6,9), (10,11), (8,11), (11,12), (12,13), 
                     (13,14), (14,15), (15,16), (9,15), (13,17)]
-        # coupling = get_best_coupling_hh(circuit_info)
-    # elif args.device_set == "bhh":
-    #     count_physical_qubit = 18
-    #     
     elif args.device_set == "grid":
         count_physical_qubit = 16
         coupling = [(0,1), (1,2), (2,3), (4,5), (5,6), (6,7), (8,9),
         (9,10), (10,11), (12,13), (13,14), (14,15), (0,4), (4,8),
         (8,12), (1,5), (5,9), (9,13), (2,6), (6,10), (10,14),
         (3,7), (7,11), (11,15)]
+    else:
+        raise ValueError("invalid device_set name\n")
+
     with open(args.device_spec) as f:
         device_spec = json.load(f)
 

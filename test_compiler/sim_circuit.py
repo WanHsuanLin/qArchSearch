@@ -1,4 +1,5 @@
 
+from cirq import fidelity
 import numpy as np
 
 
@@ -33,15 +34,22 @@ def calculate_gate_number(gate_spec):
     g1 = 0
     g2 = 0
     for g in gate_spec:
-        if g == "sg" or g[-2] == "v":
+        if g == "sg" or g[0] == "v":
             g1 += 1
         elif g == "syc":
             g2 += 1
     return (g1, g2)
 
 def calculate_cir_fidelity(data):
-    
-    return
+    fidelity = pow(SINGLE_QUBIT_GATE_FID,data["g1"])
+    two_qubit_fidelity_list = data["two_qubit_gates_fidelity"]
+    for f in two_qubit_fidelity_list:
+        fidelity *= f
+    qubit_idling_list = data["qubit_idling_time"]
+    for t in qubit_idling_list:
+        fidelity *= (SINGLE_QUBIT_GATE_FID * t/SINGLE_QUBIT_GATE_UNIT)
+    data["fidelity"] = fidelity
+    return fidelity
 
 def calculate_qubit_idling_time(qubit_last_time, time_slot_matrix):
     qubit_idling_time = []
