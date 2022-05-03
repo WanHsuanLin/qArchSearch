@@ -4,18 +4,19 @@ from qArchSearch.gate_absorption import run_only_gate_absorption
 from test_compiler.olsq.solve import OLSQ
 from test_compiler.olsq.device import qcdevice
 import csv
-
+import json
 
 def create_list_from_data(data, coupling, count_physical_qubit):
     run_only_gate_absorption(data["benchmark"], data, coupling, count_physical_qubit)
     data_list = []  # create an empty list
     # append the items to the list in the same order.
-    data_list.append(data.get('compiler'))
+    data_list.append(data.get('mode'))
     data_list.append(data.get('#e'))
     data_list.append(data.get('M'))
     data_list.append(data.get('gates'))
     data_list.append(data.get('gate_spec'))
     data_list.append(data.get('coupling'))
+    return data_list
 
 def run_olsq_tbolsq(benchmark, circuit_info, coupling, count_physical_qubit, mode):
     lsqc_solver = OLSQ(objective_name="swap", mode=mode)
@@ -60,7 +61,7 @@ if __name__ == "__main__":
         csv_name = args.folder+"/"+args.device_set+"_optimal_"+args.filename[5:-4]
     elif args.benchmark == "qaoa":
         circuit_info = (args.size, get_qaoa_graph(args.size, args.trial), args.trial)
-        csv_name = args.folder+"/"+args.device_set+"_optimal_"+args.size+"_"+args.trial
+        csv_name = args.folder+"/"+args.device_set+"_optimal_"+args.size+"_"+args.trial+".csv"
 
     if args.device_set == "hh":
         count_physical_qubit = 18
@@ -76,6 +77,8 @@ if __name__ == "__main__":
     else:
         raise ValueError("invalid device_set name\n")
 
+    with open(args.device_spec) as f:
+        device_spec = json.load(f)
 
     with open(csv_name, 'w+') as c:
         writer = csv.writer(c)
@@ -84,10 +87,15 @@ if __name__ == "__main__":
     data = dict()
     data["benchmark"] = args.benchmark
     
-    for mode in ["transition", 'mixed']:
-        data = run_olsq_tbolsq(args.benchmark, circuit_info, coupling, count_physical_qubit, mode)
-        data_list = create_list_from_data(data, coupling, count_physical_qubit)
-        with open(csv_name, 'a') as c:
-            writer = csv.writer(c)
-            writer.writerow(data_list)
+    for key in device_spec:
+        data["#e"] = int(key)
+        data["coupling"] = device_spec[key]
+        for edge in device_spec[key]:
+            coupling.append((edge[0], edge[1]))
+        for mode in ["transition", 'mixed']:
+            data = run_olsq_tbolsq(args.benchmark, circuit_info, coupling, count_physical_qubit, mode)
+            data_list = create_list_from_data(data, coupling, count_physical_qubit)
+            with open(csv_name, 'a') as c:
+                writer = csv.writer(c)
+                writer.writerow(data_list)
     
