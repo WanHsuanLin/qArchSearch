@@ -1,4 +1,5 @@
 #!/bin/bash
+# ./exp_compiler.sh o hh device_set/hh/qcnn/8-4-2_gs_d.json qcnn
 heuristic=$1
 device_set=$2
 mode=1
@@ -35,11 +36,11 @@ fi
 
 if [ "$heuristic" == "o" ]; then
     if [ "$benchmarks" == "qcnn" ]; then
-        python3 -u run_heuristic_compiler.py $device_set $device_spec $benchmarks $folderName --filename $circuit | tee "$folderName/output_o_qcnn.log"
+        python3 -u run_optimal_compiler.py $device_set $device_spec $benchmarks $folderName --filename $circuit | tee "$folderName/output_o_qcnn.log"
     fi
 
     if [ "$benchmarks" == "qaoa" ]; then
-        python3 -u run_heuristic_compiler.py $device_set $device_spec $benchmarks $folderName --size $size --trial $trial | tee "$folderName/output_o_qaoa.log"
+        python3 -u run_optimal_compiler.py $device_set $device_spec $benchmarks $folderName --size $size --trial $trial | tee "$folderName/output_o_qaoa.log"
     fi
 fi
 
