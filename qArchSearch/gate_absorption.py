@@ -3,8 +3,12 @@ from qArchSearch.olsq.util import cal_QCNN_depth_g2_g1, cal_QAOA_depth
 def compactify(gate_qubits, gate_specs, edges, num_qubits):
     gate_qubits_tmp = list()
     for qubits in gate_qubits:
-        q0 = qubits[0]
-        q1 = qubits[1]
+        if len(gate_qubits) < 2:
+            q0 = qubits[0]
+            q1 = qubits[0]
+        else:    
+            q0 = qubits[0]
+            q1 = qubits[1]
         gate_qubits_tmp.append((min(q0, q1), max(q0,q1)))
     gate_qubits = gate_qubits_tmp
 
@@ -216,11 +220,13 @@ def run_gate_absorption(benchmark:str, data, coupling_graph:list, num_qubit):
         for gtype in gate_type:
             if gtype == "SWAP":
                 tmp_params.append('swap')
+            elif gtype == "u4":
+                tmp_params.append("U4")
+            elif benchmark == "qaoa":
+                tmp_params.append('ZZ') #U4
             else:
-                if benchmark == "qaoa":
-                    tmp_params.append('ZZ') #U4
-                else:
-                    tmp_params.append("U4")
+                tmp_params.append(gtype) #U4
+
 
     tmp1_qubits, tmp1_params = compactify(tmp_qubits, tmp_params, coupling_graph, num_qubit)
     depth, swap_count, u4gate_qubits, u4gate_params = push_left_layers(tmp1_qubits, tmp1_params, num_qubit, True)

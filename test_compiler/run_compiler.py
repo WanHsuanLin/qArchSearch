@@ -33,11 +33,22 @@ def run_sabre(benchmark, circuit_info, coupling, objective):
     gates = []
     gate_spec = []
     for gate in sabre_cir.data:
+        print(gate[0].name)
+        print(gate[0].num_qubits)
+        if gate[0].name == 'barrier':
+            continue
         if gate[0].name == 'u4' or gate[0].name == 'U4' :
             gate_spec.append(["u4"])
+            gates.append([(gate[1][0].index, gate[1][1].index)])
+        elif gate[0].name[0] == 'v':
+            gate_spec.append([gate[0].name])
+            gates.append([(gate[1][0].index)])
+        elif gate[0].name == 'measure':
+            gate_spec.append(["m"])
+            gates.append([(gate[1][0].index)])
         else:
             gate_spec.append(["SWAP"])
-        gates.append([(gate[1][0].index, gate[1][1].index)])
+            gates.append([(gate[1][0].index, gate[1][1].index)])
 
     return (gates,gate_spec)
 
