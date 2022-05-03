@@ -42,7 +42,7 @@ for benchmarks in qaoa; do
     fi
 
     if [ "$benchmarks" == "qaoa" ]; then
-        for trial in 2 3 ; do
+        for trial in  3 ; do
             for size in 10 ; do
                 folderName="results/$device_set/$mode/qaoa/${size}_${trial}"
                 if [ ! -d "$folderName"    ]; then 
