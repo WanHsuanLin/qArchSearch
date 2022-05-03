@@ -75,7 +75,15 @@ def get_arch_data(df, idx, mode):
     data.append(lsit_f_imp_r[idx])
     return data
 
-
+def extract_edge(device_file_name):
+    list_of_files = get_list_of_json_files(args.folder)
+    new_data = dict()
+    for file in list_of_files:
+        with open(file) as f:
+            data = json.load(f)
+        new_data[data.get('extra_edge_num')] = data.get('extra_edge')
+    with open(device_file_name, 'w') as file_object:
+                    json.dump(new_data, file_object)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -87,13 +95,24 @@ if __name__ == "__main__":
     # Read arguments from command line
     args = parser.parse_args()
     tmp_str = args.folder.split('/')
-    if not tmp_str[-1] == 'csv':
-        r_csv_name = '_r.csv'
+    # if not tmp_str[-1] == 'csv':
+    #     r_csv_name = '_r.csv'
+    #     for i, s in enumerate(reversed(tmp_str)):
+    #         if i == 0:
+    #             r_csv_name = s + r_csv_name
+    #         elif i == 1:
+    #             r_csv_name = s + '/csv/' + r_csv_name
+    #         else:
+    #             r_csv_name = s + '/' + r_csv_name
+    #     df = write_csv(r_csv_name)
+    tmptmp_str = tmp_str[-1].split('_')
+    if not tmp_str[-1] == 'csv' and tmptmp_str[-1] == 'gs':
+        device_file_name = '_d.json'
         for i, s in enumerate(reversed(tmp_str)):
             if i == 0:
-                r_csv_name = s + r_csv_name
+                device_file_name = s + device_file_name
             elif i == 1:
-                r_csv_name = s + '/csv/' + r_csv_name
+                device_file_name = s + '/csv/' + device_file_name
             else:
-                r_csv_name = s + '/' + r_csv_name
-        df = write_csv(r_csv_name)
+                device_file_name = s + '/' + device_file_name
+        df = extract_edge(device_file_name)
