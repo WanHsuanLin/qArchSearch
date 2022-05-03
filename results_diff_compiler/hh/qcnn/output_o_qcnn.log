@@ -6,7 +6,7 @@ Bound of Trying min swap = 5...
 Bound of Trying min swap = 2...
 Bound of Trying min swap = 1...
 Bound of Trying min swap = 0...
-Compilation time = 0:00:06.947736.
+Compilation time = 0:00:06.825849.
 Gate 0: u4 0, 1 on qubits 15 and 16 at time 0
 Gate 1: u4 2, 3 on qubits 9 and 6 at time 0
 Gate 2: u4 4, 5 on qubits 14 and 17 at time 0
@@ -20,7 +20,7 @@ Gate 9: u4 2, 4 on qubits 9 and 14 at time 0
 Gate 10: u4 0, 4 on qubits 15 and 14 at time 0
 result- additional SWAP count = 0.
 result- circuit depth = 5.
-Total compilation time = 0:00:06.960719.
+Total compilation time = 0:00:06.838535.
 [[(15, 16), (9, 6), (14, 17), (13, 12)], [(16, 9), (6, 14), (17, 13)], [(15, 9), (14, 13)], [(9, 14)], [(15, 14)]]
 [['u4', 'u4', 'u4', 'u4'], ['u4', 'u4', 'u4'], ['u4', 'u4'], ['u4'], ['u4']]
 layer 0---------------------------------
@@ -50,7 +50,7 @@ Bound of Trying min swap = 5...
 Bound of Trying min swap = 2...
 Bound of Trying min swap = 1...
 Bound of Trying min swap = 0...
-Compilation time = 0:00:10.553988.
+Compilation time = 0:00:12.679228.
 Gate 0: u4 0, 1 on qubits 15 and 16 at time 0
 Gate 1: u4 2, 3 on qubits 9 and 6 at time 0
 Gate 2: u4 4, 5 on qubits 14 and 17 at time 0
@@ -64,7 +64,7 @@ Gate 9: u4 2, 4 on qubits 9 and 14 at time 3
 Gate 10: u4 0, 4 on qubits 15 and 14 at time 4
 result- additional SWAP count = 0.
 result- circuit depth = 5.
-Total compilation time = 0:00:10.574413.
+Total compilation time = 0:00:12.699574.
 [[(15, 16), (9, 6), (14, 17), (13, 12)], [(16, 9), (6, 14), (17, 13)], [(15, 9), (14, 13)], [(9, 14)], [(15, 14)]]
 [['u4', 'u4', 'u4', 'u4'], ['u4', 'u4', 'u4'], ['u4', 'u4'], ['u4'], ['u4']]
 layer 0---------------------------------
@@ -90,134 +90,59 @@ bound_depth:  1
 Using transition based mode...
 start adding constraints...
 Trying maximal depth = 1...
-Bound of Trying min swap = 5...
+Show UNSAT core
+[time__1 + 1 <= 1,
+ time__0 + 1 <= 1,
+ time__2 + 1 <= 1,
+ time__4 + 1 <= 1,
+ time__5 + 1 <= 1,
+ time__7 + 1 <= 1,
+ time__10 + 1 <= 1,
+ time__9 + 1 <= 1]
+Trying maximal depth = 2...
+Bound of Trying min swap = 6...
+Bound of Trying min swap = 3...
 Bound of Trying min swap = 2...
 Bound of Trying min swap = 1...
-Bound of Trying min swap = 0...
-Compilation time = 0:00:08.059797.
-Gate 0: u4 0, 1 on qubits 15 and 16 at time 0
-Gate 1: u4 2, 3 on qubits 9 and 6 at time 0
-Gate 2: u4 4, 5 on qubits 14 and 17 at time 0
-Gate 3: u4 6, 7 on qubits 13 and 4 at time 0
-Gate 4: u4 1, 2 on qubits 16 and 9 at time 0
-Gate 5: u4 3, 4 on qubits 6 and 14 at time 0
-Gate 6: u4 5, 6 on qubits 17 and 13 at time 0
-Gate 7: u4 0, 2 on qubits 15 and 9 at time 0
-Gate 8: u4 4, 6 on qubits 14 and 13 at time 0
-Gate 9: u4 2, 4 on qubits 9 and 14 at time 0
-Gate 10: u4 0, 4 on qubits 15 and 14 at time 0
-result- additional SWAP count = 0.
-result- circuit depth = 5.
-Total compilation time = 0:00:08.072871.
-[[(15, 16), (9, 6), (14, 17), (13, 4)], [(16, 9), (6, 14), (17, 13)], [(15, 9), (14, 13)], [(9, 14)], [(15, 14)]]
-[['u4', 'u4', 'u4', 'u4'], ['u4', 'u4', 'u4'], ['u4', 'u4'], ['u4'], ['u4']]
+Compilation time = 0:00:10.518959.
+SWAP on physical edge (3,12) at time 0
+Gate 0: u4 0, 1 on qubits 11 and 12 at time 0
+Gate 1: u4 2, 3 on qubits 8 and 2 at time 0
+Gate 2: u4 4, 5 on qubits 3 and 4 at time 0
+Gate 3: u4 6, 7 on qubits 13 and 17 at time 1
+Gate 4: u4 1, 2 on qubits 12 and 8 at time 0
+Gate 5: u4 3, 4 on qubits 2 and 3 at time 0
+Gate 6: u4 5, 6 on qubits 4 and 13 at time 1
+Gate 7: u4 0, 2 on qubits 11 and 8 at time 1
+Gate 8: u4 4, 6 on qubits 12 and 13 at time 1
+Gate 9: u4 2, 4 on qubits 8 and 12 at time 1
+Gate 10: u4 0, 4 on qubits 11 and 12 at time 1
+result- additional SWAP count = 1.
+result- circuit depth = 6.
+Total compilation time = 0:00:10.534371.
+[[(11, 12), (8, 2), (3, 4), (13, 17)], [(12, 8), (2, 3), (4, 13)], [(11, 8), (3, 12)], [(12, 13)], [(8, 12)], [(11, 12)]]
+[['u4', 'u4', 'u4', 'u4'], ['u4', 'u4', 'u4'], ['u4', 'SWAP'], ['u4'], ['u4'], ['u4']]
 layer 0---------------------------------
-gate ( U4) on qubits (6 9)
-gate ( U4) on qubits (15 16)
-gate ( U4) on qubits (14 17)
-gate ( U4) on qubits (4 13)
-layer 1---------------------------------
-gate ( U4) on qubits (9 16)
+gate ( U4) on qubits (2 8)
+gate ( U4) on qubits (11 12)
+gate ( U4) on qubits (3 4)
 gate ( U4) on qubits (13 17)
-gate ( U4) on qubits (6 14)
-layer 2---------------------------------
-gate ( U4) on qubits (9 15)
-gate ( U4) on qubits (13 14)
-layer 3---------------------------------
-gate ( U4) on qubits (9 14)
-layer 4---------------------------------
-gate ( U4) on qubits (14 15)
-metric-----------------------------------
-depth 5
-#swap 0
-bound_depth:  5
-Using normal mode...
-start adding constraints...
-Trying maximal depth = 5...
-Bound of Trying min swap = 5...
-Bound of Trying min swap = 2...
-Bound of Trying min swap = 1...
-Bound of Trying min swap = 0...
-Compilation time = 0:00:20.072434.
-Gate 0: u4 0, 1 on qubits 15 and 16 at time 0
-Gate 1: u4 2, 3 on qubits 9 and 6 at time 0
-Gate 2: u4 4, 5 on qubits 14 and 17 at time 0
-Gate 3: u4 6, 7 on qubits 13 and 4 at time 0
-Gate 4: u4 1, 2 on qubits 16 and 9 at time 1
-Gate 5: u4 3, 4 on qubits 6 and 14 at time 1
-Gate 6: u4 5, 6 on qubits 17 and 13 at time 1
-Gate 7: u4 0, 2 on qubits 15 and 9 at time 2
-Gate 8: u4 4, 6 on qubits 14 and 13 at time 2
-Gate 9: u4 2, 4 on qubits 9 and 14 at time 3
-Gate 10: u4 0, 4 on qubits 15 and 14 at time 4
-result- additional SWAP count = 0.
-result- circuit depth = 5.
-Total compilation time = 0:00:20.094560.
-[[(15, 16), (9, 6), (14, 17), (13, 4)], [(16, 9), (6, 14), (17, 13)], [(15, 9), (14, 13)], [(9, 14)], [(15, 14)]]
-[['u4', 'u4', 'u4', 'u4'], ['u4', 'u4', 'u4'], ['u4', 'u4'], ['u4'], ['u4']]
-layer 0---------------------------------
-gate ( U4) on qubits (6 9)
-gate ( U4) on qubits (15 16)
-gate ( U4) on qubits (14 17)
-gate ( U4) on qubits (4 13)
 layer 1---------------------------------
-gate ( U4) on qubits (9 16)
-gate ( U4) on qubits (13 17)
-gate ( U4) on qubits (6 14)
+gate ( U4) on qubits (8 12)
+gate ( U4) on qubits (2 3)
+gate ( U4) on qubits (4 13)
 layer 2---------------------------------
-gate ( U4) on qubits (9 15)
-gate ( U4) on qubits (13 14)
+gate ( swap) on qubits (3 12)
+gate ( U4) on qubits (8 11)
 layer 3---------------------------------
-gate ( U4) on qubits (9 14)
-layer 4---------------------------------
-gate ( U4) on qubits (14 15)
-metric-----------------------------------
-depth 5
-#swap 0
-bound_depth:  1
-Using transition based mode...
-start adding constraints...
-Trying maximal depth = 1...
-Bound of Trying min swap = 5...
-Bound of Trying min swap = 2...
-Bound of Trying min swap = 1...
-Bound of Trying min swap = 0...
-Compilation time = 0:00:08.598007.
-Gate 0: u4 0, 1 on qubits 15 and 16 at time 0
-Gate 1: u4 2, 3 on qubits 9 and 6 at time 0
-Gate 2: u4 4, 5 on qubits 14 and 17 at time 0
-Gate 3: u4 6, 7 on qubits 13 and 12 at time 0
-Gate 4: u4 1, 2 on qubits 16 and 9 at time 0
-Gate 5: u4 3, 4 on qubits 6 and 14 at time 0
-Gate 6: u4 5, 6 on qubits 17 and 13 at time 0
-Gate 7: u4 0, 2 on qubits 15 and 9 at time 0
-Gate 8: u4 4, 6 on qubits 14 and 13 at time 0
-Gate 9: u4 2, 4 on qubits 9 and 14 at time 0
-Gate 10: u4 0, 4 on qubits 15 and 14 at time 0
-result- additional SWAP count = 0.
-result- circuit depth = 5.
-Total compilation time = 0:00:08.611321.
-[[(15, 16), (9, 6), (14, 17), (13, 12)], [(16, 9), (6, 14), (17, 13)], [(15, 9), (14, 13)], [(9, 14)], [(15, 14)]]
-[['u4', 'u4', 'u4', 'u4'], ['u4', 'u4', 'u4'], ['u4', 'u4'], ['u4'], ['u4']]
-layer 0---------------------------------
-gate ( U4) on qubits (6 9)
-gate ( U4) on qubits (15 16)
-gate ( U4) on qubits (14 17)
 gate ( U4) on qubits (12 13)
-layer 1---------------------------------
-gate ( U4) on qubits (9 16)
-gate ( U4) on qubits (13 17)
-gate ( U4) on qubits (6 14)
-layer 2---------------------------------
-gate ( U4) on qubits (9 15)
-gate ( U4) on qubits (13 14)
-layer 3---------------------------------
-gate ( U4) on qubits (9 14)
 layer 4---------------------------------
-gate ( U4) on qubits (14 15)
+gate ( U4) on qubits (8 12)
+layer 5---------------------------------
+gate ( U4) on qubits (11 12)
 metric-----------------------------------
-depth 5
-#swap 0
+depth 6
+#swap 1
 bound_depth:  5
 Using normal mode...
 start adding constraints...
@@ -226,174 +151,106 @@ Bound of Trying min swap = 5...
 Bound of Trying min swap = 2...
 Bound of Trying min swap = 1...
 Bound of Trying min swap = 0...
-Compilation time = 0:00:16.252019.
-Gate 0: u4 0, 1 on qubits 15 and 16 at time 0
-Gate 1: u4 2, 3 on qubits 9 and 6 at time 0
-Gate 2: u4 4, 5 on qubits 14 and 17 at time 0
-Gate 3: u4 6, 7 on qubits 13 and 4 at time 0
-Gate 4: u4 1, 2 on qubits 16 and 9 at time 1
-Gate 5: u4 3, 4 on qubits 6 and 14 at time 1
-Gate 6: u4 5, 6 on qubits 17 and 13 at time 1
-Gate 7: u4 0, 2 on qubits 15 and 9 at time 2
-Gate 8: u4 4, 6 on qubits 14 and 13 at time 2
-Gate 9: u4 2, 4 on qubits 9 and 14 at time 3
-Gate 10: u4 0, 4 on qubits 15 and 14 at time 4
-result- additional SWAP count = 0.
+[num_swap <= 0]
+Compilation time = 0:00:29.874429.
+SWAP on physical edge (3,12) at time 1
+Gate 0: u4 0, 1 on qubits 11 and 12 at time 0
+Gate 1: u4 2, 3 on qubits 8 and 2 at time 0
+Gate 2: u4 4, 5 on qubits 3 and 4 at time 0
+Gate 3: u4 6, 7 on qubits 13 and 14 at time 0
+Gate 4: u4 1, 2 on qubits 12 and 8 at time 1
+Gate 5: u4 3, 4 on qubits 2 and 3 at time 1
+Gate 6: u4 5, 6 on qubits 4 and 13 at time 1
+Gate 7: u4 0, 2 on qubits 11 and 8 at time 2
+Gate 8: u4 4, 6 on qubits 12 and 13 at time 2
+Gate 9: u4 2, 4 on qubits 8 and 12 at time 3
+Gate 10: u4 0, 4 on qubits 11 and 12 at time 4
+result- additional SWAP count = 1.
 result- circuit depth = 5.
-Total compilation time = 0:00:16.275445.
-[[(15, 16), (9, 6), (14, 17), (13, 4)], [(16, 9), (6, 14), (17, 13)], [(15, 9), (14, 13)], [(9, 14)], [(15, 14)]]
-[['u4', 'u4', 'u4', 'u4'], ['u4', 'u4', 'u4'], ['u4', 'u4'], ['u4'], ['u4']]
+Total compilation time = 0:00:29.894075.
+[[(11, 12), (8, 2), (3, 4), (13, 14)], [(12, 8), (2, 3), (4, 13), (3, 12)], [(11, 8), (12, 13)], [(8, 12)], [(11, 12)]]
+[['u4', 'u4', 'u4', 'u4'], ['u4', 'u4', 'u4', 'SWAP'], ['u4', 'u4'], ['u4'], ['u4']]
 layer 0---------------------------------
-gate ( U4) on qubits (6 9)
-gate ( U4) on qubits (15 16)
-gate ( U4) on qubits (14 17)
+gate ( U4) on qubits (2 8)
+gate ( U4) on qubits (11 12)
+gate ( U4) on qubits (3 4)
+gate ( U4) on qubits (13 14)
+layer 1---------------------------------
+gate ( U4) on qubits (2 3)
+gate ( U4) on qubits (8 12)
 gate ( U4) on qubits (4 13)
-layer 1---------------------------------
-gate ( U4) on qubits (9 16)
-gate ( U4) on qubits (13 17)
-gate ( U4) on qubits (6 14)
 layer 2---------------------------------
-gate ( U4) on qubits (9 15)
-gate ( U4) on qubits (13 14)
+gate ( swap) on qubits (3 12)
+gate ( U4) on qubits (8 11)
 layer 3---------------------------------
-gate ( U4) on qubits (9 14)
-layer 4---------------------------------
-gate ( U4) on qubits (14 15)
-metric-----------------------------------
-depth 5
-#swap 0
-bound_depth:  1
-Using transition based mode...
-start adding constraints...
-Trying maximal depth = 1...
-Bound of Trying min swap = 5...
-Bound of Trying min swap = 2...
-Bound of Trying min swap = 1...
-Bound of Trying min swap = 0...
-Compilation time = 0:00:09.089115.
-Gate 0: u4 0, 1 on qubits 15 and 16 at time 0
-Gate 1: u4 2, 3 on qubits 9 and 6 at time 0
-Gate 2: u4 4, 5 on qubits 14 and 13 at time 0
-Gate 3: u4 6, 7 on qubits 17 and 12 at time 0
-Gate 4: u4 1, 2 on qubits 16 and 9 at time 0
-Gate 5: u4 3, 4 on qubits 6 and 14 at time 0
-Gate 6: u4 5, 6 on qubits 13 and 17 at time 0
-Gate 7: u4 0, 2 on qubits 15 and 9 at time 0
-Gate 8: u4 4, 6 on qubits 14 and 17 at time 0
-Gate 9: u4 2, 4 on qubits 9 and 14 at time 0
-Gate 10: u4 0, 4 on qubits 15 and 14 at time 0
-result- additional SWAP count = 0.
-result- circuit depth = 5.
-Total compilation time = 0:00:09.102881.
-[[(15, 16), (9, 6), (14, 13), (17, 12)], [(16, 9), (6, 14), (13, 17)], [(15, 9), (14, 17)], [(9, 14)], [(15, 14)]]
-[['u4', 'u4', 'u4', 'u4'], ['u4', 'u4', 'u4'], ['u4', 'u4'], ['u4'], ['u4']]
-layer 0---------------------------------
-gate ( U4) on qubits (6 9)
-gate ( U4) on qubits (15 16)
-gate ( U4) on qubits (13 14)
-gate ( U4) on qubits (12 17)
-layer 1---------------------------------
-gate ( U4) on qubits (9 16)
-gate ( U4) on qubits (6 14)
-gate ( U4) on qubits (13 17)
-layer 2---------------------------------
-gate ( U4) on qubits (9 15)
-gate ( U4) on qubits (14 17)
-layer 3---------------------------------
-gate ( U4) on qubits (9 14)
-layer 4---------------------------------
-gate ( U4) on qubits (14 15)
-metric-----------------------------------
-depth 5
-#swap 0
-bound_depth:  5
-Using normal mode...
-start adding constraints...
-Trying maximal depth = 5...
-Bound of Trying min swap = 5...
-Bound of Trying min swap = 2...
-Bound of Trying min swap = 1...
-Bound of Trying min swap = 0...
-Compilation time = 0:00:20.044280.
-Gate 0: u4 0, 1 on qubits 15 and 16 at time 0
-Gate 1: u4 2, 3 on qubits 9 and 6 at time 0
-Gate 2: u4 4, 5 on qubits 14 and 17 at time 0
-Gate 3: u4 6, 7 on qubits 13 and 12 at time 0
-Gate 4: u4 1, 2 on qubits 16 and 9 at time 1
-Gate 5: u4 3, 4 on qubits 6 and 14 at time 1
-Gate 6: u4 5, 6 on qubits 17 and 13 at time 1
-Gate 7: u4 0, 2 on qubits 15 and 9 at time 2
-Gate 8: u4 4, 6 on qubits 14 and 13 at time 2
-Gate 9: u4 2, 4 on qubits 9 and 14 at time 3
-Gate 10: u4 0, 4 on qubits 15 and 14 at time 4
-result- additional SWAP count = 0.
-result- circuit depth = 5.
-Total compilation time = 0:00:20.068194.
-[[(15, 16), (9, 6), (14, 17), (13, 12)], [(16, 9), (6, 14), (17, 13)], [(15, 9), (14, 13)], [(9, 14)], [(15, 14)]]
-[['u4', 'u4', 'u4', 'u4'], ['u4', 'u4', 'u4'], ['u4', 'u4'], ['u4'], ['u4']]
-layer 0---------------------------------
-gate ( U4) on qubits (6 9)
-gate ( U4) on qubits (15 16)
-gate ( U4) on qubits (14 17)
 gate ( U4) on qubits (12 13)
-layer 1---------------------------------
-gate ( U4) on qubits (9 16)
-gate ( U4) on qubits (13 17)
-gate ( U4) on qubits (6 14)
-layer 2---------------------------------
-gate ( U4) on qubits (9 15)
-gate ( U4) on qubits (13 14)
-layer 3---------------------------------
-gate ( U4) on qubits (9 14)
 layer 4---------------------------------
-gate ( U4) on qubits (14 15)
+gate ( U4) on qubits (8 12)
+layer 5---------------------------------
+gate ( U4) on qubits (11 12)
 metric-----------------------------------
-depth 5
-#swap 0
+depth 6
+#swap 1
 bound_depth:  1
 Using transition based mode...
 start adding constraints...
 Trying maximal depth = 1...
-Bound of Trying min swap = 5...
+Show UNSAT core
+[time__2 + 1 <= 1,
+ time__3 + 1 <= 1,
+ time__5 + 1 <= 1,
+ time__6 + 1 <= 1,
+ time__8 + 1 <= 1,
+ time__9 + 1 <= 1,
+ time__10 + 1 <= 1,
+ time__0 + 1 <= 1]
+Trying maximal depth = 2...
+Bound of Trying min swap = 6...
+Bound of Trying min swap = 3...
 Bound of Trying min swap = 2...
 Bound of Trying min swap = 1...
-Bound of Trying min swap = 0...
-Compilation time = 0:00:08.805767.
-Gate 0: u4 0, 1 on qubits 15 and 16 at time 0
-Gate 1: u4 2, 3 on qubits 9 and 6 at time 0
-Gate 2: u4 4, 5 on qubits 14 and 13 at time 0
-Gate 3: u4 6, 7 on qubits 17 and 12 at time 0
-Gate 4: u4 1, 2 on qubits 16 and 9 at time 0
-Gate 5: u4 3, 4 on qubits 6 and 14 at time 0
-Gate 6: u4 5, 6 on qubits 13 and 17 at time 0
-Gate 7: u4 0, 2 on qubits 15 and 9 at time 0
-Gate 8: u4 4, 6 on qubits 14 and 17 at time 0
-Gate 9: u4 2, 4 on qubits 9 and 14 at time 0
-Gate 10: u4 0, 4 on qubits 15 and 14 at time 0
-result- additional SWAP count = 0.
-result- circuit depth = 5.
-Total compilation time = 0:00:08.819540.
-[[(15, 16), (9, 6), (14, 13), (17, 12)], [(16, 9), (6, 14), (13, 17)], [(15, 9), (14, 17)], [(9, 14)], [(15, 14)]]
-[['u4', 'u4', 'u4', 'u4'], ['u4', 'u4', 'u4'], ['u4', 'u4'], ['u4'], ['u4']]
+[num_swap <= 1]
+Compilation time = 0:00:10.364361.
+SWAP on physical edge (12,17) at time 0
+SWAP on physical edge (13,14) at time 0
+Gate 0: u4 0, 1 on qubits 12 and 11 at time 0
+Gate 1: u4 2, 3 on qubits 17 and 13 at time 0
+Gate 2: u4 4, 5 on qubits 14 and 9 at time 0
+Gate 3: u4 6, 7 on qubits 15 and 16 at time 0
+Gate 4: u4 1, 2 on qubits 11 and 12 at time 1
+Gate 5: u4 3, 4 on qubits 13 and 14 at time 0
+Gate 6: u4 5, 6 on qubits 9 and 15 at time 0
+Gate 7: u4 0, 2 on qubits 17 and 12 at time 1
+Gate 8: u4 4, 6 on qubits 14 and 15 at time 0
+Gate 9: u4 2, 4 on qubits 12 and 13 at time 1
+Gate 10: u4 0, 4 on qubits 17 and 13 at time 1
+result- additional SWAP count = 2.
+result- circuit depth = 6.
+Total compilation time = 0:00:10.379860.
+[[(12, 11), (17, 13), (14, 9), (15, 16)], [(13, 14), (9, 15), (12, 17)], [(11, 12), (14, 15)], [(17, 12), (13, 14)], [(12, 13)], [(17, 13)]]
+[['u4', 'u4', 'u4', 'u4'], ['u4', 'u4', 'SWAP'], ['u4', 'u4'], ['u4', 'SWAP'], ['u4'], ['u4']]
 layer 0---------------------------------
-gate ( U4) on qubits (6 9)
-gate ( U4) on qubits (15 16)
-gate ( U4) on qubits (13 14)
-gate ( U4) on qubits (12 17)
-layer 1---------------------------------
-gate ( U4) on qubits (9 16)
-gate ( U4) on qubits (6 14)
 gate ( U4) on qubits (13 17)
-layer 2---------------------------------
-gate ( U4) on qubits (9 15)
-gate ( U4) on qubits (14 17)
-layer 3---------------------------------
 gate ( U4) on qubits (9 14)
-layer 4---------------------------------
+gate ( U4) on qubits (15 16)
+gate ( U4) on qubits (11 12)
+layer 1---------------------------------
+gate ( swap) on qubits (12 17)
+gate ( U4) on qubits (13 14)
+gate ( U4) on qubits (9 15)
+layer 2---------------------------------
+gate ( U4) on qubits (11 12)
 gate ( U4) on qubits (14 15)
+layer 3---------------------------------
+gate ( U4) on qubits (12 17)
+gate ( swap) on qubits (13 14)
+layer 4---------------------------------
+gate ( U4) on qubits (12 13)
+layer 5---------------------------------
+gate ( U4) on qubits (13 17)
 metric-----------------------------------
-depth 5
-#swap 0
+depth 6
+#swap 2
 bound_depth:  5
 Using normal mode...
 start adding constraints...
@@ -401,40 +258,301 @@ Trying maximal depth = 5...
 Bound of Trying min swap = 5...
 Bound of Trying min swap = 2...
 Bound of Trying min swap = 1...
-Bound of Trying min swap = 0...
-Compilation time = 0:00:20.973587.
-Gate 0: u4 0, 1 on qubits 15 and 16 at time 0
-Gate 1: u4 2, 3 on qubits 9 and 6 at time 0
-Gate 2: u4 4, 5 on qubits 14 and 13 at time 0
-Gate 3: u4 6, 7 on qubits 17 and 12 at time 0
-Gate 4: u4 1, 2 on qubits 16 and 9 at time 1
-Gate 5: u4 3, 4 on qubits 6 and 14 at time 1
-Gate 6: u4 5, 6 on qubits 13 and 17 at time 1
-Gate 7: u4 0, 2 on qubits 15 and 9 at time 2
-Gate 8: u4 4, 6 on qubits 14 and 17 at time 2
-Gate 9: u4 2, 4 on qubits 9 and 14 at time 3
-Gate 10: u4 0, 4 on qubits 15 and 14 at time 4
-result- additional SWAP count = 0.
+[num_swap <= 1]
+Compilation time = 0:00:27.993471.
+SWAP on physical edge (11,12) at time 1
+SWAP on physical edge (13,14) at time 2
+Gate 0: u4 0, 1 on qubits 11 and 12 at time 0
+Gate 1: u4 2, 3 on qubits 17 and 13 at time 0
+Gate 2: u4 4, 5 on qubits 14 and 9 at time 0
+Gate 3: u4 6, 7 on qubits 15 and 16 at time 0
+Gate 4: u4 1, 2 on qubits 12 and 17 at time 1
+Gate 5: u4 3, 4 on qubits 13 and 14 at time 1
+Gate 6: u4 5, 6 on qubits 9 and 15 at time 1
+Gate 7: u4 0, 2 on qubits 12 and 17 at time 2
+Gate 8: u4 4, 6 on qubits 14 and 15 at time 2
+Gate 9: u4 2, 4 on qubits 17 and 13 at time 3
+Gate 10: u4 0, 4 on qubits 12 and 13 at time 4
+result- additional SWAP count = 2.
 result- circuit depth = 5.
-Total compilation time = 0:00:20.997395.
-[[(15, 16), (9, 6), (14, 13), (17, 12)], [(16, 9), (6, 14), (13, 17)], [(15, 9), (14, 17)], [(9, 14)], [(15, 14)]]
-[['u4', 'u4', 'u4', 'u4'], ['u4', 'u4', 'u4'], ['u4', 'u4'], ['u4'], ['u4']]
+Total compilation time = 0:00:28.012607.
+[[(11, 12), (17, 13), (14, 9), (15, 16)], [(12, 17), (13, 14), (9, 15), (11, 12)], [(12, 17), (14, 15), (13, 14)], [(17, 13)], [(12, 13)]]
+[['u4', 'u4', 'u4', 'u4'], ['u4', 'u4', 'u4', 'SWAP'], ['u4', 'u4', 'SWAP'], ['u4'], ['u4']]
 layer 0---------------------------------
-gate ( U4) on qubits (6 9)
-gate ( U4) on qubits (15 16)
-gate ( U4) on qubits (13 14)
-gate ( U4) on qubits (12 17)
-layer 1---------------------------------
-gate ( U4) on qubits (9 16)
-gate ( U4) on qubits (6 14)
+gate ( U4) on qubits (11 12)
 gate ( U4) on qubits (13 17)
-layer 2---------------------------------
-gate ( U4) on qubits (9 15)
-gate ( U4) on qubits (14 17)
-layer 3---------------------------------
 gate ( U4) on qubits (9 14)
+gate ( U4) on qubits (15 16)
+layer 1---------------------------------
+gate ( U4) on qubits (12 17)
+gate ( U4) on qubits (13 14)
+gate ( U4) on qubits (9 15)
+layer 2---------------------------------
+gate ( swap) on qubits (11 12)
+gate ( U4) on qubits (14 15)
+layer 3---------------------------------
+gate ( swap) on qubits (13 14)
+gate ( U4) on qubits (12 17)
 layer 4---------------------------------
+gate ( U4) on qubits (13 17)
+layer 5---------------------------------
+gate ( U4) on qubits (12 13)
+metric-----------------------------------
+depth 6
+#swap 2
+bound_depth:  1
+Using transition based mode...
+start adding constraints...
+Trying maximal depth = 1...
+Show UNSAT core
+[time__1 + 1 <= 1,
+ time__0 + 1 <= 1,
+ time__4 + 1 <= 1,
+ time__5 + 1 <= 1,
+ time__7 + 1 <= 1,
+ time__9 + 1 <= 1,
+ time__10 + 1 <= 1]
+Trying maximal depth = 2...
+Show UNSAT core
+[time__9 + 1 <= 2,
+ time__8 + 1 <= 2,
+ time__7 + 1 <= 2,
+ time__5 + 1 <= 2,
+ time__10 + 1 <= 2]
+Trying maximal depth = 3...
+Bound of Trying min swap = 6...
+Bound of Trying min swap = 4...
+Bound of Trying min swap = 3...
+Bound of Trying min swap = 2...
+Compilation time = 0:00:13.303386.
+SWAP on physical edge (2,3) at time 0
+SWAP on physical edge (2,8) at time 1
+Gate 0: u4 0, 1 on qubits 3 and 4 at time 0
+Gate 1: u4 2, 3 on qubits 2 and 1 at time 0
+Gate 2: u4 4, 5 on qubits 8 and 11 at time 0
+Gate 3: u4 6, 7 on qubits 12 and 13 at time 0
+Gate 4: u4 1, 2 on qubits 4 and 3 at time 1
+Gate 5: u4 3, 4 on qubits 1 and 2 at time 2
+Gate 6: u4 5, 6 on qubits 11 and 12 at time 0
+Gate 7: u4 0, 2 on qubits 2 and 3 at time 1
+Gate 8: u4 4, 6 on qubits 2 and 12 at time 2
+Gate 9: u4 2, 4 on qubits 3 and 2 at time 2
+Gate 10: u4 0, 4 on qubits 8 and 2 at time 2
+result- additional SWAP count = 2.
+result- circuit depth = 9.
+Total compilation time = 0:00:13.320370.
+[[(3, 4), (2, 1), (8, 11), (12, 13)], [(11, 12), (2, 3)], [(4, 3)], [(2, 3)], [(2, 8)], [(1, 2)], [(2, 12)], [(3, 2)], [(8, 2)]]
+[['u4', 'u4', 'u4', 'u4'], ['u4', 'SWAP'], ['u4'], ['u4'], ['SWAP'], ['u4'], ['u4'], ['u4'], ['u4']]
+layer 0---------------------------------
+gate ( U4) on qubits (8 11)
+gate ( U4) on qubits (12 13)
+gate ( U4) on qubits (1 2)
+gate ( U4) on qubits (3 4)
+layer 1---------------------------------
+gate ( swap) on qubits (2 3)
+gate ( U4) on qubits (11 12)
+layer 2---------------------------------
+gate ( U4) on qubits (3 4)
+layer 3---------------------------------
+gate ( U4) on qubits (2 3)
+layer 4---------------------------------
+gate ( swap) on qubits (2 8)
+layer 5---------------------------------
+gate ( U4) on qubits (1 2)
+layer 6---------------------------------
+gate ( U4) on qubits (2 12)
+layer 7---------------------------------
+gate ( U4) on qubits (2 3)
+layer 8---------------------------------
+gate ( U4) on qubits (2 8)
+metric-----------------------------------
+depth 9
+#swap 2
+bound_depth:  5
+Using normal mode...
+start adding constraints...
+Trying maximal depth = 5...
+Bound of Trying min swap = 5...
+Bound of Trying min swap = 2...
+[num_swap <= 2]
+Bound of Trying min swap = 4...
+Bound of Trying min swap = 3...
+Compilation time = 0:00:43.852540.
+SWAP on physical edge (11,12) at time 0
+SWAP on physical edge (12,13) at time 2
+SWAP on physical edge (13,14) at time 0
+Gate 0: u4 0, 1 on qubits 14 and 15 at time 0
+Gate 1: u4 2, 3 on qubits 13 and 12 at time 0
+Gate 2: u4 4, 5 on qubits 11 and 8 at time 0
+Gate 3: u4 6, 7 on qubits 2 and 3 at time 0
+Gate 4: u4 1, 2 on qubits 15 and 14 at time 1
+Gate 5: u4 3, 4 on qubits 11 and 12 at time 1
+Gate 6: u4 5, 6 on qubits 8 and 2 at time 1
+Gate 7: u4 0, 2 on qubits 13 and 14 at time 2
+Gate 8: u4 4, 6 on qubits 12 and 2 at time 2
+Gate 9: u4 2, 4 on qubits 14 and 13 at time 3
+Gate 10: u4 0, 4 on qubits 12 and 13 at time 4
+result- additional SWAP count = 3.
+result- circuit depth = 5.
+Total compilation time = 0:00:43.871589.
+[[(14, 15), (13, 12), (11, 8), (2, 3), (11, 12), (13, 14)], [(15, 14), (11, 12), (8, 2)], [(13, 14), (12, 2), (12, 13)], [(14, 13)], [(12, 13)]]
+[['u4', 'u4', 'u4', 'u4', 'SWAP', 'SWAP'], ['u4', 'u4', 'u4'], ['u4', 'u4', 'SWAP'], ['u4'], ['u4']]
+layer 0---------------------------------
+gate ( U4) on qubits (8 11)
+gate ( U4) on qubits (12 13)
+gate ( U4) on qubits (14 15)
+gate ( U4) on qubits (2 3)
+layer 1---------------------------------
+gate ( swap) on qubits (13 14)
+gate ( U4) on qubits (2 8)
+gate ( swap U4) on qubits (11 12)
+layer 2---------------------------------
+gate ( U4) on qubits (14 15)
+gate ( U4) on qubits (2 12)
+layer 3---------------------------------
+gate ( U4) on qubits (13 14)
+layer 4---------------------------------
+gate ( swap) on qubits (12 13)
+layer 5---------------------------------
+gate ( U4) on qubits (13 14)
+layer 6---------------------------------
+gate ( U4) on qubits (12 13)
+metric-----------------------------------
+depth 7
+#swap 2
+bound_depth:  1
+Using transition based mode...
+start adding constraints...
+Trying maximal depth = 1...
+Show UNSAT core
+[time__4 + 1 <= 1,
+ time__7 + 1 <= 1,
+ time__10 + 1 <= 1,
+ time__5 + 1 <= 1,
+ time__0 + 1 <= 1,
+ time__9 + 1 <= 1]
+Trying maximal depth = 2...
+Show UNSAT core
+[time__7 + 1 <= 2,
+ time__4 + 1 <= 2,
+ time__9 + 1 <= 2,
+ time__0 + 1 <= 2,
+ time__10 + 1 <= 2]
+Trying maximal depth = 3...
+Show UNSAT core
+[time__9 + 1 <= 3,
+ time__7 + 1 <= 3,
+ time__1 + 1 <= 3,
+ time__2 + 1 <= 3,
+ time__6 + 1 <= 3,
+ time__4 + 1 <= 3,
+ time__10 + 1 <= 3,
+ time__5 + 1 <= 3,
+ time__8 + 1 <= 3,
+ time__0 + 1 <= 3]
+Trying maximal depth = 4...
+Bound of Trying min swap = 7...
+Bound of Trying min swap = 5...
+Bound of Trying min swap = 4...
+Bound of Trying min swap = 3...
+[num_swap <= 3]
+Compilation time = 0:01:12.712954.
+SWAP on physical edge (11,12) at time 0
+SWAP on physical edge (13,14) at time 1
+SWAP on physical edge (14,15) at time 2
+SWAP on physical edge (9,15) at time 0
+Gate 0: u4 0, 1 on qubits 9 and 6 at time 0
+Gate 1: u4 2, 3 on qubits 15 and 14 at time 0
+Gate 2: u4 4, 5 on qubits 13 and 12 at time 0
+Gate 3: u4 6, 7 on qubits 11 and 10 at time 0
+Gate 4: u4 1, 2 on qubits 6 and 9 at time 2
+Gate 5: u4 3, 4 on qubits 14 and 13 at time 0
+Gate 6: u4 5, 6 on qubits 11 and 12 at time 1
+Gate 7: u4 0, 2 on qubits 15 and 9 at time 2
+Gate 8: u4 4, 6 on qubits 13 and 12 at time 1
+Gate 9: u4 2, 4 on qubits 9 and 15 at time 3
+Gate 10: u4 0, 4 on qubits 14 and 15 at time 3
+result- additional SWAP count = 4.
+result- circuit depth = 8.
+Total compilation time = 0:01:12.731719.
+[[(9, 6), (15, 14), (13, 12), (11, 10)], [(14, 13), (11, 12), (9, 15)], [(6, 9), (11, 12)], [(15, 9), (13, 12)], [(13, 14)], [(14, 15)], [(9, 15)], [(14, 15)]]
+[['u4', 'u4', 'u4', 'u4'], ['u4', 'SWAP', 'SWAP'], ['u4', 'u4'], ['u4', 'u4'], ['SWAP'], ['SWAP'], ['u4'], ['u4']]
+layer 0---------------------------------
+gate ( U4) on qubits (12 13)
+gate ( U4) on qubits (14 15)
+gate ( U4) on qubits (10 11)
+gate ( U4) on qubits (6 9)
+layer 1---------------------------------
+gate ( swap) on qubits (9 15)
+gate ( swap U4) on qubits (11 12)
+gate ( U4) on qubits (13 14)
+layer 2---------------------------------
+gate ( U4) on qubits (6 9)
+gate ( U4) on qubits (12 13)
+layer 3---------------------------------
+gate ( swap) on qubits (13 14)
+gate ( U4) on qubits (9 15)
+layer 4---------------------------------
+gate ( swap) on qubits (14 15)
+layer 5---------------------------------
+gate ( U4) on qubits (9 15)
+layer 6---------------------------------
 gate ( U4) on qubits (14 15)
 metric-----------------------------------
-depth 5
-#swap 0
+depth 7
+#swap 3
+bound_depth:  5
+Using normal mode...
+start adding constraints...
+Trying maximal depth = 5...
+Bound of Trying min swap = 5...
+Bound of Trying min swap = 2...
+[num_swap <= 2]
+Bound of Trying min swap = 4...
+Bound of Trying min swap = 3...
+[num_swap <= 3]
+Compilation time = 0:01:01.961673.
+SWAP on physical edge (3,4) at time 3
+SWAP on physical edge (4,5) at time 1
+SWAP on physical edge (2,8) at time 2
+SWAP on physical edge (11,12) at time 0
+Gate 0: u4 0, 1 on qubits 5 and 4 at time 0
+Gate 1: u4 2, 3 on qubits 3 and 2 at time 0
+Gate 2: u4 4, 5 on qubits 8 and 11 at time 0
+Gate 3: u4 6, 7 on qubits 12 and 13 at time 0
+Gate 4: u4 1, 2 on qubits 4 and 3 at time 1
+Gate 5: u4 3, 4 on qubits 2 and 8 at time 1
+Gate 6: u4 5, 6 on qubits 12 and 11 at time 1
+Gate 7: u4 0, 2 on qubits 4 and 3 at time 2
+Gate 8: u4 4, 6 on qubits 8 and 11 at time 2
+Gate 9: u4 2, 4 on qubits 3 and 2 at time 3
+Gate 10: u4 0, 4 on qubits 3 and 2 at time 4
+result- additional SWAP count = 4.
+result- circuit depth = 5.
+Total compilation time = 0:01:01.979755.
+[[(5, 4), (3, 2), (8, 11), (12, 13), (11, 12)], [(4, 3), (2, 8), (12, 11), (4, 5)], [(4, 3), (8, 11), (2, 8)], [(3, 2), (3, 4)], [(3, 2)]]
+[['u4', 'u4', 'u4', 'u4', 'SWAP'], ['u4', 'u4', 'u4', 'SWAP'], ['u4', 'u4', 'SWAP'], ['u4', 'SWAP'], ['u4']]
+layer 0---------------------------------
+gate ( U4) on qubits (8 11)
+gate ( U4) on qubits (12 13)
+gate ( U4) on qubits (2 3)
+gate ( U4) on qubits (4 5)
+layer 1---------------------------------
+gate ( U4) on qubits (3 4)
+gate ( U4) on qubits (2 8)
+gate ( swap U4) on qubits (11 12)
+layer 2---------------------------------
+gate ( swap) on qubits (4 5)
+gate ( U4) on qubits (8 11)
+layer 3---------------------------------
+gate ( swap) on qubits (2 8)
+gate ( U4) on qubits (3 4)
+layer 4---------------------------------
+gate ( U4) on qubits (2 3)
+layer 5---------------------------------
+gate ( swap) on qubits (3 4)
+layer 6---------------------------------
+gate ( U4) on qubits (2 3)
+metric-----------------------------------
+depth 7
+#swap 3
