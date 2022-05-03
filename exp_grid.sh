@@ -15,7 +15,7 @@ if [ ! -d "results/$device_set/$mode" ]; then
 fi
 
 
-for benchmarks in qcnn qaoa; do
+for benchmarks in qaoa; do
     if [ ! -d "results/$device_set/$mode/$benchmarks" ]; then
         mkdir "results/$device_set/$mode/$benchmarks"
     fi
@@ -42,7 +42,7 @@ for benchmarks in qcnn qaoa; do
     fi
 
     if [ "$benchmarks" == "qaoa" ]; then
-        for size in 8 10 12; do
+        for size in 12; do
             for trial in 0 1 2 3 4; do
                 folderName="results/$device_set/$mode/qaoa/${size}_${trial}"
                 if [ ! -d "$folderName"    ]; then 
