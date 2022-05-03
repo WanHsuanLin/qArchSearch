@@ -1,5 +1,7 @@
 import argparse
 
+import csv
+
 SINGLE_QUBIT_GATE_DURATION = 25 #ns
 TWO_QUBIT_GATE_DURATION = 10 #ns
 MEASUREMENT_DURATION = 4000 #4us
@@ -22,6 +24,14 @@ T_PHI=2*T_1
 
 def sim_circuit(phy_qubit_num, data, coupling):
     one_hot_distance, two_hot_distance = preprocess(phy_qubit_num, coupling)
+    print("one hot dis:")
+    for q in one_hot_distance:
+        print(f"qubit {q}:")
+        print(one_hot_distance[q])
+    print("two hot dis:")
+    for q in two_hot_distance:
+        print(f"qubit {q}:")
+        print(two_hot_distance[q])
     measurement_pair = merge_gate(phy_qubit_num, data)
     qubit_last_time, time_slot_matrix, time_two_qubit_gate_indicator = scheduling(measurement_pair, phy_qubit_num,data)
     calculate_gate_fidelity(data, time_slot_matrix, time_two_qubit_gate_indicator, one_hot_distance, two_hot_distance)
@@ -74,7 +84,7 @@ def calculate_gate_fidelity(data, time_slot_matrix, time_two_qubit_gate_indicato
                             g_p_pos = gate_pos[g_p]
                             if g_p_pos[0] in one_hot_distance[g_pos[0]] or g_p_pos[0] in one_hot_distance[g_pos[1]] \
                                 or g_p_pos[1] in one_hot_distance[g_pos[0]] or g_p_pos[1] in one_hot_distance[g_pos[1]]:
-                                gate_fidelity -= P1_PARALLEL_ERR
+                                per_gate_fidelity -= P1_PARALLEL_ERR
                             elif g_p_pos[0] in two_hot_distance[g_pos[0]] or g_p_pos[0] in two_hot_distance[g_pos[1]] \
                                 or g_p_pos[1] in two_hot_distance[g_pos[0]] or g_p_pos[1] in two_hot_distance[g_pos[1]]:
                                 per_gate_fidelity -= P2_PARALLEL_ERR
@@ -93,7 +103,7 @@ def preprocess(phy_qubit_num, coupling):
     for q in range(phy_qubit_num):
         for neighbor_q in one_hot_distance[q]:
             for two_hot_q in one_hot_distance[neighbor_q]:
-                if two_hot_q not in one_hot_distance[q]:
+                if two_hot_q not in one_hot_distance[q] and two_hot_q != q and two_hot_q not in two_hot_distance[q]:
                     two_hot_distance[q].append(two_hot_q)
     
     return one_hot_distance, two_hot_distance
@@ -104,7 +114,7 @@ def scheduling(measurement_pair, phy_qubit_num, data):
     qubit_last_time = [0] * phy_qubit_num
     time_slot_matrix = [[-1] * TIME_LENGTH ] * phy_qubit_num
     time_two_qubit_gate_indicator = [False] * TIME_LENGTH
-    for g_id, g, g_pos in enumerate(zip(gate_spec, gate_pos)):
+    for g_id, (g, g_pos) in enumerate(zip(gate_spec, gate_pos)):
         if g == "sg":
             gate_start_time = qubit_last_time[g_pos[0]] + 1
             for i in range(SINGLE_QUBIT_GATE_UNIT):
@@ -195,35 +205,84 @@ def merge_gate(phy_qubit_num, data):
     data["gate_spec"] = new_gate_spec
     data["gates"] = new_gate_pos
     return measurement_pair
-        
+
+def create_list_from_data(data):
+    data_list = []  # create an empty list
+    # append the items to the list in the same order.
+    data_list.append(data.get('compiler'))
+    data_list.append(data.get('fidelity'))
+    data_list.append(data.get('g1'))
+    data_list.append(data.get('g2'))
+    data_list.append(data.get('#e'))
+    data_list.append(data.get('idling time'))
+    data_list.append(data.get('two qubit gate fidelity'))
+    data_list.append(data.get('gates'))
+    data_list.append(data.get('gate_spec'))
+    data_list.append(data.get('coupling'))
+    return data_list
+
+
 if __name__ == "__main__":
-    # Initialize parser
-    parser = argparse.ArgumentParser()
-    # Adding optional argument
-    parser.add_argument("csv_file", metavar='DS', type=str,
-        help="csv_file to store gate and gate spec")
-    parser.add_argument("device_set", metavar='DS', type=str,
-        help="Device: hh: heavy-hexagonal (IBM), grid: sqaure")
-    parser.add_argument("benchmark", metavar='B', type=str,
-        help="Benchmark Set: arith or qaoa or qcnn")
-    # Read arguments from command line
-    args = parser.parse_args()
+    # # Initialize parser
+    # parser = argparse.ArgumentParser()
+    # # Adding optional argument
+    # parser.add_argument("csv_file", metavar='DS', type=str,
+    #     help="csv_file to store gate and gate spec")
+    # parser.add_argument("device_set", metavar='DS', type=str,
+    #     help="Device: hh: heavy-hexagonal (IBM), grid: sqaure")
+    # parser.add_argument("benchmark", metavar='B', type=str,
+    #     help="Benchmark Set: arith or qaoa or qcnn")
+    # # Read arguments from command line
+    # args = parser.parse_args()
     
-    if args.device_set == "hh":
-        count_physical_qubit = 18
-        fix_coupling = [(0,4), (1,2), (2,3), (3,4), (4,5), (5,6), (6,7), 
-                    (2,8), (6,9), (10,11), (8,11), (11,12), (12,13), 
-                    (13,14), (14,15), (15,16), (9,15), (13,17)]
-    elif args.device_set == "grid":
-        count_physical_qubit = 16
-        fix_coupling = [(0,1), (1,2), (2,3), (4,5), (5,6), (6,7), (8,9),
-        (9,10), (10,11), (12,13), (13,14), (14,15), (0,4), (4,8),
-        (8,12), (1,5), (5,9), (9,13), (2,6), (6,10), (10,14),
-        (3,7), (7,11), (11,15)]
-    else:
-        raise ValueError("invalid benchmark name\n")
+    # if args.device_set == "hh":
+    #     count_physical_qubit = 18
+    #     fix_coupling = [[0,4], [1,2], [2,3], [3,4], [4,5], [5,6], [6,7], 
+    #                 [2,8], [6,9], [10,11], [8,11], [11,12], [12,13], 
+    #                 [13,14], [14,15], [15,16], [9,15], [13,17]]
+    # elif args.device_set == "grid":
+    #     count_physical_qubit = 16
+    #     fix_coupling = [[0,1], [1,2], [2,3], [4,5], [5,6], [6,7], [8,9],
+    #     [9,10], [10,11], [12,13], [13,14], [14,15], [0,4], [4,8],
+    #     [8,12], [1,5], [5,9], [9,13], [2,6], [6,10], [10,14],
+    #     [3,7], [7,11], [11,15]]
+    # else:
+    #     raise ValueError("invalid benchmark name\n")
     
+    # csvreader = csv.reader(args.csv_file)
+    # header = []
+    # header = next(csvreader)
+    # data = dict()
+
+    # csv_name = args.csv_file[:-4]+"_sim.csv"
+    # with open(csv_name, 'w+') as c:
+    #     writer = csv.writer(c)
+    #     writer.writerow(['compiler', 'fidelity', 'g1', 'g2', '#e', 'idling time', 'two qubit gate fidelity', 'gates', 'gate_spec', 'coupling'])
+
+    # for row in csvreader:
+    #     data['compiler'] = row[0]
+    #     data["gates"] = row[3]
+    #     data["gate_spec"] = row[4]
+    #     coupling = row[5] + fix_coupling
+    #     sim_circuit(count_physical_qubit, data, coupling)
+    #     with open(csv_name, 'a') as c:
+    #         writer = csv.writer(c)
+    #         data_list = create_list_from_data(data)
+    #         writer.writerow(data_list)
     
-    sim_circuit(phy_qubit_num, data, coupling)
-    data["gate_spec"]
-    gate_pos = data["gates"]
+    count_physical_qubit = 16
+    coupling = [[0,1], [1,2], [2,3], [4,5], [5,6], [6,7], [8,9],
+        [9,10], [10,11], [12,13], [13,14], [14,15], [0,4], [4,8],
+        [8,12], [1,5], [5,9], [9,13], [2,6], [6,10], [10,14],
+        [3,7], [7,11], [11,15]]
+    
+    data = dict()
+    # data["gates"] = [[[10, 11]], [[13, 14], [9, 10], [7, 11]], [[14, 15], [6, 10]], [[13, 14], [11, 15]]]
+    # data["gate_spec"] = [[" ZZ"], [" ZZ", " ZZ", " ZZ swap"], [" swap", " swap"], [" ZZ", " ZZ"]]
+
+    data["gates"] = [[[10, 11]]] 
+    data["gate_spec"] = [[" ZZ"]]
+    
+    sim_circuit(count_physical_qubit, data, coupling)
+
+    

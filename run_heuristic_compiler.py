@@ -51,7 +51,7 @@ if __name__ == "__main__":
         program_qubit = args.size
         circuit_info_sabre = (args.size, get_qaoa_graph(args.size, args.trial), args.trial)
         circuit_info_tket = circuit_info_sabre
-        csv_name = args.folder+"/"+args.device_set+"_heristic_"+args.size+"_"+args.trial
+        csv_name = args.folder+"/"+str(args.device_set)+"_heristic_"+str(args.size)+"_"+args.trial
     else:
         raise ValueError("invalid benchmark name\n")
 
@@ -99,7 +99,7 @@ if __name__ == "__main__":
     csv_name2 = csv_name + "_tket.csv" 
     with open(csv_name2, 'w+') as c:
         writer = csv.writer(c)
-        writer.writerow(['compiler', '#e','M', '#gates', 'gate_spec', 'coupling'])
+        writer.writerow(['compiler', '#e','M', 'gates', 'gate_spec', 'coupling'])
 
     for key in device_spec:
         data["#e"] = int(key)

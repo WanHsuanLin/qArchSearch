@@ -61,7 +61,7 @@ if __name__ == "__main__":
         csv_name = args.folder+"/"+args.device_set+"_optimal_"+args.filename[5:-4]+"csv"
     elif args.benchmark == "qaoa":
         circuit_info = (args.size, get_qaoa_graph(args.size, args.trial), args.trial)
-        csv_name = args.folder+"/"+args.device_set+"_optimal_"+args.size+"_"+args.trial+".csv"
+        csv_name = args.folder+"/"+args.device_set+"_optimal_"+str(args.size)+"_"+str(args.trial)+".csv"
 
     if args.device_set == "hh":
         count_physical_qubit = 18
@@ -82,7 +82,7 @@ if __name__ == "__main__":
 
     with open(csv_name, 'w+') as c:
         writer = csv.writer(c)
-        writer.writerow(['mode', '#e','M', '#gates', 'gate_spec', 'coupling'])
+        writer.writerow(['mode', '#e','M', 'gates', 'gate_spec', 'coupling'])
 
     data = dict()
     data["benchmark"] = args.benchmark
