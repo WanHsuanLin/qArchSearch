@@ -57,12 +57,12 @@ if __name__ == "__main__":
 
     if args.device_set == "hh":
         count_physical_qubit = 18
-        coupling = [(0,4), (1,2), (2,3), (3,4), (4,5), (5,6), (6,7), 
+        fix_coupling = [(0,4), (1,2), (2,3), (3,4), (4,5), (5,6), (6,7), 
                     (2,8), (6,9), (10,11), (8,11), (11,12), (12,13), 
                     (13,14), (14,15), (15,16), (9,15), (13,17)]
     elif args.device_set == "grid":
         count_physical_qubit = 16
-        coupling = [(0,1), (1,2), (2,3), (4,5), (5,6), (6,7), (8,9),
+        fix_coupling = [(0,1), (1,2), (2,3), (4,5), (5,6), (6,7), (8,9),
         (9,10), (10,11), (12,13), (13,14), (14,15), (0,4), (4,8),
         (8,12), (1,5), (5,9), (9,13), (2,6), (6,10), (10,14),
         (3,7), (7,11), (11,15)]
@@ -84,8 +84,10 @@ if __name__ == "__main__":
     for key in device_spec:
         data["#e"] = int(key)
         data["coupling"] = device_spec[key]
+        coupling = []
         for edge in device_spec[key]:
             coupling.append((edge[0], edge[1]))
+        coupling += fix_coupling
         for objective in ["basic", "lookahead", "decay"]:
             data["compiler"] = "sabre_"+objective
             data["gates"], data["gate_spec"] = run_sabre(args.benchmark, circuit_info_sabre, coupling, objective)
