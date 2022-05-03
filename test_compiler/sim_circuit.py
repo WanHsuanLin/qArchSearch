@@ -21,7 +21,7 @@ P2_PARALLEL_ERR = P1_PARALLEL_ERR * FACTOR
 
 
 def sim_circuit(phy_qubit_num, data, coupling):
-    one_hot_distance, two_hot_distance = preprocess(coupling)
+    one_hot_distance, two_hot_distance = preprocess(phy_qubit_num, coupling)
     measurement_pair = merge_gate(phy_qubit_num, data)
     qubit_last_time, time_slot_matrix, time_two_qubit_gate_indicator = scheduling(measurement_pair, phy_qubit_num,data)
     calculate_gate_fidelity(data, time_slot_matrix, time_two_qubit_gate_indicator, one_hot_distance, two_hot_distance)
@@ -74,9 +74,21 @@ def calculate_gate_fidelity(data, time_slot_matrix, time_two_qubit_gate_indicato
                     gate_fidelity.append(per_gate_fidelity)
     data["two_qubit_gates_fidelity"] = gate_fidelity
 
-def preprocess(coupling):
+def preprocess(phy_qubit_num, coupling):
     one_hot_distance = dict() # qubit to its one hot dis qubit
     two_hot_distance = dict() # qubit to its two hot dis qubit
+    for q in range(phy_qubit_num):
+        one_hot_distance[q] = list()
+        two_hot_distance[q] = list()
+    for edge in coupling:
+        one_hot_distance[edge[0]].append(edge[1])
+        one_hot_distance[edge[1]].append(edge[0])
+    for q in range(phy_qubit_num):
+        for neighbor_q in one_hot_distance[q]:
+            for two_hot_q in one_hot_distance[neighbor_q]:
+                if two_hot_q not in one_hot_distance[q]:
+                    two_hot_distance[q].append(two_hot_q)
+    
     return one_hot_distance, two_hot_distance
 
 def scheduling(measurement_pair, phy_qubit_num, data):
@@ -100,6 +112,7 @@ def scheduling(measurement_pair, phy_qubit_num, data):
                 time_two_qubit_gate_indicator[cur_time] = True
             qubit_last_time[g_pos[0]] = cur_time
             qubit_last_time[g_pos[1]] = cur_time
+        # v and m may have some problem
         elif g[-2] == "v":
             q_m = gate_pos[measurement_pair[int(g[-1])][0]][0]
             gate_start_time = max(qubit_last_time[g_pos[0]], qubit_last_time[q_m]) + 1
