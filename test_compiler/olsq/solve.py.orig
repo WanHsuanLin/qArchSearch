@@ -4,15 +4,15 @@ from numpy import insert
 
 from z3 import Int, IntVector, Bool, Optimize, Implies, And, Or, If, sat, Solver, set_option
 
-from run.olsq.input import input_qasm
-from run.olsq.output import output_qasm
-from run.olsq.device import qcdevice
+from olsq.input import input_qasm
+from olsq.output import output_qasm
+from olsq.device import qcdevice
 import pkgutil
 from enum import Enum
 
-from run.util import cal_crosstalk, cal_fidelity
-from run.device import get_char_graph
-from run.gate_absorption import run_gate_absorption
+from util import cal_crosstalk, cal_fidelity
+from device import get_char_graph
+from gate_absorption import run_gate_absorption
 
 MEMORY_MAX_SIZE = 1000 * 60
 MAX_TREAD_NUM = 8

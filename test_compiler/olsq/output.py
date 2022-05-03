@@ -1,4 +1,4 @@
-from run.olsq.device import qcdevice
+from olsq.device import qcdevice
 
 
 def output_qasm(device: qcdevice, result_depth: int,
