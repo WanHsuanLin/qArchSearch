@@ -2,6 +2,8 @@ import argparse
 
 import csv
 
+from sympy import Q
+
 SINGLE_QUBIT_GATE_DURATION = 25 #ns
 TWO_QUBIT_GATE_DURATION = 10 #ns
 MEASUREMENT_DURATION = 4000 #4us
@@ -24,16 +26,33 @@ T_PHI=2*T_1
 
 def sim_circuit(phy_qubit_num, data, coupling):
     one_hot_distance, two_hot_distance = preprocess(phy_qubit_num, coupling)
-    print("one hot dis:")
-    for q in one_hot_distance:
-        print(f"qubit {q}:")
-        print(one_hot_distance[q])
-    print("two hot dis:")
-    for q in two_hot_distance:
-        print(f"qubit {q}:")
-        print(two_hot_distance[q])
+    # print("one hot dis:")
+    # for q in one_hot_distance:
+    #     print(f"qubit {q}:")
+    #     print(one_hot_distance[q])
+    # print("two hot dis:")
+    # for q in two_hot_distance:
+    #     print(f"qubit {q}:")
+    #     print(two_hot_distance[q])
+    # print("ori gate info:")
+    # print("gate_spec:")
+    # print(data["gate_spec"])
+    # print("gate_pos:")
+    # print(data["gates"])
     measurement_pair = merge_gate(phy_qubit_num, data)
+    print("\nnew gate info:")
+    print("gate_spec:")
+    print(data["gate_spec"])
+    print("gate_pos:")
+    print(data["gates"])
     qubit_last_time, time_slot_matrix, time_two_qubit_gate_indicator = scheduling(measurement_pair, phy_qubit_num,data)
+    print("qubit_last_time:")
+    print(qubit_last_time)
+    circuit_d = max(qubit_last_time)
+    print("circuit_depth ", circuit_d)
+    print("gate scheduling:")
+    for qubit in range(phy_qubit_num):
+        print(time_slot_matrix[qubit][:circuit_d + 2])
     calculate_gate_fidelity(data, time_slot_matrix, time_two_qubit_gate_indicator, one_hot_distance, two_hot_distance)
     data["qubit_idling_time"] = calculate_qubit_idling_time(qubit_last_time, time_slot_matrix)
     data["g1"], data["g2"] = calculate_gate_number(data["gate_spec"])
@@ -112,7 +131,9 @@ def scheduling(measurement_pair, phy_qubit_num, data):
     gate_spec = data["gate_spec"]
     gate_pos = data["gates"]
     qubit_last_time = [0] * phy_qubit_num
-    time_slot_matrix = [[-1] * TIME_LENGTH ] * phy_qubit_num
+    time_slot_matrix = [] 
+    for _ in range(phy_qubit_num):
+        time_slot_matrix.append([-1] * TIME_LENGTH )
     time_two_qubit_gate_indicator = [False] * TIME_LENGTH
     for g_id, (g, g_pos) in enumerate(zip(gate_spec, gate_pos)):
         if g == "sg":
@@ -135,10 +156,12 @@ def scheduling(measurement_pair, phy_qubit_num, data):
             gate_start_time = max(qubit_last_time[g_pos[0]], qubit_last_time[q_m]) + 1
             for i in range(SINGLE_QUBIT_GATE_UNIT):
                 time_slot_matrix[g_pos[0]][gate_start_time+i] = g_id
+            qubit_last_time[g_pos[0]] = gate_start_time+SINGLE_QUBIT_GATE_UNIT
         elif g[-2] == "m":
             gate_start_time = qubit_last_time[g_pos[0]] + 1
             for i in range(MEASUREMENT_UNIT):
                 time_slot_matrix[g_pos[0]][gate_start_time+i] = g_id
+            qubit_last_time[g_pos[0]] = gate_start_time+MEASUREMENT_UNIT
             continue
             # measurement_pair[1] = g_pos[0]
         else:
@@ -170,6 +193,8 @@ def merge_gate(phy_qubit_num, data):
                     new_gate_pos.append([g_pos[0]])
                     new_gate_spec.append("sg")
                     new_gate_pos.append([g_pos[1]])
+                q_last_gate_list[g_pos[0]] = "sg"
+                q_last_gate_list[g_pos[1]] = "sg"
             elif g == " ZZ":
                 new_gate_spec.append("syc")
                 new_gate_pos.append(g_pos)
@@ -178,6 +203,9 @@ def merge_gate(phy_qubit_num, data):
                 new_gate_spec.append("sg")
                 new_gate_pos.append([g_pos[1]])
                 new_gate_spec.append("syc")
+                new_gate_pos.append(g_pos)
+                q_last_gate_list[g_pos[0]] = "syc"
+                q_last_gate_list[g_pos[1]] = "syc"
             elif g == " swap":
                 for _ in range(3):
                     new_gate_spec.append("syc")
@@ -186,6 +214,8 @@ def merge_gate(phy_qubit_num, data):
                     new_gate_pos.append([g_pos[0]])
                     new_gate_spec.append("sg")
                     new_gate_pos.append([g_pos[1]])
+                q_last_gate_list[g_pos[0]] = "sg"
+                q_last_gate_list[g_pos[1]] = "sg"
             else:   # measurement and v in qcnn
                 index = int(g_pos[-1])
                 if not isinstance(measurement_pair[index], list):
@@ -194,14 +224,16 @@ def merge_gate(phy_qubit_num, data):
                     measurement_pair[index][0] = g_id
                     new_gate_spec.append("v"+str(index))
                     new_gate_pos.append([g_pos[0]])
+                    q_last_gate_list[g_pos[0]] = "v"
                 elif g[-2] == "m":
                     measurement_pair[index][1] = g_id
                     new_gate_spec.append("m"+str(index))
                     new_gate_pos.append([g_pos[0]])
+                    q_last_gate_list[g_pos[0]] = "m"
                 else:
                     raise ValueError("invalid gate name\n")
             g_id += 1
-            
+    assert(len(new_gate_spec) == len(new_gate_pos))
     data["gate_spec"] = new_gate_spec
     data["gates"] = new_gate_pos
     return measurement_pair
@@ -280,8 +312,11 @@ if __name__ == "__main__":
     # data["gates"] = [[[10, 11]], [[13, 14], [9, 10], [7, 11]], [[14, 15], [6, 10]], [[13, 14], [11, 15]]]
     # data["gate_spec"] = [[" ZZ"], [" ZZ", " ZZ", " ZZ swap"], [" swap", " swap"], [" ZZ", " ZZ"]]
 
-    data["gates"] = [[[10, 11]]] 
-    data["gate_spec"] = [[" ZZ"]]
+    # data["gates"] = [[[10, 11]]] 
+    # data["gate_spec"] = [[" ZZ"]]
+
+    data["gates"] = [[[10, 11]], [[9, 10]]]
+    data["gate_spec"] = [[" swap"], [" ZZ swap"]]
     
     sim_circuit(count_physical_qubit, data, coupling)
 
