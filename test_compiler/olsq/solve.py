@@ -393,7 +393,7 @@ class OLSQ:
                 bound_depth *= 2
                 break
             if preprossess_only:
-                swap_bound = (self.bound_depth-1 , model[count_swap].as_long())
+                swap_bound = (0 , model[count_swap].as_long())
                 break
             if swap_bound != None:
                 swap_bound = (swap_bound[0],model[count_swap].as_long())

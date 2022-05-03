@@ -92,7 +92,7 @@ if __name__ == "__main__":
         data["coupling"] = device_spec[key]
         for edge in device_spec[key]:
             coupling.append((edge[0], edge[1]))
-        for mode in ["transition", 'mixed']:
+        for mode in ["transition", 'normal']:
             data = run_olsq_tbolsq(args.benchmark, circuit_info, coupling, count_physical_qubit, mode)
             data_list = create_list_from_data(data, coupling, count_physical_qubit)
             with open(csv_name, 'a') as c:

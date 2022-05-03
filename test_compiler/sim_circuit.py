@@ -200,8 +200,8 @@ if __name__ == "__main__":
     # Initialize parser
     parser = argparse.ArgumentParser()
     # Adding optional argument
-    parser.add_argument("device_set", metavar='DS', type=str,
-        help="Device: hh: heavy-hexagonal (IBM), grid: sqaure")
+    parser.add_argument("csv_file", metavar='DS', type=str,
+        help="csv_file to store gate and gate spec")
     parser.add_argument("device_spec", metavar='DS', type=str,
         help="file to store device spec")
     parser.add_argument("benchmark", metavar='B', type=str,
