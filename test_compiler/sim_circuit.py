@@ -202,19 +202,28 @@ if __name__ == "__main__":
     # Adding optional argument
     parser.add_argument("csv_file", metavar='DS', type=str,
         help="csv_file to store gate and gate spec")
-    parser.add_argument("device_spec", metavar='DS', type=str,
-        help="file to store device spec")
+    parser.add_argument("device_set", metavar='DS', type=str,
+        help="Device: hh: heavy-hexagonal (IBM), grid: sqaure")
     parser.add_argument("benchmark", metavar='B', type=str,
         help="Benchmark Set: arith or qaoa or qcnn")
-    parser.add_argument("folder", metavar='F', type=str,
-        help="the folder to store results")
-    parser.add_argument("--size", dest="size", type=int,
-        help="The size of the qaoa circuit: 8, 10, 12, 14, 16")
-    parser.add_argument("--trial", dest="trial", type=int,
-        help="The index of qaoa circuit: from 0 to 9")
-    parser.add_argument("--filename", dest="filename", type=str,
-        help="The file name of the arith circuit")
     # Read arguments from command line
     args = parser.parse_args()
     
+    if args.device_set == "hh":
+        count_physical_qubit = 18
+        fix_coupling = [(0,4), (1,2), (2,3), (3,4), (4,5), (5,6), (6,7), 
+                    (2,8), (6,9), (10,11), (8,11), (11,12), (12,13), 
+                    (13,14), (14,15), (15,16), (9,15), (13,17)]
+    elif args.device_set == "grid":
+        count_physical_qubit = 16
+        fix_coupling = [(0,1), (1,2), (2,3), (4,5), (5,6), (6,7), (8,9),
+        (9,10), (10,11), (12,13), (13,14), (14,15), (0,4), (4,8),
+        (8,12), (1,5), (5,9), (9,13), (2,6), (6,10), (10,14),
+        (3,7), (7,11), (11,15)]
+    else:
+        raise ValueError("invalid benchmark name\n")
     
+    
+    sim_circuit(phy_qubit_num, data, coupling)
+    data["gate_spec"]
+    gate_pos = data["gates"]

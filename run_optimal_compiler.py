@@ -58,7 +58,7 @@ if __name__ == "__main__":
     
     if args.benchmark == "qcnn":
         circuit_info = args.filename
-        csv_name = args.folder+"/"+args.device_set+"_optimal_"+args.filename[5:-4]
+        csv_name = args.folder+"/"+args.device_set+"_optimal_"+args.filename[5:-4]+"csv"
     elif args.benchmark == "qaoa":
         circuit_info = (args.size, get_qaoa_graph(args.size, args.trial), args.trial)
         csv_name = args.folder+"/"+args.device_set+"_optimal_"+args.size+"_"+args.trial+".csv"
