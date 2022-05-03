@@ -428,7 +428,7 @@ class qArchEval:
         print(f"Total compilation time = {datetime.datetime.now() - start_time}.")
         return swap_bound, results
 
-    def _optimize_circuit(tight_depth, self, lsqc, preprossess_only, count_extra_edge, num_e, time, count_gate, count_swap, bound_depth, swap_bound):
+    def _optimize_circuit(self, tight_depth, lsqc, preprossess_only, count_extra_edge, num_e, time, count_gate, count_swap, bound_depth, swap_bound):
         if swap_bound != None:
             print(f"optimizing circuit with swap range ({swap_bound[0]},{swap_bound[1]}) ")
         if swap_bound != None:
