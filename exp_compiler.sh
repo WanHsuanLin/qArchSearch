@@ -1,5 +1,5 @@
 #!/bin/bash
-# ./exp_compiler.sh o hh device_set/hh/qcnn/8-4-2_gs_d.json qcnn
+# ./exp_compiler.sh o hh device_set/hh/qcnn/8-4-2_gs_d.json qcnn --filename qcnn/8-4-2.qasm
 heuristic=$1
 device_set=$2
 mode=1

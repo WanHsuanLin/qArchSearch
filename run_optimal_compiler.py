@@ -40,6 +40,8 @@ if __name__ == "__main__":
     # Adding optional argument
     parser.add_argument("device_set", metavar='DS', type=str,
         help="Device: hh: heavy-hexagonal (IBM), grid: sqaure")
+    parser.add_argument("device_spec", metavar='DS', type=str,
+        help="file to store device spec")
     parser.add_argument("benchmark", metavar='B', type=str,
         help="Benchmark Set: arith or qaoa or qcnn")
     parser.add_argument("folder", metavar='F', type=str,
