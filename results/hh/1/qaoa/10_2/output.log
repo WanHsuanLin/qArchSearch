@@ -70,78 +70,72 @@ Bound of Trying min swap = 13...
 Bound of Trying min swap = 12...
 Bound of Trying min swap = 11...
 []
-SWAP on physical edge (6,9) at time 0
-SWAP on physical edge (6,9) at time 2
-SWAP on physical edge (11,12) at time 3
-SWAP on physical edge (12,13) at time 2
-SWAP on physical edge (12,13) at time 4
-SWAP on physical edge (13,14) at time 1
-SWAP on physical edge (14,15) at time 0
-SWAP on physical edge (14,15) at time 2
-SWAP on physical edge (14,15) at time 4
-SWAP on physical edge (15,16) at time 1
-SWAP on physical edge (15,16) at time 3
-SWAP on physical edge (6,7) at time 1
-Gate 0: ZZ 0, 7 on qubits 15 and 9 at time 0
-Gate 1: ZZ 0, 2 on qubits 14 and 15 at time 1
-Gate 2: ZZ 0, 8 on qubits 14 and 13 at time 1
-Gate 3: ZZ 7, 6 on qubits 6 and 7 at time 1
-Gate 4: ZZ 7, 1 on qubits 6 and 9 at time 1
-Gate 5: ZZ 3, 8 on qubits 17 and 13 at time 1
-Gate 6: ZZ 3, 4 on qubits 17 and 13 at time 3
-Gate 7: ZZ 3, 5 on qubits 17 and 13 at time 5
-Gate 8: ZZ 8, 6 on qubits 15 and 9 at time 3
-Gate 9: ZZ 1, 2 on qubits 9 and 15 at time 1
-Gate 10: ZZ 1, 9 on qubits 9 and 15 at time 2
-Gate 11: ZZ 2, 5 on qubits 14 and 13 at time 5
-Gate 12: ZZ 4, 9 on qubits 13 and 14 at time 3
-Gate 13: ZZ 4, 5 on qubits 12 and 13 at time 5
-Gate 14: ZZ 9, 6 on qubits 15 and 9 at time 5
+SWAP on physical edge (0,4) at time 0
+SWAP on physical edge (1,2) at time 1
+SWAP on physical edge (2,3) at time 0
+SWAP on physical edge (2,3) at time 3
+SWAP on physical edge (3,4) at time 1
+SWAP on physical edge (3,4) at time 2
+SWAP on physical edge (3,4) at time 4
+SWAP on physical edge (4,5) at time 3
+SWAP on physical edge (2,8) at time 2
+SWAP on physical edge (2,8) at time 4
+SWAP on physical edge (10,11) at time 3
+SWAP on physical edge (11,12) at time 4
+Gate 0: ZZ 0, 7 on qubits 3 and 4 at time 0
+Gate 1: ZZ 0, 2 on qubits 2 and 3 at time 1
+Gate 2: ZZ 0, 8 on qubits 2 and 8 at time 1
+Gate 3: ZZ 7, 6 on qubits 4 and 5 at time 0
+Gate 4: ZZ 7, 1 on qubits 0 and 4 at time 1
+Gate 5: ZZ 3, 8 on qubits 11 and 8 at time 2
+Gate 6: ZZ 3, 4 on qubits 10 and 11 at time 4
+Gate 7: ZZ 3, 5 on qubits 10 and 11 at time 5
+Gate 8: ZZ 8, 6 on qubits 4 and 3 at time 5
+Gate 9: ZZ 1, 2 on qubits 4 and 3 at time 1
+Gate 10: ZZ 1, 9 on qubits 3 and 2 at time 2
+Gate 11: ZZ 2, 5 on qubits 8 and 11 at time 5
+Gate 12: ZZ 4, 9 on qubits 11 and 8 at time 4
+Gate 13: ZZ 4, 5 on qubits 12 and 11 at time 5
+Gate 14: ZZ 9, 6 on qubits 2 and 3 at time 5
 result- additional SWAP count = 12.
 result- circuit depth = 13.
-Compilation time = 0:06:30.130234.
+Compilation time = 0:06:44.776378.
 layer 0---------------------------------
-gate ( ZZ) on qubits (9 15)
+gate ( ZZ) on qubits (3 4)
 layer 1---------------------------------
-gate ( swap) on qubits (6 9)
-gate ( swap ZZ) on qubits (14 15)
+gate ( ZZ) on qubits (4 5)
+gate ( swap ZZ) on qubits (2 3)
 layer 2---------------------------------
-gate ( ZZ) on qubits (6 7)
-gate ( ZZ) on qubits (13 14)
+gate ( ZZ) on qubits (2 8)
+gate ( swap ZZ) on qubits (0 4)
 layer 3---------------------------------
-gate ( ZZ) on qubits (6 9)
-gate ( ZZ) on qubits (13 17)
+gate ( ZZ) on qubits (8 11)
+gate ( swap) on qubits (1 2)
+gate ( ZZ swap) on qubits (3 4)
 layer 4---------------------------------
-gate ( ZZ) on qubits (9 15)
-gate ( swap) on qubits (13 14)
-gate ( swap) on qubits (6 7)
+gate ( ZZ) on qubits (2 3)
+gate ( swap ZZ) on qubits (10 11)
 layer 5---------------------------------
-gate ( swap) on qubits (15 16)
-gate ( swap) on qubits (12 13)
+gate ( swap) on qubits (2 8)
+gate ( swap) on qubits (3 4)
 layer 6---------------------------------
-gate ( ZZ) on qubits (9 15)
-gate ( ZZ) on qubits (13 17)
-gate ( swap) on qubits (11 12)
+gate ( swap) on qubits (2 3)
+gate ( swap) on qubits (4 5)
+gate ( ZZ) on qubits (8 11)
 layer 7---------------------------------
-gate ( swap) on qubits (6 9)
-gate ( swap) on qubits (14 15)
+gate ( swap) on qubits (11 12)
+gate ( swap) on qubits (2 8)
+gate ( swap ZZ) on qubits (3 4)
 layer 8---------------------------------
-gate ( ZZ) on qubits (9 15)
-gate ( ZZ) on qubits (13 14)
+gate ( ZZ) on qubits (10 11)
+gate ( ZZ) on qubits (2 3)
 layer 9---------------------------------
-gate ( swap) on qubits (12 13)
-gate ( swap) on qubits (15 16)
+gate ( ZZ) on qubits (8 11)
 layer 10---------------------------------
-gate ( ZZ) on qubits (13 17)
-gate ( swap) on qubits (14 15)
-layer 11---------------------------------
-gate ( ZZ) on qubits (13 14)
-gate ( ZZ) on qubits (9 15)
-layer 12---------------------------------
-gate ( ZZ) on qubits (12 13)
+gate ( ZZ) on qubits (11 12)
 metric-----------------------------------
-depth 13
-#swap 11
+depth 11
+#swap 7
 optimizing circuit with swap range (0,12) 
 Trying maximal depth = 1...
 Show UNSAT core
@@ -166,6 +160,7 @@ Show UNSAT core
  time__12 + 1 <= 2,
  time__4 + 1 <= 2,
  time__1 + 1 <= 2,
+ time__0 + 1 <= 2,
  time__2 + 1 <= 2,
  time__7 + 1 <= 2,
  time__8 + 1 <= 2,
@@ -180,5 +175,399 @@ Trying maximal depth = 3...
 Bound of Trying min swap = 7...
 []
 Bound of Trying min swap = 10...
-Bound of Trying min swap = 9...
+[]
+Bound of Trying min swap = 11...
+[]
+SWAP on physical edge (0,4) at time 1
+SWAP on physical edge (2,3) at time 1
+SWAP on physical edge (3,4) at time 0
+SWAP on physical edge (2,8) at time 0
+SWAP on physical edge (6,9) at time 1
+SWAP on physical edge (10,11) at time 1
+SWAP on physical edge (10,11) at time 2
+SWAP on physical edge (11,12) at time 0
+SWAP on physical edge (13,14) at time 1
+SWAP on physical edge (14,15) at time 0
+SWAP on physical edge (13,17) at time 0
+Gate 0: ZZ 0, 7 on qubits 3 and 4 at time 0
+Gate 1: ZZ 0, 2 on qubits 3 and 2 at time 0
+Gate 2: ZZ 0, 8 on qubits 3 and 13 at time 0
+Gate 3: ZZ 7, 6 on qubits 3 and 13 at time 1
+Gate 4: ZZ 7, 1 on qubits 3 and 2 at time 1
+Gate 5: ZZ 3, 8 on qubits 12 and 13 at time 0
+Gate 6: ZZ 3, 4 on qubits 12 and 11 at time 0
+Gate 7: ZZ 3, 5 on qubits 10 and 11 at time 2
+Gate 8: ZZ 8, 6 on qubits 17 and 13 at time 1
+Gate 9: ZZ 1, 2 on qubits 2 and 8 at time 1
+Gate 10: ZZ 1, 9 on qubits 3 and 13 at time 2
+Gate 11: ZZ 2, 5 on qubits 8 and 11 at time 2
+Gate 12: ZZ 4, 9 on qubits 12 and 13 at time 2
+Gate 13: ZZ 4, 5 on qubits 12 and 11 at time 2
+Gate 14: ZZ 9, 6 on qubits 13 and 14 at time 2
+result- additional SWAP count = 10.
+result- circuit depth = 12.
+Compilation time = 0:06:44.352691.
+final swap on qubits 0 and 4
+final swap on qubits 6 and 9
+layer 0---------------------------------
+gate ( ZZ) on qubits (3 4)
+gate ( swap) on qubits (14 15)
+layer 1---------------------------------
+gate ( ZZ) on qubits (2 3)
+layer 2---------------------------------
+gate ( ZZ) on qubits (3 13)
+gate ( swap) on qubits (2 8)
+layer 3---------------------------------
+gate ( ZZ) on qubits (12 13)
+gate ( swap) on qubits (3 4)
+layer 4---------------------------------
+gate ( swap) on qubits (13 17)
+gate ( ZZ swap) on qubits (11 12)
+layer 5---------------------------------
+gate ( ZZ) on qubits (3 13)
+gate ( swap ZZ) on qubits (10 11)
+layer 6---------------------------------
+gate ( ZZ) on qubits (2 3)
+gate ( ZZ) on qubits (13 17)
+layer 7---------------------------------
+gate ( ZZ) on qubits (2 8)
+gate ( swap) on qubits (13 14)
+layer 8---------------------------------
+gate ( swap) on qubits (2 3)
+gate ( ZZ) on qubits (8 11)
+layer 9---------------------------------
+gate ( ZZ) on qubits (3 13)
+layer 10---------------------------------
+gate ( ZZ) on qubits (12 13)
+layer 11---------------------------------
+gate ( ZZ) on qubits (11 12)
+gate ( ZZ) on qubits (13 14)
+metric-----------------------------------
+depth 12
+#swap 6
+optimizing circuit with swap range (0,12) 
+Trying maximal depth = 1...
+Show UNSAT core
+[time__10 + 1 <= 1,
+ time__12 + 1 <= 1,
+ time__11 + 1 <= 1,
+ time__9 + 1 <= 1,
+ time__3 + 1 <= 1,
+ time__6 + 1 <= 1,
+ time__7 + 1 <= 1,
+ time__4 + 1 <= 1,
+ time__13 + 1 <= 1,
+ time__5 + 1 <= 1,
+ time__8 + 1 <= 1,
+ time__2 + 1 <= 1,
+ time__0 + 1 <= 1,
+ time__1 + 1 <= 1,
+ time__14 + 1 <= 1]
+Trying maximal depth = 2...
+Show UNSAT core
+[]
+Trying maximal depth = 3...
+Bound of Trying min swap = 7...
+Bound of Trying min swap = 4...
+[]
+Bound of Trying min swap = 6...
+Bound of Trying min swap = 5...
+SWAP on physical edge (1,2) at time 0
+SWAP on physical edge (2,8) at time 1
+SWAP on physical edge (10,11) at time 1
+SWAP on physical edge (11,12) at time 0
+SWAP on physical edge (13,14) at time 1
+Gate 0: ZZ 0, 7 on qubits 2 and 1 at time 0
+Gate 1: ZZ 0, 2 on qubits 2 and 3 at time 0
+Gate 2: ZZ 0, 8 on qubits 2 and 12 at time 0
+Gate 3: ZZ 7, 6 on qubits 8 and 11 at time 2
+Gate 4: ZZ 7, 1 on qubits 8 and 2 at time 2
+Gate 5: ZZ 3, 8 on qubits 13 and 12 at time 0
+Gate 6: ZZ 3, 4 on qubits 13 and 14 at time 0
+Gate 7: ZZ 3, 5 on qubits 13 and 4 at time 0
+Gate 8: ZZ 8, 6 on qubits 10 and 11 at time 2
+Gate 9: ZZ 1, 2 on qubits 2 and 3 at time 2
+Gate 10: ZZ 1, 9 on qubits 2 and 12 at time 2
+Gate 11: ZZ 2, 5 on qubits 3 and 4 at time 2
+Gate 12: ZZ 4, 9 on qubits 13 and 12 at time 2
+Gate 13: ZZ 4, 5 on qubits 13 and 4 at time 2
+Gate 14: ZZ 9, 6 on qubits 12 and 11 at time 2
+result- additional SWAP count = 5.
+result- circuit depth = 12.
+Compilation time = 0:06:14.566148.
+layer 0---------------------------------
+gate ( ZZ) on qubits (1 2)
+layer 1---------------------------------
+gate ( ZZ) on qubits (2 3)
+layer 2---------------------------------
+gate ( ZZ) on qubits (2 12)
+layer 3---------------------------------
+gate ( ZZ) on qubits (12 13)
+gate ( swap) on qubits (1 2)
+layer 4---------------------------------
+gate ( ZZ) on qubits (13 14)
+gate ( swap) on qubits (11 12)
+gate ( swap) on qubits (2 8)
+layer 5---------------------------------
+gate ( swap) on qubits (10 11)
+gate ( ZZ) on qubits (4 13)
+layer 6---------------------------------
+gate ( ZZ) on qubits (8 11)
+gate ( swap) on qubits (13 14)
+layer 7---------------------------------
+gate ( ZZ) on qubits (2 8)
+gate ( ZZ) on qubits (10 11)
+layer 8---------------------------------
+gate ( ZZ) on qubits (2 3)
+layer 9---------------------------------
+gate ( ZZ) on qubits (2 12)
+gate ( ZZ) on qubits (3 4)
+layer 10---------------------------------
+gate ( ZZ) on qubits (12 13)
+layer 11---------------------------------
+gate ( ZZ) on qubits (4 13)
+gate ( ZZ) on qubits (11 12)
+metric-----------------------------------
+depth 12
+#swap 5
+optimizing circuit with swap range (0,5) 
+Trying maximal depth = 1...
+Show UNSAT core
+[time__0 + 1 <= 1,
+ time__2 + 1 <= 1,
+ time__6 + 1 <= 1,
+ time__7 + 1 <= 1,
+ time__9 + 1 <= 1,
+ time__13 + 1 <= 1,
+ time__8 + 1 <= 1,
+ time__1 + 1 <= 1,
+ time__3 + 1 <= 1,
+ time__10 + 1 <= 1,
+ time__11 + 1 <= 1,
+ time__5 + 1 <= 1,
+ time__4 + 1 <= 1,
+ time__12 + 1 <= 1,
+ time__14 + 1 <= 1]
+Trying maximal depth = 2...
+Bound of Trying min swap = 3...
+[]
+Bound of Trying min swap = 4...
+SWAP on physical edge (3,4) at time 0
+SWAP on physical edge (10,11) at time 0
+SWAP on physical edge (13,14) at time 0
+SWAP on physical edge (14,15) at time 1
+Gate 0: ZZ 0, 7 on qubits 11 and 8 at time 0
+Gate 1: ZZ 0, 2 on qubits 11 and 12 at time 0
+Gate 2: ZZ 0, 8 on qubits 11 and 3 at time 0
+Gate 3: ZZ 7, 6 on qubits 8 and 2 at time 0
+Gate 4: ZZ 7, 1 on qubits 8 and 11 at time 1
+Gate 5: ZZ 3, 8 on qubits 13 and 3 at time 0
+Gate 6: ZZ 3, 4 on qubits 13 and 14 at time 0
+Gate 7: ZZ 3, 5 on qubits 13 and 17 at time 0
+Gate 8: ZZ 8, 6 on qubits 3 and 2 at time 0
+Gate 9: ZZ 1, 2 on qubits 11 and 12 at time 1
+Gate 10: ZZ 1, 9 on qubits 11 and 3 at time 1
+Gate 11: ZZ 2, 5 on qubits 12 and 17 at time 1
+Gate 12: ZZ 4, 9 on qubits 13 and 3 at time 1
+Gate 13: ZZ 4, 5 on qubits 13 and 17 at time 1
+Gate 14: ZZ 9, 6 on qubits 3 and 2 at time 1
+result- additional SWAP count = 3.
+result- circuit depth = 9.
+Compilation time = 0:04:14.042949.
+layer 0---------------------------------
+gate ( ZZ) on qubits (8 11)
+layer 1---------------------------------
+gate ( ZZ) on qubits (11 12)
+gate ( ZZ) on qubits (2 8)
+layer 2---------------------------------
+gate ( ZZ) on qubits (3 11)
+layer 3---------------------------------
+gate ( swap) on qubits (10 11)
+gate ( ZZ) on qubits (3 13)
+layer 4---------------------------------
+gate ( ZZ) on qubits (13 14)
+gate ( ZZ) on qubits (8 11)
+gate ( ZZ) on qubits (2 3)
+layer 5---------------------------------
+gate ( swap) on qubits (3 4)
+gate ( ZZ) on qubits (11 12)
+gate ( ZZ) on qubits (13 17)
+layer 6---------------------------------
+gate ( ZZ) on qubits (3 11)
+gate ( swap) on qubits (13 14)
+gate ( ZZ) on qubits (12 17)
+layer 7---------------------------------
+gate ( ZZ) on qubits (3 13)
+layer 8---------------------------------
+gate ( ZZ) on qubits (2 3)
+gate ( ZZ) on qubits (13 17)
+metric-----------------------------------
+depth 9
+#swap 3
+optimizing circuit with swap range (0,4) 
+Trying maximal depth = 1...
+Show UNSAT core
+[time__7 + 1 <= 1,
+ time__12 + 1 <= 1,
+ time__4 + 1 <= 1,
+ time__14 + 1 <= 1,
+ time__5 + 1 <= 1,
+ time__1 + 1 <= 1,
+ time__11 + 1 <= 1,
+ time__6 + 1 <= 1,
+ time__2 + 1 <= 1,
+ time__8 + 1 <= 1,
+ time__10 + 1 <= 1,
+ time__0 + 1 <= 1,
+ time__13 + 1 <= 1,
+ time__9 + 1 <= 1,
+ time__3 + 1 <= 1]
+Trying maximal depth = 2...
+Bound of Trying min swap = 2...
+[]
+Bound of Trying min swap = 3...
+SWAP on physical edge (2,3) at time 0
+SWAP on physical edge (4,5) at time 0
+SWAP on physical edge (12,17) at time 0
+Gate 0: ZZ 0, 7 on qubits 12 and 11 at time 0
+Gate 1: ZZ 0, 2 on qubits 12 and 13 at time 0
+Gate 2: ZZ 0, 8 on qubits 12 and 3 at time 0
+Gate 3: ZZ 7, 6 on qubits 11 and 8 at time 1
+Gate 4: ZZ 7, 1 on qubits 11 and 12 at time 1
+Gate 5: ZZ 3, 8 on qubits 4 and 3 at time 0
+Gate 6: ZZ 3, 4 on qubits 4 and 5 at time 0
+Gate 7: ZZ 3, 5 on qubits 4 and 14 at time 0
+Gate 8: ZZ 8, 6 on qubits 2 and 8 at time 1
+Gate 9: ZZ 1, 2 on qubits 12 and 13 at time 1
+Gate 10: ZZ 1, 9 on qubits 12 and 3 at time 1
+Gate 11: ZZ 2, 5 on qubits 13 and 14 at time 1
+Gate 12: ZZ 4, 9 on qubits 4 and 3 at time 1
+Gate 13: ZZ 4, 5 on qubits 4 and 14 at time 1
+Gate 14: ZZ 9, 6 on qubits 3 and 8 at time 1
+result- additional SWAP count = 3.
+result- circuit depth = 9.
+Compilation time = 0:02:36.664869.
+layer 0---------------------------------
+gate ( ZZ) on qubits (11 12)
+layer 1---------------------------------
+gate ( ZZ) on qubits (12 13)
+gate ( ZZ) on qubits (8 11)
+layer 2---------------------------------
+gate ( ZZ) on qubits (3 12)
+layer 3---------------------------------
+gate ( swap) on qubits (12 17)
+gate ( ZZ) on qubits (3 4)
+layer 4---------------------------------
+gate ( ZZ) on qubits (4 5)
+gate ( swap) on qubits (2 3)
+gate ( ZZ) on qubits (11 12)
+layer 5---------------------------------
+gate ( ZZ) on qubits (12 13)
+gate ( ZZ) on qubits (4 14)
+gate ( ZZ) on qubits (2 8)
+layer 6---------------------------------
+gate ( ZZ) on qubits (3 12)
+gate ( swap) on qubits (4 5)
+gate ( ZZ) on qubits (13 14)
+layer 7---------------------------------
+gate ( ZZ) on qubits (3 4)
+layer 8---------------------------------
+gate ( ZZ) on qubits (3 8)
+gate ( ZZ) on qubits (4 14)
+metric-----------------------------------
+depth 9
+#swap 3
+optimizing circuit with swap range (0,3) 
+Trying maximal depth = 1...
+Show UNSAT core
+[time__5 + 1 <= 1,
+ time__9 + 1 <= 1,
+ time__0 + 1 <= 1,
+ time__12 + 1 <= 1,
+ time__3 + 1 <= 1,
+ time__13 + 1 <= 1,
+ time__4 + 1 <= 1,
+ time__7 + 1 <= 1,
+ time__10 + 1 <= 1,
+ time__14 + 1 <= 1,
+ time__6 + 1 <= 1,
+ time__8 + 1 <= 1,
+ time__1 + 1 <= 1,
+ time__11 + 1 <= 1,
+ time__2 + 1 <= 1]
+Trying maximal depth = 2...
+Bound of Trying min swap = 2...
+[]
+SWAP on physical edge (0,4) at time 0
+SWAP on physical edge (12,13) at time 0
+SWAP on physical edge (14,15) at time 0
+Gate 0: ZZ 0, 7 on qubits 14 and 4 at time 0
+Gate 1: ZZ 0, 2 on qubits 14 and 6 at time 0
+Gate 2: ZZ 0, 8 on qubits 14 and 13 at time 0
+Gate 3: ZZ 7, 6 on qubits 4 and 3 at time 0
+Gate 4: ZZ 7, 1 on qubits 4 and 5 at time 0
+Gate 5: ZZ 3, 8 on qubits 17 and 13 at time 0
+Gate 6: ZZ 3, 4 on qubits 17 and 13 at time 1
+Gate 7: ZZ 3, 5 on qubits 17 and 14 at time 1
+Gate 8: ZZ 8, 6 on qubits 12 and 3 at time 1
+Gate 9: ZZ 1, 2 on qubits 5 and 6 at time 1
+Gate 10: ZZ 1, 9 on qubits 5 and 4 at time 1
+Gate 11: ZZ 2, 5 on qubits 6 and 14 at time 1
+Gate 12: ZZ 4, 9 on qubits 13 and 4 at time 1
+Gate 13: ZZ 4, 5 on qubits 13 and 14 at time 1
+Gate 14: ZZ 9, 6 on qubits 4 and 3 at time 1
+result- additional SWAP count = 3.
+result- circuit depth = 9.
+Compilation time = 0:01:57.137153.
+layer 0---------------------------------
+gate ( ZZ) on qubits (4 14)
+layer 1---------------------------------
+gate ( ZZ) on qubits (6 14)
+gate ( ZZ) on qubits (3 4)
+layer 2---------------------------------
+gate ( ZZ) on qubits (13 14)
+gate ( ZZ) on qubits (4 5)
+layer 3---------------------------------
+gate ( swap) on qubits (0 4)
+gate ( ZZ) on qubits (5 6)
+gate ( ZZ) on qubits (13 17)
+gate ( swap) on qubits (14 15)
+layer 4---------------------------------
+gate ( swap) on qubits (12 13)
+gate ( ZZ) on qubits (4 5)
+layer 5---------------------------------
+gate ( ZZ) on qubits (13 17)
+gate ( ZZ) on qubits (3 12)
+layer 6---------------------------------
+gate ( ZZ) on qubits (14 17)
+gate ( ZZ) on qubits (4 13)
+layer 7---------------------------------
+gate ( ZZ) on qubits (6 14)
+gate ( ZZ) on qubits (3 4)
+layer 8---------------------------------
+gate ( ZZ) on qubits (13 14)
+metric-----------------------------------
+depth 9
+#swap 3
+optimizing circuit with swap range (0,3) 
+Trying maximal depth = 1...
+Show UNSAT core
+[time__6 + 1 <= 1,
+ time__8 + 1 <= 1,
+ time__13 + 1 <= 1,
+ time__14 + 1 <= 1,
+ time__4 + 1 <= 1,
+ time__1 + 1 <= 1,
+ time__5 + 1 <= 1,
+ time__3 + 1 <= 1,
+ time__7 + 1 <= 1,
+ time__12 + 1 <= 1,
+ time__2 + 1 <= 1,
+ time__9 + 1 <= 1,
+ time__10 + 1 <= 1,
+ time__0 + 1 <= 1,
+ time__11 + 1 <= 1]
+Trying maximal depth = 2...
+Bound of Trying min swap = 2...
+Bound of Trying min swap = 1...
 []
