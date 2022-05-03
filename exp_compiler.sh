@@ -1,8 +1,7 @@
 #!/bin/bash
-# ./exp_compiler.sh o hh device_set/hh/qcnn/8-4-2_gs_d.json qcnn --filename qcnn/8-4-2.qasm
+# ./exp_compiler.sh o hh device_set/hh/qcnn/8-4-2_gs_d.json qcnn qcnn/8-4-2.qasm
 heuristic=$1
 device_set=$2
-mode=1
 device_spec=$3
 max_memory_usage=0
 benchmarks=$4
@@ -14,15 +13,15 @@ if [ ! -d "results_diff_compiler/$device_set" ]; then
     mkdir "results_diff_compiler/$device_set"
 fi
 
-if [ ! -d "results_diff_compiler/$device_set/$mode" ]; then
-    mkdir "results_diff_compiler/$device_set/$mode"
+if [ ! -d "results_diff_compiler/$device_set" ]; then
+    mkdir "results_diff_compiler/$device_set"
 fi
 
-if [ ! -d "results_diff_compiler/$device_set/$mode/$benchmarks" ]; then
-    mkdir "results_diff_compiler/$device_set/$mode/$benchmarks"
+if [ ! -d "results_diff_compiler/$device_set/$benchmarks" ]; then
+    mkdir "results_diff_compiler/$device_set/$benchmarks"
 fi
 
-folderName="results_diff_compiler/$device_set/$mode/$benchmarks"
+folderName="results_diff_compiler/$device_set/$benchmarks"
 
 if [ "$heuristic" == "h" ]; then
     if [ "$benchmarks" == "qcnn" ]; then

@@ -661,10 +661,8 @@ class OLSQ:
         list_gate_qubits = self.list_gate_qubits
         count_qubit_edge = len(list_qubit_edge)
         count_gate = len(list_gate_qubits)
-        count_extra_edge = len(self.list_extra_qubit_edge)
         list_gate_name = self.list_gate_name
         count_program_qubit = self.count_program_qubit
-        list_extra_qubit_edge_idx = self.list_extra_qubit_edge_idx
         result_time = []
         result_depth = 0
         for l in range(count_gate):

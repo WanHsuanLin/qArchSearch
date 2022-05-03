@@ -1,7 +1,4 @@
-
-from cirq import fidelity
-import numpy as np
-
+import argparse
 
 SINGLE_QUBIT_GATE_DURATION = 25 #ns
 TWO_QUBIT_GATE_DURATION = 10 #ns
@@ -19,6 +16,8 @@ FACTOR = 0.1
 P1_PARALLEL_ERR = 0.005
 P2_PARALLEL_ERR = P1_PARALLEL_ERR * FACTOR
 
+T_1=15000
+T_PHI=2*T_1
 
 
 def sim_circuit(phy_qubit_num, data, coupling):
@@ -47,7 +46,7 @@ def calculate_cir_fidelity(data):
         fidelity *= f
     qubit_idling_list = data["qubit_idling_time"]
     for t in qubit_idling_list:
-        fidelity *= (SINGLE_QUBIT_GATE_FID * t/SINGLE_QUBIT_GATE_UNIT)
+        fidelity *= (1 - ((1/3) * (1/T_1 + 1/T_PHI) * t))
     data["fidelity"] = fidelity
     return fidelity
 
@@ -197,4 +196,25 @@ def merge_gate(phy_qubit_num, data):
     data["gates"] = new_gate_pos
     return measurement_pair
         
-            
+if __name__ == "__main__":
+    # Initialize parser
+    parser = argparse.ArgumentParser()
+    # Adding optional argument
+    parser.add_argument("device_set", metavar='DS', type=str,
+        help="Device: hh: heavy-hexagonal (IBM), grid: sqaure")
+    parser.add_argument("device_spec", metavar='DS', type=str,
+        help="file to store device spec")
+    parser.add_argument("benchmark", metavar='B', type=str,
+        help="Benchmark Set: arith or qaoa or qcnn")
+    parser.add_argument("folder", metavar='F', type=str,
+        help="the folder to store results")
+    parser.add_argument("--size", dest="size", type=int,
+        help="The size of the qaoa circuit: 8, 10, 12, 14, 16")
+    parser.add_argument("--trial", dest="trial", type=int,
+        help="The index of qaoa circuit: from 0 to 9")
+    parser.add_argument("--filename", dest="filename", type=str,
+        help="The file name of the arith circuit")
+    # Read arguments from command line
+    args = parser.parse_args()
+    
+    
