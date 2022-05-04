@@ -1,6 +1,7 @@
 #!/bin/bash
 # ./exp_compiler.sh o hh device_set/hh/qcnn/8-4-2_gs_d.json qcnn qcnn/8-4-2.qasm
 # ./exp_compiler.sh h hh device_set/hh/qaoa/8_0_gs_d.json qaoa 8 0
+# ./exp_compiler.sh o hh device_set/hh/qaoa/8_0_gs_d.json qaoa 8 0
 heuristic=$1
 device_set=$2
 device_spec=$3
@@ -40,7 +41,7 @@ if [ "$heuristic" == "o" ]; then
     fi
 
     if [ "$benchmarks" == "qaoa" ]; then
-        python3 -u run_optimal_compiler.py $device_set $device_spec $benchmarks $folderName --size $size --trial $trial | tee "$folderName/output_o_qaoa.log"
+        python3 -u run_optimal_compiler.py $device_set $device_spec $benchmarks $folderName --size $size --trial $trial | tee "$folderName/output_o_qaoa_${size}_${trial}.log"
     fi
 fi
 

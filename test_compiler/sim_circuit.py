@@ -268,7 +268,11 @@ def create_list_from_data(data):
     data_list.append(data.get('g1'))
     data_list.append(data.get('g2'))
     data_list.append(data.get('#e'))
+    avg_idling_time = np.average(np.array(data.get('qubit_idling_time')))
+    data_list.append(avg_idling_time)
     data_list.append(data.get('qubit_idling_time'))
+    avg_two_quibt_gate_fid = np.average(np.array(data.get('two_qubit_gates_fidelity')))
+    data_list.append(avg_two_quibt_gate_fid)
     data_list.append(data.get('two_qubit_gates_fidelity'))
     data_list.append(data.get('gates'))
     data_list.append(data.get('gate_spec'))
@@ -316,7 +320,7 @@ if __name__ == "__main__":
         csv_name = csv_name + "sim/" + tmp[-1][:-4]+"_sim.csv"
         with open(csv_name, 'w+') as c:
             writer = csv.writer(c)
-            writer.writerow(['compiler', 'fidelity', 'g1', 'g2', '#e', 'idling time', 'two qubit gate fidelity', 'gates', 'gate_spec', 'coupling'])
+            writer.writerow(['compiler', 'fidelity', 'g1', 'g2', '#e', 'avg idling time', 'idling time', 'avg two qubit gate fidelity', 'two qubit gate fidelity', 'gates', 'gate_spec', 'coupling'])
 
         if args.benchmark == "qcnn":
             measure_at_end = False

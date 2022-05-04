@@ -11,9 +11,6 @@ __pycache__
 /docs/source/_static
 /docs/source/_templates
 
-results2/
-results3/
-
 *.png
 
 tmp.sh
