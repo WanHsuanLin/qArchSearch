@@ -280,7 +280,7 @@ if __name__ == "__main__":
     # Initialize parser
     parser = argparse.ArgumentParser()
     # Adding optional argument
-    parser.add_argument("csv_file", metavar='DS', type=str,
+    parser.add_argument("csv_file", metavar='cf', type=str,
         help="csv_file to store gate and gate spec")
     parser.add_argument("device_set", metavar='DS', type=str,
         help="Device: hh: heavy-hexagonal (IBM), grid: sqaure")
@@ -308,8 +308,12 @@ if __name__ == "__main__":
         header = []
         header = next(csvreader)
         data = dict()
-
-        csv_name = args.csv_file[:-4]+"_sim.csv"
+        
+        tmp = args.csv_file.split('/')
+        csv_name = ""
+        for i in range(len(tmp)-1):
+            csv_name += (tmp[i] + '/')
+        csv_name = csv_name + "sim/" + tmp[-1][:-4]+"_sim.csv"
         with open(csv_name, 'w+') as c:
             writer = csv.writer(c)
             writer.writerow(['compiler', 'fidelity', 'g1', 'g2', '#e', 'idling time', 'two qubit gate fidelity', 'gates', 'gate_spec', 'coupling'])
@@ -333,22 +337,6 @@ if __name__ == "__main__":
                 writer = csv.writer(c)
                 data_list = create_list_from_data(data)
                 writer.writerow(data_list)
-    
-    # count_physical_qubit = 16
-    # coupling = [[0,1], [1,2], [2,3], [4,5], [5,6], [6,7], [8,9],
-    #     [9,10], [10,11], [12,13], [13,14], [14,15], [0,4], [4,8],
-    #     [8,12], [1,5], [5,9], [9,13], [2,6], [6,10], [10,14],
-    #     [3,7], [7,11], [11,15]]
-    
-    # data = dict()
-    # data["gates"] = [[[10, 11]], [[10, 14], [11, 15]], [[13, 14], [9, 10], [7, 11]], [[14, 15], [6, 10]], [[13, 14], [11, 15]], [[10, 14], [9, 13]], [[10, 11]], [[9, 10]]]
-    # data["gate_spec"] = [[" ZZ"], [" ZZ", " ZZ"], [" ZZ", " ZZ", " ZZ swap"], [" swap", " swap"], [" ZZ", " ZZ"], [" ZZ", " ZZ"], [" ZZ"], [" ZZ"]]
-    
-    # data["gates"] = [[[10, 11]]] 
-    # data["gate_spec"] = [[" ZZ"]]
-
-    # data["gates"] = [[[10, 11]], [[10, 14], [11, 15]]]
-    # data["gate_spec"] = [[" ZZ"], [" ZZ", " ZZ"]]
     
     
 

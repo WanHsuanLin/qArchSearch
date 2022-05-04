@@ -1,5 +1,6 @@
 #!/bin/bash
 # ./exp_compiler.sh o hh device_set/hh/qcnn/8-4-2_gs_d.json qcnn qcnn/8-4-2.qasm
+# ./exp_compiler.sh h hh device_set/hh/qaoa/8_0_gs_d.json qaoa 8 0
 heuristic=$1
 device_set=$2
 device_spec=$3

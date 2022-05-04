@@ -51,7 +51,7 @@ if __name__ == "__main__":
         program_qubit = args.size
         circuit_info_sabre = (args.size, get_qaoa_graph(args.size, args.trial), args.trial)
         circuit_info_tket = circuit_info_sabre
-        csv_name = args.folder+"/"+str(args.device_set)+"_heristic_"+str(args.size)+"_"+args.trial
+        csv_name = args.folder+"/"+args.device_set+"_heristic_"+str(args.size)+"_"+str(args.trial)
     else:
         raise ValueError("invalid benchmark name\n")
 
@@ -90,7 +90,7 @@ if __name__ == "__main__":
         coupling += fix_coupling
         for objective in ["basic", "lookahead", "decay"]:
             data["compiler"] = "sabre_"+objective
-            data["gates"], data["gate_spec"] = run_sabre(args.benchmark, circuit_info_sabre, coupling, objective)
+            data["gates"], data["gate_spec"] = run_sabre(args.benchmark, circuit_info_sabre, coupling, objective, count_physical_qubit)
             data_list = create_list_from_data(data, coupling, count_physical_qubit)
             with open(csv_name1, 'a') as c:
                 writer = csv.writer(c)
@@ -106,7 +106,7 @@ if __name__ == "__main__":
         data["coupling"] = device_spec[key]
         for edge in device_spec[key]:
             coupling.append((edge[0], edge[1]))
-        data["gates"], data["gate_spec"] = run_tket(args.benchmark, circuit_info_tket, coupling)
+        data["gates"], data["gate_spec"] = run_tket(args.benchmark, circuit_info_tket, coupling, count_physical_qubit)
         data["compiler"] = "tket"
         data_list = create_list_from_data(data, coupling, count_physical_qubit)
         with open(csv_name2, 'a') as c:
