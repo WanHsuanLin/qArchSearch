@@ -1,6 +1,8 @@
 import argparse
 
 import csv
+import numpy as np
+import ast
 
 SINGLE_QUBIT_GATE_DURATION = 25 #ns
 TWO_QUBIT_GATE_DURATION = 10 #ns
@@ -22,22 +24,48 @@ T_1=15000
 T_PHI=2*T_1
 
 
-def sim_circuit(phy_qubit_num, data, coupling):
+def sim_circuit(phy_qubit_num, data, coupling, measure_at_end = True):
     one_hot_distance, two_hot_distance = preprocess(phy_qubit_num, coupling)
-    print("one hot dis:")
-    for q in one_hot_distance:
-        print(f"qubit {q}:")
-        print(one_hot_distance[q])
-    print("two hot dis:")
-    for q in two_hot_distance:
-        print(f"qubit {q}:")
-        print(two_hot_distance[q])
+    # print("one hot dis:")
+    # for q in one_hot_distance:
+    #     print(f"qubit {q}:")
+    #     print(one_hot_distance[q])
+    # print("two hot dis:")
+    # for q in two_hot_distance:
+    #     print(f"qubit {q}:")
+    #     print(two_hot_distance[q])
+    # print("ori gate info:")
+    # print("gate_spec:")
+    # print(data["gate_spec"])
+    # print("gate_pos:")
+    # print(data["gates"])
     measurement_pair = merge_gate(phy_qubit_num, data)
+    # print("\nnew gate info:")
+    # print("gate_spec:")
+    # print(data["gate_spec"])
+    # print("gate_pos:")
+    # print(data["gates"])
     qubit_last_time, time_slot_matrix, time_two_qubit_gate_indicator = scheduling(measurement_pair, phy_qubit_num,data)
+    # print("qubit_last_time:")
+    # print(qubit_last_time)
+    circuit_d = max(qubit_last_time)
+    # print("circuit_depth ", circuit_d)
+    # print("time_two_qubit_gate_indicator:")
+    # print(time_two_qubit_gate_indicator[:circuit_d + 2])
+    # print("gate scheduling:")
+    # for qubit in range(phy_qubit_num):
+    #     print(time_slot_matrix[qubit][:circuit_d + 2])
     calculate_gate_fidelity(data, time_slot_matrix, time_two_qubit_gate_indicator, one_hot_distance, two_hot_distance)
-    data["qubit_idling_time"] = calculate_qubit_idling_time(qubit_last_time, time_slot_matrix)
+    # print("two_qubit_gates_fidelity:")
+    # print(data["two_qubit_gates_fidelity"])
+    data["qubit_idling_time"] = calculate_qubit_idling_time(qubit_last_time, time_slot_matrix, measure_at_end)
+    # print("qubit_idling_time:")
+    # print(data["qubit_idling_time"])
     data["g1"], data["g2"] = calculate_gate_number(data["gate_spec"])
+    assert(data["g2"] == len(data["two_qubit_gates_fidelity"]))
+    # print("g1: ", data["g1"])
     calculate_cir_fidelity(data)
+    # print("fidelity: ", data["fidelity"])
 
 def calculate_gate_number(gate_spec):
     g1 = 0
@@ -58,14 +86,18 @@ def calculate_cir_fidelity(data):
     for t in qubit_idling_list:
         fidelity *= (1 - ((1/3) * (1/T_1 + 1/T_PHI) * t))
     data["fidelity"] = fidelity
-    return fidelity
 
-def calculate_qubit_idling_time(qubit_last_time, time_slot_matrix):
+def calculate_qubit_idling_time(qubit_last_time, time_slot_matrix, measure_at_end):
     qubit_idling_time = []
+    if measure_at_end:
+        circuit_depth = max(qubit_last_time)
     for q_id, q_last_time in enumerate(qubit_last_time):
         if q_last_time > 0:
-            per_q_time_slot = time_slot_matrix[q_id][:q_last_time+1]
-            idling_time = per_q_time_slot.count(-1)
+            if measure_at_end:
+                per_q_time_slot = time_slot_matrix[q_id][:circuit_depth+1]
+            else:
+                per_q_time_slot = time_slot_matrix[q_id][:q_last_time+1]
+            idling_time = per_q_time_slot.count(-1) - 1
             qubit_idling_time.append(idling_time)
     return qubit_idling_time
 
@@ -73,14 +105,20 @@ def calculate_gate_fidelity(data, time_slot_matrix, time_two_qubit_gate_indicato
     gate_spec = data["gate_spec"]
     gate_pos = data["gates"]
     gate_fidelity = []
-    for time_slot, two_qubit_gate_indictator in zip(time_slot_matrix, time_two_qubit_gate_indicator):
+    two_qubit_gate_set = set()
+    transpose_time_slot_matrix = np.array(time_slot_matrix).T.tolist()
+    for time_slot, two_qubit_gate_indictator in zip(transpose_time_slot_matrix, time_two_qubit_gate_indicator):
         if two_qubit_gate_indictator:
+            # print("in a time slot")
+            # print(time_slot)
             for g in time_slot:
-                if gate_spec[g] == "syc":
+                if g != -1 and gate_spec[g] == "syc" and g not in two_qubit_gate_set:
+                    # print(f"check gate {g}")
+                    checked_set = set()
                     g_pos = gate_pos[g]
                     per_gate_fidelity = TWO_QUBIT_GATE_FID
                     for g_p in time_slot:
-                        if gate_spec[g_p] == "syc" and g != g_p:
+                        if g_p != -1 and gate_spec[g_p] == "syc" and g != g_p and g_p not in checked_set:
                             g_p_pos = gate_pos[g_p]
                             if g_p_pos[0] in one_hot_distance[g_pos[0]] or g_p_pos[0] in one_hot_distance[g_pos[1]] \
                                 or g_p_pos[1] in one_hot_distance[g_pos[0]] or g_p_pos[1] in one_hot_distance[g_pos[1]]:
@@ -88,7 +126,10 @@ def calculate_gate_fidelity(data, time_slot_matrix, time_two_qubit_gate_indicato
                             elif g_p_pos[0] in two_hot_distance[g_pos[0]] or g_p_pos[0] in two_hot_distance[g_pos[1]] \
                                 or g_p_pos[1] in two_hot_distance[g_pos[0]] or g_p_pos[1] in two_hot_distance[g_pos[1]]:
                                 per_gate_fidelity -= P2_PARALLEL_ERR
+                            checked_set.add(g_p)
+                    # print(f"result fid = {per_gate_fidelity}")
                     gate_fidelity.append(per_gate_fidelity)
+                    two_qubit_gate_set.add(g)
     data["two_qubit_gates_fidelity"] = gate_fidelity
 
 def preprocess(phy_qubit_num, coupling):
@@ -112,7 +153,9 @@ def scheduling(measurement_pair, phy_qubit_num, data):
     gate_spec = data["gate_spec"]
     gate_pos = data["gates"]
     qubit_last_time = [0] * phy_qubit_num
-    time_slot_matrix = [[-1] * TIME_LENGTH ] * phy_qubit_num
+    time_slot_matrix = [] 
+    for _ in range(phy_qubit_num):
+        time_slot_matrix.append([-1] * TIME_LENGTH )
     time_two_qubit_gate_indicator = [False] * TIME_LENGTH
     for g_id, (g, g_pos) in enumerate(zip(gate_spec, gate_pos)):
         if g == "sg":
@@ -135,10 +178,12 @@ def scheduling(measurement_pair, phy_qubit_num, data):
             gate_start_time = max(qubit_last_time[g_pos[0]], qubit_last_time[q_m]) + 1
             for i in range(SINGLE_QUBIT_GATE_UNIT):
                 time_slot_matrix[g_pos[0]][gate_start_time+i] = g_id
+            qubit_last_time[g_pos[0]] = gate_start_time+SINGLE_QUBIT_GATE_UNIT
         elif g[-2] == "m":
             gate_start_time = qubit_last_time[g_pos[0]] + 1
             for i in range(MEASUREMENT_UNIT):
                 time_slot_matrix[g_pos[0]][gate_start_time+i] = g_id
+            qubit_last_time[g_pos[0]] = gate_start_time+MEASUREMENT_UNIT
             continue
             # measurement_pair[1] = g_pos[0]
         else:
@@ -170,6 +215,8 @@ def merge_gate(phy_qubit_num, data):
                     new_gate_pos.append([g_pos[0]])
                     new_gate_spec.append("sg")
                     new_gate_pos.append([g_pos[1]])
+                q_last_gate_list[g_pos[0]] = "sg"
+                q_last_gate_list[g_pos[1]] = "sg"
             elif g == " ZZ":
                 new_gate_spec.append("syc")
                 new_gate_pos.append(g_pos)
@@ -178,6 +225,9 @@ def merge_gate(phy_qubit_num, data):
                 new_gate_spec.append("sg")
                 new_gate_pos.append([g_pos[1]])
                 new_gate_spec.append("syc")
+                new_gate_pos.append(g_pos)
+                q_last_gate_list[g_pos[0]] = "syc"
+                q_last_gate_list[g_pos[1]] = "syc"
             elif g == " swap":
                 for _ in range(3):
                     new_gate_spec.append("syc")
@@ -186,6 +236,8 @@ def merge_gate(phy_qubit_num, data):
                     new_gate_pos.append([g_pos[0]])
                     new_gate_spec.append("sg")
                     new_gate_pos.append([g_pos[1]])
+                q_last_gate_list[g_pos[0]] = "sg"
+                q_last_gate_list[g_pos[1]] = "sg"
             else:   # measurement and v in qcnn
                 index = int(g_pos[-1])
                 if not isinstance(measurement_pair[index], list):
@@ -194,14 +246,16 @@ def merge_gate(phy_qubit_num, data):
                     measurement_pair[index][0] = g_id
                     new_gate_spec.append("v"+str(index))
                     new_gate_pos.append([g_pos[0]])
+                    q_last_gate_list[g_pos[0]] = "v"
                 elif g[-2] == "m":
                     measurement_pair[index][1] = g_id
                     new_gate_spec.append("m"+str(index))
                     new_gate_pos.append([g_pos[0]])
+                    q_last_gate_list[g_pos[0]] = "m"
                 else:
                     raise ValueError("invalid gate name\n")
             g_id += 1
-            
+    assert(len(new_gate_spec) == len(new_gate_pos))
     data["gate_spec"] = new_gate_spec
     data["gates"] = new_gate_pos
     return measurement_pair
@@ -214,8 +268,8 @@ def create_list_from_data(data):
     data_list.append(data.get('g1'))
     data_list.append(data.get('g2'))
     data_list.append(data.get('#e'))
-    data_list.append(data.get('idling time'))
-    data_list.append(data.get('two qubit gate fidelity'))
+    data_list.append(data.get('qubit_idling_time'))
+    data_list.append(data.get('two_qubit_gates_fidelity'))
     data_list.append(data.get('gates'))
     data_list.append(data.get('gate_spec'))
     data_list.append(data.get('coupling'))
@@ -223,66 +277,79 @@ def create_list_from_data(data):
 
 
 if __name__ == "__main__":
-    # # Initialize parser
-    # parser = argparse.ArgumentParser()
-    # # Adding optional argument
-    # parser.add_argument("csv_file", metavar='DS', type=str,
-    #     help="csv_file to store gate and gate spec")
-    # parser.add_argument("device_set", metavar='DS', type=str,
-    #     help="Device: hh: heavy-hexagonal (IBM), grid: sqaure")
-    # parser.add_argument("benchmark", metavar='B', type=str,
-    #     help="Benchmark Set: arith or qaoa or qcnn")
-    # # Read arguments from command line
-    # args = parser.parse_args()
+    # Initialize parser
+    parser = argparse.ArgumentParser()
+    # Adding optional argument
+    parser.add_argument("csv_file", metavar='DS', type=str,
+        help="csv_file to store gate and gate spec")
+    parser.add_argument("device_set", metavar='DS', type=str,
+        help="Device: hh: heavy-hexagonal (IBM), grid: sqaure")
+    parser.add_argument("benchmark", metavar='B', type=str,
+        help="Benchmark Set: arith or qaoa or qcnn")
+    # Read arguments from command line
+    args = parser.parse_args()
     
-    # if args.device_set == "hh":
-    #     count_physical_qubit = 18
-    #     fix_coupling = [[0,4], [1,2], [2,3], [3,4], [4,5], [5,6], [6,7], 
-    #                 [2,8], [6,9], [10,11], [8,11], [11,12], [12,13], 
-    #                 [13,14], [14,15], [15,16], [9,15], [13,17]]
-    # elif args.device_set == "grid":
-    #     count_physical_qubit = 16
-    #     fix_coupling = [[0,1], [1,2], [2,3], [4,5], [5,6], [6,7], [8,9],
-    #     [9,10], [10,11], [12,13], [13,14], [14,15], [0,4], [4,8],
-    #     [8,12], [1,5], [5,9], [9,13], [2,6], [6,10], [10,14],
-    #     [3,7], [7,11], [11,15]]
-    # else:
-    #     raise ValueError("invalid benchmark name\n")
-    
-    # csvreader = csv.reader(args.csv_file)
-    # header = []
-    # header = next(csvreader)
-    # data = dict()
-
-    # csv_name = args.csv_file[:-4]+"_sim.csv"
-    # with open(csv_name, 'w+') as c:
-    #     writer = csv.writer(c)
-    #     writer.writerow(['compiler', 'fidelity', 'g1', 'g2', '#e', 'idling time', 'two qubit gate fidelity', 'gates', 'gate_spec', 'coupling'])
-
-    # for row in csvreader:
-    #     data['compiler'] = row[0]
-    #     data["gates"] = row[3]
-    #     data["gate_spec"] = row[4]
-    #     coupling = row[5] + fix_coupling
-    #     sim_circuit(count_physical_qubit, data, coupling)
-    #     with open(csv_name, 'a') as c:
-    #         writer = csv.writer(c)
-    #         data_list = create_list_from_data(data)
-    #         writer.writerow(data_list)
-    
-    count_physical_qubit = 16
-    coupling = [[0,1], [1,2], [2,3], [4,5], [5,6], [6,7], [8,9],
+    if args.device_set == "hh":
+        count_physical_qubit = 18
+        fix_coupling = [[0,4], [1,2], [2,3], [3,4], [4,5], [5,6], [6,7], 
+                    [2,8], [6,9], [10,11], [8,11], [11,12], [12,13], 
+                    [13,14], [14,15], [15,16], [9,15], [13,17]]
+    elif args.device_set == "grid":
+        count_physical_qubit = 16
+        fix_coupling = [[0,1], [1,2], [2,3], [4,5], [5,6], [6,7], [8,9],
         [9,10], [10,11], [12,13], [13,14], [14,15], [0,4], [4,8],
         [8,12], [1,5], [5,9], [9,13], [2,6], [6,10], [10,14],
         [3,7], [7,11], [11,15]]
+    else:
+        raise ValueError("invalid benchmark name\n")
     
-    data = dict()
-    # data["gates"] = [[[10, 11]], [[13, 14], [9, 10], [7, 11]], [[14, 15], [6, 10]], [[13, 14], [11, 15]]]
-    # data["gate_spec"] = [[" ZZ"], [" ZZ", " ZZ", " ZZ swap"], [" swap", " swap"], [" ZZ", " ZZ"]]
+    with open(args.csv_file, 'r') as r:
+        csvreader = csv.reader(r)
+        header = []
+        header = next(csvreader)
+        data = dict()
 
-    data["gates"] = [[[10, 11]]] 
-    data["gate_spec"] = [[" ZZ"]]
+        csv_name = args.csv_file[:-4]+"_sim.csv"
+        with open(csv_name, 'w+') as c:
+            writer = csv.writer(c)
+            writer.writerow(['compiler', 'fidelity', 'g1', 'g2', '#e', 'idling time', 'two qubit gate fidelity', 'gates', 'gate_spec', 'coupling'])
+
+        if args.benchmark == "qcnn":
+            measure_at_end = False
+        else:
+            measure_at_end = True
+
+        # print(header)
+        for row in csvreader:
+            # print(row)
+            data['compiler'] = row[0]
+            data["gates"] = ast.literal_eval(row[3])
+            data["gate_spec"] = ast.literal_eval(row[4])
+            data["#e"] = ast.literal_eval(row[1])
+            # print(data)
+            coupling = ast.literal_eval(row[5]) + fix_coupling
+            sim_circuit(count_physical_qubit, data, coupling, measure_at_end)
+            with open(csv_name, 'a') as c:
+                writer = csv.writer(c)
+                data_list = create_list_from_data(data)
+                writer.writerow(data_list)
     
-    sim_circuit(count_physical_qubit, data, coupling)
+    # count_physical_qubit = 16
+    # coupling = [[0,1], [1,2], [2,3], [4,5], [5,6], [6,7], [8,9],
+    #     [9,10], [10,11], [12,13], [13,14], [14,15], [0,4], [4,8],
+    #     [8,12], [1,5], [5,9], [9,13], [2,6], [6,10], [10,14],
+    #     [3,7], [7,11], [11,15]]
+    
+    # data = dict()
+    # data["gates"] = [[[10, 11]], [[10, 14], [11, 15]], [[13, 14], [9, 10], [7, 11]], [[14, 15], [6, 10]], [[13, 14], [11, 15]], [[10, 14], [9, 13]], [[10, 11]], [[9, 10]]]
+    # data["gate_spec"] = [[" ZZ"], [" ZZ", " ZZ"], [" ZZ", " ZZ", " ZZ swap"], [" swap", " swap"], [" ZZ", " ZZ"], [" ZZ", " ZZ"], [" ZZ"], [" ZZ"]]
+    
+    # data["gates"] = [[[10, 11]]] 
+    # data["gate_spec"] = [[" ZZ"]]
+
+    # data["gates"] = [[[10, 11]], [[10, 14], [11, 15]]]
+    # data["gate_spec"] = [[" ZZ"], [" ZZ", " ZZ"]]
+    
+    
 
     
