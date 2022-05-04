@@ -1,8 +1,7 @@
 import argparse
 
 import csv
-
-from sympy import Q
+import numpy as np
 
 SINGLE_QUBIT_GATE_DURATION = 25 #ns
 TWO_QUBIT_GATE_DURATION = 10 #ns
@@ -50,10 +49,14 @@ def sim_circuit(phy_qubit_num, data, coupling):
     print(qubit_last_time)
     circuit_d = max(qubit_last_time)
     print("circuit_depth ", circuit_d)
+    print("time_two_qubit_gate_indicator:")
+    print(time_two_qubit_gate_indicator[:circuit_d + 2])
     print("gate scheduling:")
     for qubit in range(phy_qubit_num):
         print(time_slot_matrix[qubit][:circuit_d + 2])
     calculate_gate_fidelity(data, time_slot_matrix, time_two_qubit_gate_indicator, one_hot_distance, two_hot_distance)
+    print("two_qubit_gates_fidelity:")
+    print(data["two_qubit_gates_fidelity"])
     data["qubit_idling_time"] = calculate_qubit_idling_time(qubit_last_time, time_slot_matrix)
     data["g1"], data["g2"] = calculate_gate_number(data["gate_spec"])
     calculate_cir_fidelity(data)
@@ -92,14 +95,20 @@ def calculate_gate_fidelity(data, time_slot_matrix, time_two_qubit_gate_indicato
     gate_spec = data["gate_spec"]
     gate_pos = data["gates"]
     gate_fidelity = []
-    for time_slot, two_qubit_gate_indictator in zip(time_slot_matrix, time_two_qubit_gate_indicator):
+    two_qubit_gate_set = set()
+    transpose_time_slot_matrix = np.array(time_slot_matrix).T.tolist()
+    for time_slot, two_qubit_gate_indictator in zip(transpose_time_slot_matrix, time_two_qubit_gate_indicator):
         if two_qubit_gate_indictator:
+            print("in a time slot")
+            print(time_slot)
             for g in time_slot:
-                if gate_spec[g] == "syc":
+                if g != -1 and gate_spec[g] == "syc" and g not in two_qubit_gate_set:
+                    print(f"check gate {g}")
+                    checked_set = set()
                     g_pos = gate_pos[g]
                     per_gate_fidelity = TWO_QUBIT_GATE_FID
                     for g_p in time_slot:
-                        if gate_spec[g_p] == "syc" and g != g_p:
+                        if g_p != -1 and gate_spec[g_p] == "syc" and g != g_p and g_p not in checked_set:
                             g_p_pos = gate_pos[g_p]
                             if g_p_pos[0] in one_hot_distance[g_pos[0]] or g_p_pos[0] in one_hot_distance[g_pos[1]] \
                                 or g_p_pos[1] in one_hot_distance[g_pos[0]] or g_p_pos[1] in one_hot_distance[g_pos[1]]:
@@ -107,7 +116,10 @@ def calculate_gate_fidelity(data, time_slot_matrix, time_two_qubit_gate_indicato
                             elif g_p_pos[0] in two_hot_distance[g_pos[0]] or g_p_pos[0] in two_hot_distance[g_pos[1]] \
                                 or g_p_pos[1] in two_hot_distance[g_pos[0]] or g_p_pos[1] in two_hot_distance[g_pos[1]]:
                                 per_gate_fidelity -= P2_PARALLEL_ERR
+                            checked_set.add(g_p)
+                    print(f"result fid = {per_gate_fidelity}")
                     gate_fidelity.append(per_gate_fidelity)
+                    two_qubit_gate_set.add(g)
     data["two_qubit_gates_fidelity"] = gate_fidelity
 
 def preprocess(phy_qubit_num, coupling):
@@ -309,14 +321,14 @@ if __name__ == "__main__":
         [3,7], [7,11], [11,15]]
     
     data = dict()
-    # data["gates"] = [[[10, 11]], [[13, 14], [9, 10], [7, 11]], [[14, 15], [6, 10]], [[13, 14], [11, 15]]]
-    # data["gate_spec"] = [[" ZZ"], [" ZZ", " ZZ", " ZZ swap"], [" swap", " swap"], [" ZZ", " ZZ"]]
-
+    # data["gates"] = [[[10, 11]], [[10, 14], [11, 15]], [[13, 14], [9, 10], [7, 11]], [[14, 15], [6, 10]], [[13, 14], [11, 15]], [[10, 14], [9, 13]], [[10, 11]], [[9, 10]]], 
+    # data["gate_spec"] = [[" ZZ"], [" ZZ", " ZZ"], [" ZZ", " ZZ", " ZZ swap"], [" swap", " swap"], [" ZZ", " ZZ"], [" ZZ", " ZZ"], [" ZZ"], [" ZZ"]]
+    
     # data["gates"] = [[[10, 11]]] 
     # data["gate_spec"] = [[" ZZ"]]
 
-    data["gates"] = [[[10, 11]], [[9, 10]]]
-    data["gate_spec"] = [[" swap"], [" ZZ swap"]]
+    data["gates"] = [[[10, 11]], [[10, 14], [11, 15]]]
+    data["gate_spec"] = [[" ZZ"], [" ZZ", " ZZ"]]
     
     sim_circuit(count_physical_qubit, data, coupling)
 
