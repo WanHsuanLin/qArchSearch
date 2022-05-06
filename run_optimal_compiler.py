@@ -7,6 +7,7 @@ import csv
 import json
 
 def create_list_from_data(data, coupling, count_physical_qubit):
+    print(data)
     run_only_gate_absorption(data["benchmark"], data, coupling, count_physical_qubit)
     data_list = []  # create an empty list
     # append the items to the list in the same order.
@@ -24,6 +25,19 @@ def run_olsq_tbolsq(benchmark, circuit_info, coupling, count_physical_qubit, mod
         file = open(circuit_info)
         lsqc_solver.setprogram("qcnn", file.read())
         file.close()
+        measurement = dict()
+        single_qubit_gate = dict()
+        for i, gname in enumerate(lsqc_solver.list_gate_name):
+            if gname[0] == 'v':
+                single_qubit_gate[int(gname[1:])] = i
+            elif gname[0] == 'm':
+                measurement[int(gname[1:])] = i
+        dependency = []
+        for key in measurement:
+            dependency.append((measurement[key], single_qubit_gate[key]))
+        lsqc_solver.setdependency(dependency)
+        # print(dependency)
+
     elif benchmark == "qaoa":
         program = [circuit_info[0],
             circuit_info[1],
@@ -87,6 +101,7 @@ if __name__ == "__main__":
     data = dict()
     data["benchmark"] = args.benchmark
     
+    test_set = [0,6,7]
     for key in range(17):
         str_key = str(key)
         if str_key not in device_spec.keys():

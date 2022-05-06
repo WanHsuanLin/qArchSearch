@@ -287,8 +287,9 @@ class OLSQ:
             memory_max_alloc_count: set hard upper limit for memory allocations in Z3 (G)
             verbose: verbose stats in Z3
         """
-        if not self.inpput_dependency:
-            self.list_gate_dependency = collision_extracting(self.list_gate_qubits)
+        # if not self.inpput_dependency:
+        #     self.list_gate_dependency = collision_extracting(self.list_gate_qubits)
+        self.list_gate_dependency = tuple(self.list_gate_dependency + list(collision_extracting(self.list_gate_qubits)))
         if self.mode == Mode.transition:
             print("Using transition based mode...")
             _, result = self._search(False, None, output_mode, output_file_name, memory_max_size, verbose)
