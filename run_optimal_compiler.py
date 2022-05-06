@@ -102,7 +102,8 @@ if __name__ == "__main__":
     data["benchmark"] = args.benchmark
     
     test_set = [0,6,7]
-    for key in range(17):
+    # for key in range(17):
+    for key in test_set:
         str_key = str(key)
         if str_key not in device_spec.keys():
             break
