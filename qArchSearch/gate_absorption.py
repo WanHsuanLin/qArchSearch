@@ -258,8 +258,8 @@ def run_only_gate_absorption(benchmark:str, data, coupling_graph:list, num_qubit
     tmp_params = list()
     results_gate = list()
     results_gate_spec = list()
-    print(data["gates"])
-    print(data["gate_spec"])
+    # print(data["gates"])
+    # print(data["gate_spec"])
     for gate_pos, gate_type in zip(data["gates"],data["gate_spec"]):
         for g_pos, g_type in zip(gate_pos, gate_type):
             if g_type[0] == 'v' or g_type[0] == 'm':
@@ -267,8 +267,8 @@ def run_only_gate_absorption(benchmark:str, data, coupling_graph:list, num_qubit
                     results_gate.append([g_pos])
                     results_gate_spec.append([g_type])
                     continue
-                print(tmp_qubits)
-                print(tmp_params)
+                # print(tmp_qubits)
+                # print(tmp_params)
                 if len(tmp_qubits) < 2:
                     results_gate.append([tmp_qubits])
                     results_gate_spec.append([tmp_params])

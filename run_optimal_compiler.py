@@ -7,7 +7,7 @@ import csv
 import json
 
 def create_list_from_data(data, coupling, count_physical_qubit):
-    print(data)
+    # print(data)
     run_only_gate_absorption(data["benchmark"], data, coupling, count_physical_qubit)
     data_list = []  # create an empty list
     # append the items to the list in the same order.
