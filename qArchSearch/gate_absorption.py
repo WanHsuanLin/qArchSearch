@@ -258,17 +258,21 @@ def run_only_gate_absorption(benchmark:str, data, coupling_graph:list, num_qubit
         for g_pos, g_type in zip(gate_pos, gate_type):
             if g_type[0] == 'v' or g_type[0] == 'm':
                 if (len(tmp_qubits) == 0):
-                    results_gate += [g_pos]
-                    results_gate_spec += [g_type]
+                    results_gate.append([g_pos])
+                    results_gate_spec.append([g_type])
                     continue
                 print(tmp_qubits)
                 print(tmp_params)
-                tmp1_qubits, tmp1_params = compactify(tmp_qubits, tmp_params, coupling_graph, num_qubit)
-                depth, swap_count, u4gate_qubits, u4gate_params = push_left_layers(tmp1_qubits, tmp1_params, num_qubit, True)
-                results_gate += [g_pos]
-                results_gate += u4gate_qubits
-                results_gate_spec += [g_type]
-                results_gate_spec += u4gate_params
+                if len(tmp_qubits) < 2:
+                    results_gate.append([tmp_qubits])
+                    results_gate_spec.append([tmp_params])
+                else:
+                    tmp1_qubits, tmp1_params = compactify(tmp_qubits, tmp_params, coupling_graph, num_qubit)
+                    depth, swap_count, u4gate_qubits, u4gate_params = push_left_layers(tmp1_qubits, tmp1_params, num_qubit, True)
+                    results_gate.append(u4gate_qubits)
+                    results_gate.append(u4gate_params)
+                results_gate.append([g_pos])
+                results_gate_spec.append([g_type])
                 tmp_qubits = list()
                 tmp_params = list()
             else:
