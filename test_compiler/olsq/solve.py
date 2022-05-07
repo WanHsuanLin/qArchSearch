@@ -703,9 +703,16 @@ class OLSQ:
                     if result_time[tmp_gate] == block:
                         qubits = list_gate_qubits[tmp_gate]
                         if len(qubits) == 1:
+                            # only for qcnn 
                             p0 = model[pi[qubits[0]][block]].as_long()
                             real_time[tmp_gate] = \
                                 list_depth_on_qubit[p0] + 1
+                            for l_g_d in self.list_gate_dependency:
+                                if tmp_gate == l_g_d[1]:
+                                    qubits2 = list_gate_qubits[l_g_d[0]]
+                                    p1 = model[pi[qubits2[0]][block]].as_long()
+                                    real_time[tmp_gate] = max(real_time[tmp_gate], \
+                                        list_depth_on_qubit[p1] + 1)
                             list_depth_on_qubit[p0] = \
                                 real_time[tmp_gate]
                         else:
