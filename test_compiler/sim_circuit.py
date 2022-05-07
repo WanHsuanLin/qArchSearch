@@ -1,3 +1,4 @@
+# python3 test_compiler/sim_circuit.py results_diff_compiler/grid/qcnn/grid_optimal_8_0.csv grid qaoa
 import argparse
 
 import csv
@@ -97,7 +98,9 @@ def calculate_qubit_idling_time(qubit_last_time, time_slot_matrix, measure_at_en
                 per_q_time_slot = time_slot_matrix[q_id][:circuit_depth+1]
             else:
                 per_q_time_slot = time_slot_matrix[q_id][:q_last_time+1]
+            # print(per_q_time_slot)
             idling_time = per_q_time_slot.count(-1) - 1
+            # print(idling_time)
             qubit_idling_time.append(idling_time)
     return qubit_idling_time
 
@@ -173,13 +176,15 @@ def scheduling(measurement_pair, phy_qubit_num, data):
             qubit_last_time[g_pos[0]] = cur_time
             qubit_last_time[g_pos[1]] = cur_time
         # v and m may have some problem
-        elif g[-2] == "v":
-            q_m = gate_pos[measurement_pair[int(g[-1])][0]][0]
+        elif g[0] == "v":
+            q_m = gate_pos[measurement_pair[int(g[1:])][0]][0]
             gate_start_time = max(qubit_last_time[g_pos[0]], qubit_last_time[q_m]) + 1
+            # print("measurement_pair :", measurement_pair[int(g[1:])], " , time: ", qubit_last_time[q_m])
+            # print("max time: ", gate_start_time)
             for i in range(SINGLE_QUBIT_GATE_UNIT):
                 time_slot_matrix[g_pos[0]][gate_start_time+i] = g_id
             qubit_last_time[g_pos[0]] = gate_start_time+SINGLE_QUBIT_GATE_UNIT
-        elif g[-2] == "m":
+        elif g[0] == "m":
             gate_start_time = qubit_last_time[g_pos[0]] + 1
             for i in range(MEASUREMENT_UNIT):
                 time_slot_matrix[g_pos[0]][gate_start_time+i] = g_id
@@ -198,7 +203,6 @@ def merge_gate(phy_qubit_num, data):
     q_last_gate_list = [""]*phy_qubit_num
     measurement_pair = dict()
     # merge consecutive single qubit gates
-    g_id = 0
     for g_slot, g_pos_slot in zip(gate_spec, gate_pos):
         for g, g_pos in zip(g_slot, g_pos_slot):
             if g == " U4" or g == " U4 swap" or g == " swap U4" or g == " ZZ swap" or g == " swap ZZ":
@@ -239,25 +243,26 @@ def merge_gate(phy_qubit_num, data):
                 q_last_gate_list[g_pos[0]] = "sg"
                 q_last_gate_list[g_pos[1]] = "sg"
             else:   # measurement and v in qcnn
-                index = int(g_pos[-1])
-                if not isinstance(measurement_pair[index], list):
+                index = int(g[2:])
+                if index not in measurement_pair:
                     measurement_pair[index] = [0,0]
-                if g[-2] == "v":
-                    measurement_pair[index][0] = g_id
+                if g[1] == "v":
+                    measurement_pair[index][1] = len(new_gate_spec)
                     new_gate_spec.append("v"+str(index))
                     new_gate_pos.append([g_pos[0]])
                     q_last_gate_list[g_pos[0]] = "v"
-                elif g[-2] == "m":
-                    measurement_pair[index][1] = g_id
+                elif g[1] == "m":
+                    measurement_pair[index][0] = len(new_gate_spec)
                     new_gate_spec.append("m"+str(index))
                     new_gate_pos.append([g_pos[0]])
                     q_last_gate_list[g_pos[0]] = "m"
                 else:
                     raise ValueError("invalid gate name\n")
-            g_id += 1
     assert(len(new_gate_spec) == len(new_gate_pos))
     data["gate_spec"] = new_gate_spec
     data["gates"] = new_gate_pos
+    # print("measurement_pair")
+    # print(measurement_pair)
     return measurement_pair
 
 def create_list_from_data(data):

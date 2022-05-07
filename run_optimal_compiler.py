@@ -7,7 +7,7 @@ import csv
 import json
 
 def create_list_from_data(data, coupling, count_physical_qubit):
-    print(data)
+    # print(data)
     run_only_gate_absorption(data["benchmark"], data, coupling, count_physical_qubit)
     data_list = []  # create an empty list
     # append the items to the list in the same order.
@@ -94,16 +94,16 @@ if __name__ == "__main__":
     with open(args.device_spec) as f:
         device_spec = json.load(f)
 
-    # with open(csv_name, 'w+') as c:
-    #     writer = csv.writer(c)
-    #     writer.writerow(['mode', '#e','M', 'gates', 'gate_spec', 'coupling'])
+    with open(csv_name, 'w+') as c:
+        writer = csv.writer(c)
+        writer.writerow(['mode', '#e','M', 'gates', 'gate_spec', 'coupling'])
 
     data = dict()
     data["benchmark"] = args.benchmark
     
-    test_set = [0,6,7]
-    # for key in range(17):
-    for key in test_set:
+    # test_set = [0,6,7]
+    # for key in test_set:
+    for key in range(17):
         str_key = str(key)
         if str_key not in device_spec.keys():
             break

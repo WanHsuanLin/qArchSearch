@@ -1,6 +1,6 @@
 from qArchSearch.olsq.util import cal_QCNN_depth_g2_g1, cal_QAOA_depth
 
-def compactify(gate_qubits, gate_specs, edges, num_qubits):
+def compactify(gate_qubits, gate_specs, edges, num_qubits, remove_final_swap):
     gate_qubits_tmp = list()
     for qubits in gate_qubits:
         if len(gate_qubits) < 2:
@@ -84,12 +84,18 @@ def compactify(gate_qubits, gate_specs, edges, num_qubits):
                 rest_gate_specs.append(accu_specs[rest_gate])
     for spec in rest_gate_specs:
         spec = spec.replace(" swap swap", "")
-    for j, qubits in enumerate(rest_gate_qubits):
-        if rest_gate_specs[j] != "" and rest_gate_specs[j] != " swap":
+    if remove_final_swap:
+        for j, qubits in enumerate(rest_gate_qubits):
+            if rest_gate_specs[j] != "" and rest_gate_specs[j] != " swap":
+                result_qubits.append(rest_gate_qubits[j])
+                result_specs.append(rest_gate_specs[j])
+            if rest_gate_specs[j] == " swap":
+                print(f"final swap on qubits {qubits[0]} and {qubits[1]}")
+    else:
+        for j, qubits in enumerate(rest_gate_qubits):
             result_qubits.append(rest_gate_qubits[j])
             result_specs.append(rest_gate_specs[j])
-        if rest_gate_specs[j] == " swap":
-            print(f"final swap on qubits {qubits[0]} and {qubits[1]}")
+    
 
 
     for spec in result_specs:
@@ -252,23 +258,27 @@ def run_only_gate_absorption(benchmark:str, data, coupling_graph:list, num_qubit
     tmp_params = list()
     results_gate = list()
     results_gate_spec = list()
-    print(data["gates"])
-    print(data["gate_spec"])
+    # print(data["gates"])
+    # print(data["gate_spec"])
     for gate_pos, gate_type in zip(data["gates"],data["gate_spec"]):
         for g_pos, g_type in zip(gate_pos, gate_type):
             if g_type[0] == 'v' or g_type[0] == 'm':
                 if (len(tmp_qubits) == 0):
-                    results_gate += [g_pos]
-                    results_gate_spec += [g_type]
+                    results_gate.append([g_pos])
+                    results_gate_spec.append([g_type])
                     continue
-                print(tmp_qubits)
-                print(tmp_params)
-                tmp1_qubits, tmp1_params = compactify(tmp_qubits, tmp_params, coupling_graph, num_qubit)
-                depth, swap_count, u4gate_qubits, u4gate_params = push_left_layers(tmp1_qubits, tmp1_params, num_qubit, True)
-                results_gate += [g_pos]
-                results_gate += u4gate_qubits
-                results_gate_spec += [g_type]
-                results_gate_spec += u4gate_params
+                # print(tmp_qubits)
+                # print(tmp_params)
+                if len(tmp_qubits) < 2:
+                    results_gate.append([tmp_qubits])
+                    results_gate_spec.append([tmp_params])
+                else:
+                    tmp1_qubits, tmp1_params = compactify(tmp_qubits, tmp_params, coupling_graph, num_qubit, False)
+                    depth, swap_count, u4gate_qubits, u4gate_params = push_left_layers(tmp1_qubits, tmp1_params, num_qubit, True)
+                    results_gate += u4gate_qubits
+                    results_gate_spec += u4gate_params
+                results_gate.append([g_pos])
+                results_gate_spec.append([g_type])
                 tmp_qubits = list()
                 tmp_params = list()
             else:
@@ -282,7 +292,7 @@ def run_only_gate_absorption(benchmark:str, data, coupling_graph:list, num_qubit
                 else:
                     tmp_params.append(g_type) #U4
 
-    tmp1_qubits, tmp1_params = compactify(tmp_qubits, tmp_params, coupling_graph, num_qubit)
+    tmp1_qubits, tmp1_params = compactify(tmp_qubits, tmp_params, coupling_graph, num_qubit, True)
     depth, swap_count, u4gate_qubits, u4gate_params = push_left_layers(tmp1_qubits, tmp1_params, num_qubit, True)
     results_gate += u4gate_qubits
     results_gate_spec += u4gate_params
