@@ -49,8 +49,7 @@ def sim_circuit(phy_qubit_num, data, coupling, measure_at_end = True):
     qubit_last_time, time_slot_matrix, time_two_qubit_gate_indicator = scheduling(measurement_pair, phy_qubit_num,data)
     # print("qubit_last_time:")
     # print(qubit_last_time)
-    data['D'] = max(qubit_last_time)
-    data['qubit_lifetime'] = qubit_last_time
+    
     # print("circuit_depth ", circuit_d)
     # print("time_two_qubit_gate_indicator:")
     # print(time_two_qubit_gate_indicator[:circuit_d + 2])
@@ -60,7 +59,8 @@ def sim_circuit(phy_qubit_num, data, coupling, measure_at_end = True):
     calculate_gate_fidelity(data, time_slot_matrix, time_two_qubit_gate_indicator, one_hot_distance, two_hot_distance)
     # print("two_qubit_gates_fidelity:")
     # print(data["two_qubit_gates_fidelity"])
-    data["qubit_idling_time"] = calculate_qubit_idling_time(qubit_last_time, time_slot_matrix, measure_at_end)
+    # data["qubit_idling_time"] = calculate_qubit_idling_time(qubit_last_time, time_slot_matrix, measure_at_end)
+    new_calculate_qubit_idling_time(data, phy_qubit_num, qubit_last_time, time_slot_matrix, measure_at_end)
     # print("qubit_idling_time:")
     # print(data["qubit_idling_time"])
     data["g1"], data["g2"] = calculate_gate_number(data["gate_spec"])
@@ -98,6 +98,7 @@ def calculate_cir_fidelity(data):
 
 def calculate_qubit_idling_time(qubit_last_time, time_slot_matrix, measure_at_end):
     qubit_idling_time = []
+
     if measure_at_end:
         circuit_depth = max(qubit_last_time)
     for q_id, q_last_time in enumerate(qubit_last_time):
@@ -106,11 +107,72 @@ def calculate_qubit_idling_time(qubit_last_time, time_slot_matrix, measure_at_en
                 per_q_time_slot = time_slot_matrix[q_id][:circuit_depth+1]
             else:
                 per_q_time_slot = time_slot_matrix[q_id][:q_last_time+1]
-            # print(per_q_time_slot)
             idling_time = per_q_time_slot.count(-1) - 1
             # print(idling_time)
             qubit_idling_time.append(idling_time)
+
+    data['D'] = max(qubit_last_time)
+    data['qubit_lifetime'] = qubit_last_time
     return qubit_idling_time
+
+def new_calculate_qubit_idling_time(data, phy_qubit_num, qubit_last_time, time_slot_matrix, measure_at_end):
+
+    max_d =  max(qubit_last_time)
+    gate_spec = data["gate_spec"]
+    affective_q = []
+    for q_id, q_last_time in enumerate(qubit_last_time):
+        if q_last_time > 0:
+            affective_q.append(q_id)
+
+    qubit_idling_time = [0] * phy_qubit_num
+    qubit_lifetime = [0] * phy_qubit_num
+
+    for time in range(1,max_d):
+        has_single_qubit_gate = False
+        has_measurement = False
+        for q in affective_q:
+            if time_slot_matrix[q][time] == -1:
+                continue
+            gate_name = gate_spec[time_slot_matrix[q][time]]
+            if gate_name == "sg" or gate_name[0] == "v":
+                has_single_qubit_gate = True
+            elif gate_name[0] == "m":
+                has_measurement = True
+                break
+        for q in affective_q:
+            if not measure_at_end and qubit_last_time[q] > time:
+                continue
+            if has_measurement:
+                qubit_lifetime[q] += MEASUREMENT_DURATION
+            elif has_single_qubit_gate: 
+                qubit_lifetime[q] += SINGLE_QUBIT_GATE_DURATION
+            else:
+                qubit_lifetime[q] += TWO_QUBIT_GATE_DURATION
+            
+            if time_slot_matrix[q][time] == -1:
+                if has_measurement:
+                    qubit_idling_time[q] += MEASUREMENT_DURATION
+                elif has_single_qubit_gate:
+                    qubit_idling_time[q] += SINGLE_QUBIT_GATE_DURATION
+                else:
+                    qubit_idling_time[q] += TWO_QUBIT_GATE_DURATION
+            else:
+                gate_name = gate_spec[time_slot_matrix[q][time]]
+                if gate_name == "sg" or gate_name[0] == "v":
+                    if has_measurement:
+                        qubit_idling_time[q] += (MEASUREMENT_DURATION-SINGLE_QUBIT_GATE_DURATION)
+                elif gate_name == "syc":
+                    if has_measurement:
+                        qubit_idling_time[q] += (MEASUREMENT_DURATION-TWO_QUBIT_GATE_DURATION)
+                    elif has_single_qubit_gate:
+                        qubit_idling_time[q] += (SINGLE_QUBIT_GATE_DURATION-TWO_QUBIT_GATE_DURATION)
+    data['D'] = max(qubit_lifetime)
+    data['qubit_lifetime'] = list()
+    data['qubit_idling_time'] = list()
+    for lifetime, idling_time in zip (qubit_lifetime, qubit_idling_time):
+        if lifetime > 0:
+            data["qubit_idling_time"].append(idling_time)
+            data["qubit_lifetime"].append(lifetime)
 
 def calculate_gate_fidelity(data, time_slot_matrix, time_two_qubit_gate_indicator, one_hot_distance, two_hot_distance):
     gate_spec = data["gate_spec"]
@@ -171,32 +233,44 @@ def scheduling(measurement_pair, phy_qubit_num, data):
     for g_id, (g, g_pos) in enumerate(zip(gate_spec, gate_pos)):
         if g == "sg":
             gate_start_time = qubit_last_time[g_pos[0]] + 1
-            for i in range(SINGLE_QUBIT_GATE_UNIT):
-                time_slot_matrix[g_pos[0]][gate_start_time+i] = g_id
-            qubit_last_time[g_pos[0]] += SINGLE_QUBIT_GATE_UNIT
+            # for i in range(SINGLE_QUBIT_GATE_UNIT):
+            #     time_slot_matrix[g_pos[0]][gate_start_time+i] = g_id
+            # qubit_last_time[g_pos[0]] += SINGLE_QUBIT_GATE_UNIT
+            time_slot_matrix[g_pos[0]][gate_start_time] = g_id
+            qubit_last_time[g_pos[0]] += 1
         elif g == "syc":
+            print
             gate_start_time = max(qubit_last_time[g_pos[0]], qubit_last_time[g_pos[1]]) + 1
-            for i in range(TWO_QUBIT_GATE_UNIT):
-                cur_time = gate_start_time+i
-                time_slot_matrix[g_pos[0]][cur_time] = g_id
-                time_slot_matrix[g_pos[1]][cur_time] = g_id
-                time_two_qubit_gate_indicator[cur_time] = True
-            qubit_last_time[g_pos[0]] = cur_time
-            qubit_last_time[g_pos[1]] = cur_time
+            # for i in range(TWO_QUBIT_GATE_UNIT):
+            #     cur_time = gate_start_time+i
+            #     time_slot_matrix[g_pos[0]][cur_time] = g_id
+            #     time_slot_matrix[g_pos[1]][cur_time] = g_id
+            #     time_two_qubit_gate_indicator[cur_time] = True
+            # qubit_last_time[g_pos[0]] = cur_time
+            # qubit_last_time[g_pos[1]] = cur_time
+            time_slot_matrix[g_pos[0]][gate_start_time] = g_id
+            time_slot_matrix[g_pos[1]][gate_start_time] = g_id
+            time_two_qubit_gate_indicator[gate_start_time] = True
+            qubit_last_time[g_pos[0]] += 1
+            qubit_last_time[g_pos[1]] += 1
         # v and m may have some problem
         elif g[0] == "v":
             q_m = gate_pos[measurement_pair[int(g[1:])][0]][0]
             gate_start_time = max(qubit_last_time[g_pos[0]], qubit_last_time[q_m]) + 1
+            time_slot_matrix[g_pos[0]][gate_start_time] = g_id
+            qubit_last_time[g_pos[0]] = gate_start_time
             # print("measurement_pair :", measurement_pair[int(g[1:])], " , time: ", qubit_last_time[q_m])
             # print("max time: ", gate_start_time)
-            for i in range(SINGLE_QUBIT_GATE_UNIT):
-                time_slot_matrix[g_pos[0]][gate_start_time+i] = g_id
-            qubit_last_time[g_pos[0]] = gate_start_time+SINGLE_QUBIT_GATE_UNIT
+            # for i in range(SINGLE_QUBIT_GATE_UNIT):
+            #     time_slot_matrix[g_pos[0]][gate_start_time+i] = g_id
+            # qubit_last_time[g_pos[0]] = gate_start_time+SINGLE_QUBIT_GATE_UNIT
         elif g[0] == "m":
             gate_start_time = qubit_last_time[g_pos[0]] + 1
-            for i in range(MEASUREMENT_UNIT):
-                time_slot_matrix[g_pos[0]][gate_start_time+i] = g_id
-            qubit_last_time[g_pos[0]] = gate_start_time+MEASUREMENT_UNIT
+            # for i in range(MEASUREMENT_UNIT):
+            #     time_slot_matrix[g_pos[0]][gate_start_time+i] = g_id
+            # qubit_last_time[g_pos[0]] = gate_start_time+MEASUREMENT_UNIT
+            time_slot_matrix[g_pos[0]][gate_start_time] = g_id
+            qubit_last_time[g_pos[0]] += 1
             continue
             # measurement_pair[1] = g_pos[0]
         else:
@@ -215,6 +289,7 @@ def merge_gate(phy_qubit_num, data):
     for g_slot, g_pos_slot in zip(gate_spec, gate_pos):
         for g, g_pos in zip(g_slot, g_pos_slot):
             # print(g)
+            # print(g_pos)
             if g == "U4" or g == " U4 U4" or g == " U4" or g == " U4 swap" or g == " swap U4" or g == " ZZ swap" or g == " swap ZZ":
                 if q_last_gate_list[g_pos[0]] != "sg":
                     new_gate_spec.append("sg")
@@ -327,6 +402,7 @@ if __name__ == "__main__":
         raise ValueError("invalid benchmark name\n")
     
     with open(args.csv_file, 'r') as r:
+        print(args.csv_file)
         csvreader = csv.reader(r)
         header = []
         header = next(csvreader)

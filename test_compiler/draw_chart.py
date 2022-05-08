@@ -1,3 +1,4 @@
+# python3 test_compiler/draw_chart.py draw_info/compiler_hh_qcnn_8.txt c      
 import os
 import matplotlib as mpl
 from sympy import true
@@ -7,7 +8,6 @@ if os.environ.get('DISPLAY','') == '':
 import matplotlib.pyplot as plt
 import argparse
 import numpy as np
-import matplotlib.ticker as mticker
 import csv
 import ast
 
@@ -17,19 +17,21 @@ plt.rcParams.update({'font.size': 56})
 gMarks1 = ['o','X','D','s','^','p']
 gMarks2 = ['.','*','s','2','p','1','d','h']
 gColors = ['lightcoral','orange','limegreen','cornflowerblue','gray','peru','teal','darkkhaki','slategray']
-width = 35
-height = 23
+width = 33
+height = 15
 linewidth = 11 #default 1.5
 markersize = 40
 
 file_type='.png'
 
-def draw_normal(title:str, fileName:str, data_list, label, average = False):
+def draw_normal(title:str, fileName:str, data_list, label, average = False, percentage = False):
     plt.figure(figsize=(width,height))
-    plt.title(title, y=1.03)
+    # plt.title(title, y=1.03)
     x_value = np.arange(len(data_list[0]))
     plt.xticks(x_value)
     for data, c, m, l in zip(data_list, gColors, gMarks1, label):
+        if len(data) != len(x_value):
+            x_value = np.arange(len(data))
         plt.plot(x_value, data, linestyle='--', marker=m, color=c, label=l,linewidth= linewidth, markersize=markersize)
     if average:
         np_data = np.array(data_list)
@@ -37,8 +39,11 @@ def draw_normal(title:str, fileName:str, data_list, label, average = False):
         plt.plot(x_value, avg, linestyle='--', marker='d', color='violet', label='average', linewidth= linewidth, markersize=markersize)
         current_values = plt.gca().get_yticks()
         plt.gca().set_yticklabels(['{:,.0%}'.format(x) for x in current_values])
+    if percentage:
+        current_values = plt.gca().get_yticks()
+        plt.gca().set_yticklabels(['{:,.0%}'.format(x) for x in current_values])
     # plt.legend(bbox_to_anchor=(1.0, 1.0), loc='lower center')
-    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.08), ncol = 4)
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.12), ncol = 5, frameon=False, labelspacing = 0.025, handletextpad = 0.2)
     plt.xlabel(r'#$e_{extra}$')
     plt.grid(axis='y')
     # plt.margins(0.5)
@@ -59,7 +64,19 @@ def draw_copmiler(filename, data):
         new_fileName = 'fig/' + filename + '_' + target.replace(" ", "_").replace("/", "") + file_type
         draw_normal(title, new_fileName, Fidelity_list, line_name, True)
 
-
+def draw_architecture(filename, data):
+    line_name = ["Heavy-hexagon", "Grid"]
+    for target in ["Fidelity", "Fidelity w/o Crosstalk", "Average Two-Qubit Gate Fidelity"]:
+        Fidelity_list = [data["hh"][target], data["grid"][target]]
+        title = target
+        new_fileName = 'fig/' + filename + '_' + target.replace(" ", "_").replace("/", "") + file_type
+        draw_normal(title, new_fileName, Fidelity_list, line_name)
+    
+    for target in ["Fidelity improvement", "Fidelity Improvement w/o Crosstalk"]:
+        Fidelity_list = [data["hh"][target], data["grid"][target]]
+        title = target
+        new_fileName = 'fig/' + filename + '_' + target.replace(" ", "_").replace("/", "") + file_type
+        draw_normal(title, new_fileName, Fidelity_list, line_name, False, True)
 
 def get_info(title, csv_name, edge_num):
     data = {"D": [0] * edge_num, "Average Two-Qubit Gate Fidelity": [0] * edge_num, "Fidelity": [0] * edge_num, "Fidelity w/o Crosstalk": [0] * edge_num, "Fidelity improvement": [0] * edge_num, "Fidelity Improvement w/o Crosstalk": [0] * edge_num}
@@ -103,6 +120,7 @@ def get_info(title, csv_name, edge_num):
     for i, fid in enumerate(data["Fidelity"]):
         data["Fidelity improvement"][i] = (fid - baseline)/baseline
     
+    baseline = data["Fidelity w/o Crosstalk"][0]
     for i, fid in enumerate(data["Fidelity w/o Crosstalk"]):
         data["Fidelity Improvement w/o Crosstalk"][i] = (fid - baseline)/baseline
 
@@ -125,18 +143,26 @@ if __name__ == "__main__":
     split_info = file_info[0].split(',')
     # print(split_info)
     data = dict()
-    for info in file_info[1:]:
-        info_list = info.split(",")
-        # print(info_list)
-        if args.type == 'c':
+    if args.type == 'c':
+        for info in file_info[1:]:
+            info_list = info.split(",")
             data[info_list[0]] = get_info(info_list[0], info_list[1].strip(), int(split_info[1])+1)
-        elif args.type == 'a':
-            raise ValueError("Invalid type")
-        else:
-            raise ValueError("Invalid type")
+        # print(info_list)    
+    elif args.type == 'a':
+        info_list = file_info[1].split(",")
+        data[info_list[0]] = get_info("OLSQ", info_list[1].strip(), int(split_info[1])+1)
+        info_list = file_info[2].split(",")
+        data[info_list[0]] = get_info("OLSQ", info_list[1].strip(), int(split_info[2])+1)
+    else:
+        raise ValueError("Invalid type")
     
     # print(data)
-    draw_copmiler(split_info[0], data)
+    if args.type == 'c':
+        draw_copmiler(split_info[0], data)
+    elif args.type == 'a':
+        draw_architecture(split_info[0], data)
+    else:
+        raise ValueError("Invalid type")    
 
     
 
