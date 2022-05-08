@@ -49,7 +49,8 @@ def sim_circuit(phy_qubit_num, data, coupling, measure_at_end = True):
     qubit_last_time, time_slot_matrix, time_two_qubit_gate_indicator = scheduling(measurement_pair, phy_qubit_num,data)
     # print("qubit_last_time:")
     # print(qubit_last_time)
-    circuit_d = max(qubit_last_time)
+    data['D'] = max(qubit_last_time)
+    data['qubit_lifetime'] = qubit_last_time
     # print("circuit_depth ", circuit_d)
     # print("time_two_qubit_gate_indicator:")
     # print(time_two_qubit_gate_indicator[:circuit_d + 2])
@@ -80,13 +81,18 @@ def calculate_gate_number(gate_spec):
 
 def calculate_cir_fidelity(data):
     fidelity = pow(SINGLE_QUBIT_GATE_FID,data["g1"])
-    two_qubit_fidelity_list = data["two_qubit_gates_fidelity"]
-    for f in two_qubit_fidelity_list:
-        fidelity *= f
+    
     qubit_idling_list = data["qubit_idling_time"]
     for t in qubit_idling_list:
         fidelity *= (1 - ((1/3) * (1/T_1 + 1/T_PHI) * t))
+
+    fidelity_no_crosstalk = fidelity * pow(TWO_QUBIT_GATE_FID,data["g1"])
+    two_qubit_fidelity_list = data["two_qubit_gates_fidelity"]
+    for f in two_qubit_fidelity_list:
+        fidelity *= f
+
     data["fidelity"] = fidelity
+    data['fidelity_no_crosstalk'] = fidelity_no_crosstalk
 
 def calculate_qubit_idling_time(qubit_last_time, time_slot_matrix, measure_at_end):
     qubit_idling_time = []
@@ -268,20 +274,22 @@ def merge_gate(phy_qubit_num, data):
 def create_list_from_data(data):
     data_list = []  # create an empty list
     # append the items to the list in the same order.
+    data_list.append(data.get('#e'))
     data_list.append(data.get('compiler'))
+    data_list.append(data.get('fidelity_no_crosstalk'))
     data_list.append(data.get('fidelity'))
     data_list.append(data.get('g1'))
     data_list.append(data.get('g2'))
-    data_list.append(data.get('#e'))
+    data_list.append(data.get('D'))
     avg_idling_time = np.average(np.array(data.get('qubit_idling_time')))
     data_list.append(avg_idling_time)
     data_list.append(data.get('qubit_idling_time'))
+    data_list.append(data.get('qubit_lifetime'))
     avg_two_quibt_gate_fid = np.average(np.array(data.get('two_qubit_gates_fidelity')))
     data_list.append(avg_two_quibt_gate_fid)
     data_list.append(data.get('two_qubit_gates_fidelity'))
     data_list.append(data.get('gates'))
     data_list.append(data.get('gate_spec'))
-    data_list.append(data.get('coupling'))
     return data_list
 
 
@@ -325,7 +333,8 @@ if __name__ == "__main__":
         csv_name = csv_name + "sim/" + tmp[-1][:-4]+"_sim.csv"
         with open(csv_name, 'w+') as c:
             writer = csv.writer(c)
-            writer.writerow(['compiler', 'fidelity', 'g1', 'g2', '#e', 'avg idling time', 'idling time', 'avg two qubit gate fidelity', 'two qubit gate fidelity', 'gates', 'gate_spec', 'coupling'])
+            writer.writerow([ '#e', 'compiler', 'fidelity no crosstalk', 'fidelity', 'g1', 'g2', 'D', 'avg idling time', 'idling time', 'qubit lifetime', 'avg two qubit gate fidelity', 'two qubit gate fidelity', 'gates', 'gate_spec'])
+
 
         if args.benchmark == "qcnn":
             measure_at_end = False
@@ -346,6 +355,7 @@ if __name__ == "__main__":
                 writer = csv.writer(c)
                 data_list = create_list_from_data(data)
                 writer.writerow(data_list)
+
     
     
 
