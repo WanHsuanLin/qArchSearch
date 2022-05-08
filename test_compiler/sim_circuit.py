@@ -209,9 +209,11 @@ def merge_gate(phy_qubit_num, data):
     q_last_gate_list = [""]*phy_qubit_num
     measurement_pair = dict()
     # merge consecutive single qubit gates
+    # print(gate_spec)
     for g_slot, g_pos_slot in zip(gate_spec, gate_pos):
         for g, g_pos in zip(g_slot, g_pos_slot):
-            if g == " U4" or g == " U4 swap" or g == " swap U4" or g == " ZZ swap" or g == " swap ZZ":
+            # print(g)
+            if g == "U4" or g == " U4 U4" or g == " U4" or g == " U4 swap" or g == " swap U4" or g == " ZZ swap" or g == " swap ZZ":
                 if q_last_gate_list[g_pos[0]] != "sg":
                     new_gate_spec.append("sg")
                     new_gate_pos.append([g_pos[0]])
@@ -238,7 +240,7 @@ def merge_gate(phy_qubit_num, data):
                 new_gate_pos.append(g_pos)
                 q_last_gate_list[g_pos[0]] = "syc"
                 q_last_gate_list[g_pos[1]] = "syc"
-            elif g == " swap":
+            elif g == " swap" or g == "swap":
                 for _ in range(3):
                     new_gate_spec.append("syc")
                     new_gate_pos.append(g_pos)
@@ -250,7 +252,7 @@ def merge_gate(phy_qubit_num, data):
                 q_last_gate_list[g_pos[1]] = "sg"
             else:   # measurement and v in qcnn
                 name = str(g).strip()
-                print(name)
+                # print(name)
                 index = int(name[1:])
                 if index not in measurement_pair:
                     measurement_pair[index] = [0,0]
