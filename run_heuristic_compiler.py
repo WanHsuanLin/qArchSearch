@@ -72,32 +72,32 @@ if __name__ == "__main__":
     with open(args.device_spec) as f:
         device_spec = json.load(f)
 
-    # csv_name1 = csv_name + "_sabre.csv" 
-    # with open(csv_name1, 'w+') as c:
-    #     writer = csv.writer(c)
-    #     writer.writerow(['compiler', '#e','M', '#gates', 'gate_spec', 'coupling'])
+    csv_name1 = csv_name + "_sabre.csv" 
+    with open(csv_name1, 'w+') as c:
+        writer = csv.writer(c)
+        writer.writerow(['compiler', '#e','M', '#gates', 'gate_spec', 'coupling'])
 
     data = dict()
     data["benchmark"] = args.benchmark
     data["M"]=program_qubit
 
-    # for key in range(17):
-    #     str_key = str(key)
-    #     if str_key not in device_spec.keys():
-    #         break
-    #     data["#e"] = int(key)
-    #     data["coupling"] = device_spec[str_key]
-    #     coupling = []
-    #     for edge in device_spec[str_key]:
-    #         coupling.append((edge[0], edge[1]))
-    #     coupling += fix_coupling
-    #     for objective in ["basic", "lookahead", "decay"]:
-    #         data["compiler"] = "sabre_"+objective
-    #         data["gates"], data["gate_spec"] = run_sabre(args.benchmark, circuit_info_sabre, coupling, objective, count_physical_qubit)
-    #         data_list = create_list_from_data(data, coupling, count_physical_qubit)
-    #         with open(csv_name1, 'a') as c:
-    #             writer = csv.writer(c)
-    #             writer.writerow(data_list)
+    for key in range(17):
+        str_key = str(key)
+        if str_key not in device_spec.keys():
+            break
+        data["#e"] = int(key)
+        data["coupling"] = device_spec[str_key]
+        coupling = []
+        for edge in device_spec[str_key]:
+            coupling.append((edge[0], edge[1]))
+        coupling += fix_coupling
+        for objective in ["basic", "lookahead", "decay"]:
+            data["compiler"] = "sabre_"+objective
+            data["gates"], data["gate_spec"] = run_sabre(args.benchmark, circuit_info_sabre, coupling, objective, count_physical_qubit)
+            data_list = create_list_from_data(data, coupling, count_physical_qubit)
+            with open(csv_name1, 'a') as c:
+                writer = csv.writer(c)
+                writer.writerow(data_list)
     
     csv_name2 = csv_name + "_tket.csv" 
     with open(csv_name2, 'w+') as c:
