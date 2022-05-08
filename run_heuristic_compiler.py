@@ -45,13 +45,13 @@ if __name__ == "__main__":
         filename=args.filename.split('/')
         circuit_info_sabre=filename[0]+"_sabre/"+filename[1]
         circuit_info_tket=filename[0]+"_tket/"+filename[1]
-        csv_name = args.folder+"/"+args.device_set+"_heristic_"+filename[-1][:-5]
+        csv_name = args.folder+"/"+args.device_set+"_heuristic_"+filename[-1][:-5]
         program_qubit=int(filename[-1][:-5])
     elif args.benchmark == "qaoa":
         program_qubit = args.size
         circuit_info_sabre = (args.size, get_qaoa_graph(args.size, args.trial), args.trial)
         circuit_info_tket = circuit_info_sabre
-        csv_name = args.folder+"/"+args.device_set+"_heristic_"+str(args.size)+"_"+str(args.trial)
+        csv_name = args.folder+"/"+args.device_set+"_heuristic_"+str(args.size)+"_"+str(args.trial)
     else:
         raise ValueError("invalid benchmark name\n")
 
