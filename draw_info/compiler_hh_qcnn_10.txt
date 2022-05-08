@@ -1,0 +1,5 @@
+QCNN_10_hh,7
+SABRE,results_diff_compiler/hh/qcnn/sim/hh_heuristic_10_sabre_sim.csv
+tket,results_diff_compiler/hh/qcnn/sim/hh_heuristic_10_tket_sim.csv
+OLSQ,
+TB-OLSQ,

@@ -85,13 +85,15 @@ def calculate_cir_fidelity(data):
     qubit_idling_list = data["qubit_idling_time"]
     for t in qubit_idling_list:
         fidelity *= (1 - ((1/3) * (1/T_1 + 1/T_PHI) * t))
-
-    fidelity_no_crosstalk = fidelity * pow(TWO_QUBIT_GATE_FID,data["g1"])
+    fidelity_no_crosstalk = fidelity * pow(TWO_QUBIT_GATE_FID,data["g2"])
     two_qubit_fidelity_list = data["two_qubit_gates_fidelity"]
+    assert(len(two_qubit_fidelity_list)==data["g2"])
     for f in two_qubit_fidelity_list:
         fidelity *= f
 
     data["fidelity"] = fidelity
+    # print("fidelity: ", fidelity)
+    # print("fidelity_no_crosstalk: ", fidelity_no_crosstalk)
     data['fidelity_no_crosstalk'] = fidelity_no_crosstalk
 
 def calculate_qubit_idling_time(qubit_last_time, time_slot_matrix, measure_at_end):
