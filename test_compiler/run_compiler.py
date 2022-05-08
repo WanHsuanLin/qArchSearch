@@ -6,6 +6,7 @@ from qiskit.transpiler.passes import SabreSwap
 from qiskit.converters import *
 
 from pytket.architecture import Architecture
+from pytket.qasm import circuit_from_qasm
 from pytket.mapping import MappingManager
 from pytket.mapping import LexiLabellingMethod, LexiRouteRoutingMethod
 from pytket.extensions.qiskit import qiskit_to_tk, tk_to_qiskit
@@ -46,8 +47,8 @@ def run_sabre(benchmark, circuit_info, coupling, objective, count_physical_qubit
         elif gate[0].name[0] == 'v':
             gate_spec.append([gate[0].name])
             gates.append([(gate[1][0].index,)])
-        elif gate[0].name == 'measure':
-            gate_spec.append(["m"])
+        elif gate[0].name[0] == 'm':
+            gate_spec.append([gate[0].name])
             gates.append([(gate[1][0].index,)])
         else:
             gate_spec.append(["SWAP"])
@@ -59,13 +60,14 @@ def run_tket(benchmark, circuit_info, coupling, count_physical_qubit):
     # https://github.com/CQCL/pytket/blob/main/examples/mapping_example.ipynb
     # read qasm
     if benchmark == "qcnn":
-        qc = QuantumCircuit.from_qasm_file(circuit_info)
+        # qc = QuantumCircuit.from_qasm_file(circuit_info)
+        circuit = circuit_from_qasm(circuit_info)
     elif benchmark == "qaoa":
         qc = QuantumCircuit(count_physical_qubit)
         for gate in circuit_info[1]:
             qc.rzz(1.0, gate[0], gate[1])
     # qc.draw(scale=0.7, filename = "cir_for_tket.png", output='mpl', style='color')
-    circuit = qiskit_to_tk(qc)
+        circuit = qiskit_to_tk(qc)
     architecture = Architecture(coupling)
     mapping_manager = MappingManager(architecture)
     lexi_label = LexiLabellingMethod()
@@ -81,20 +83,22 @@ def run_tket(benchmark, circuit_info, coupling, count_physical_qubit):
         # print(gate[0].num_qubits)
         if gate[0].name == 'barrier':
             continue
-        if gate[0].name == 'u4' or gate[0].name == 'U4' :
-            gate_spec.append(["u4"])
-            gates.append([(gate[1][0].index, gate[1][1].index)])
         elif gate[0].name == "rzz" :
             gate_spec.append(["ZZ"])
             gates.append([(gate[1][0].index, gate[1][1].index)])
-        elif gate[0].name[0] == 'v':
-            gate_spec.append([gate[0].name])
+        elif gate[0].name == 'rx':
+            p = str(int(gate[0].params[0]))
+            gate_spec.append(["v"+p])
             gates.append([(gate[1][0].index,)])
-        elif gate[0].name == 'measure':
-            gate_spec.append(["m"])
+        elif gate[0].name == 'u1':
+            p = str(int(gate[0].params[0]))
+            gate_spec.append(["m"+p])
             gates.append([(gate[1][0].index,)])
-        else:
+        elif gate[0].name == "SWAP":
             gate_spec.append(["SWAP"])
+            gates.append([(gate[1][0].index, gate[1][1].index)])
+        else:
+            gate_spec.append(["u4"])
             gates.append([(gate[1][0].index, gate[1][1].index)])
     # print(gate_spec)
     return (gates,gate_spec)

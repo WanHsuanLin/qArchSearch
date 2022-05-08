@@ -11,8 +11,6 @@ __pycache__
 /docs/source/_static
 /docs/source/_templates
 
-*.png
-
 tmp.sh
 
 *.log

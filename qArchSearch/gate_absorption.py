@@ -270,8 +270,8 @@ def run_only_gate_absorption(benchmark:str, data, coupling_graph:list, num_qubit
                 # print(tmp_qubits)
                 # print(tmp_params)
                 if len(tmp_qubits) < 2:
-                    results_gate.append([tmp_qubits])
-                    results_gate_spec.append([tmp_params])
+                    results_gate += [tmp_qubits]
+                    results_gate_spec += [tmp_params]
                 else:
                     tmp1_qubits, tmp1_params = compactify(tmp_qubits, tmp_params, coupling_graph, num_qubit, False)
                     depth, swap_count, u4gate_qubits, u4gate_params = push_left_layers(tmp1_qubits, tmp1_params, num_qubit, True)

@@ -49,7 +49,8 @@ def sim_circuit(phy_qubit_num, data, coupling, measure_at_end = True):
     qubit_last_time, time_slot_matrix, time_two_qubit_gate_indicator = scheduling(measurement_pair, phy_qubit_num,data)
     # print("qubit_last_time:")
     # print(qubit_last_time)
-    circuit_d = max(qubit_last_time)
+    data['D'] = max(qubit_last_time)
+    data['qubit_lifetime'] = qubit_last_time
     # print("circuit_depth ", circuit_d)
     # print("time_two_qubit_gate_indicator:")
     # print(time_two_qubit_gate_indicator[:circuit_d + 2])
@@ -80,13 +81,20 @@ def calculate_gate_number(gate_spec):
 
 def calculate_cir_fidelity(data):
     fidelity = pow(SINGLE_QUBIT_GATE_FID,data["g1"])
-    two_qubit_fidelity_list = data["two_qubit_gates_fidelity"]
-    for f in two_qubit_fidelity_list:
-        fidelity *= f
+    
     qubit_idling_list = data["qubit_idling_time"]
     for t in qubit_idling_list:
         fidelity *= (1 - ((1/3) * (1/T_1 + 1/T_PHI) * t))
+    fidelity_no_crosstalk = fidelity * pow(TWO_QUBIT_GATE_FID,data["g2"])
+    two_qubit_fidelity_list = data["two_qubit_gates_fidelity"]
+    assert(len(two_qubit_fidelity_list)==data["g2"])
+    for f in two_qubit_fidelity_list:
+        fidelity *= f
+
     data["fidelity"] = fidelity
+    # print("fidelity: ", fidelity)
+    # print("fidelity_no_crosstalk: ", fidelity_no_crosstalk)
+    data['fidelity_no_crosstalk'] = fidelity_no_crosstalk
 
 def calculate_qubit_idling_time(qubit_last_time, time_slot_matrix, measure_at_end):
     qubit_idling_time = []
@@ -203,9 +211,11 @@ def merge_gate(phy_qubit_num, data):
     q_last_gate_list = [""]*phy_qubit_num
     measurement_pair = dict()
     # merge consecutive single qubit gates
+    # print(gate_spec)
     for g_slot, g_pos_slot in zip(gate_spec, gate_pos):
         for g, g_pos in zip(g_slot, g_pos_slot):
-            if g == " U4" or g == " U4 swap" or g == " swap U4" or g == " ZZ swap" or g == " swap ZZ":
+            # print(g)
+            if g == "U4" or g == " U4 U4" or g == " U4" or g == " U4 swap" or g == " swap U4" or g == " ZZ swap" or g == " swap ZZ":
                 if q_last_gate_list[g_pos[0]] != "sg":
                     new_gate_spec.append("sg")
                     new_gate_pos.append([g_pos[0]])
@@ -232,7 +242,7 @@ def merge_gate(phy_qubit_num, data):
                 new_gate_pos.append(g_pos)
                 q_last_gate_list[g_pos[0]] = "syc"
                 q_last_gate_list[g_pos[1]] = "syc"
-            elif g == " swap":
+            elif g == " swap" or g == "swap":
                 for _ in range(3):
                     new_gate_spec.append("syc")
                     new_gate_pos.append(g_pos)
@@ -243,15 +253,17 @@ def merge_gate(phy_qubit_num, data):
                 q_last_gate_list[g_pos[0]] = "sg"
                 q_last_gate_list[g_pos[1]] = "sg"
             else:   # measurement and v in qcnn
-                index = int(g[2:])
+                name = str(g).strip()
+                # print(name)
+                index = int(name[1:])
                 if index not in measurement_pair:
                     measurement_pair[index] = [0,0]
-                if g[1] == "v":
+                if name[0] == "v":
                     measurement_pair[index][1] = len(new_gate_spec)
                     new_gate_spec.append("v"+str(index))
                     new_gate_pos.append([g_pos[0]])
                     q_last_gate_list[g_pos[0]] = "v"
-                elif g[1] == "m":
+                elif name[0] == "m":
                     measurement_pair[index][0] = len(new_gate_spec)
                     new_gate_spec.append("m"+str(index))
                     new_gate_pos.append([g_pos[0]])
@@ -268,20 +280,22 @@ def merge_gate(phy_qubit_num, data):
 def create_list_from_data(data):
     data_list = []  # create an empty list
     # append the items to the list in the same order.
+    data_list.append(data.get('#e'))
     data_list.append(data.get('compiler'))
+    data_list.append(data.get('fidelity_no_crosstalk'))
     data_list.append(data.get('fidelity'))
     data_list.append(data.get('g1'))
     data_list.append(data.get('g2'))
-    data_list.append(data.get('#e'))
+    data_list.append(data.get('D'))
     avg_idling_time = np.average(np.array(data.get('qubit_idling_time')))
     data_list.append(avg_idling_time)
     data_list.append(data.get('qubit_idling_time'))
+    data_list.append(data.get('qubit_lifetime'))
     avg_two_quibt_gate_fid = np.average(np.array(data.get('two_qubit_gates_fidelity')))
     data_list.append(avg_two_quibt_gate_fid)
     data_list.append(data.get('two_qubit_gates_fidelity'))
     data_list.append(data.get('gates'))
     data_list.append(data.get('gate_spec'))
-    data_list.append(data.get('coupling'))
     return data_list
 
 
@@ -325,7 +339,8 @@ if __name__ == "__main__":
         csv_name = csv_name + "sim/" + tmp[-1][:-4]+"_sim.csv"
         with open(csv_name, 'w+') as c:
             writer = csv.writer(c)
-            writer.writerow(['compiler', 'fidelity', 'g1', 'g2', '#e', 'avg idling time', 'idling time', 'avg two qubit gate fidelity', 'two qubit gate fidelity', 'gates', 'gate_spec', 'coupling'])
+            writer.writerow([ '#e', 'compiler', 'fidelity no crosstalk', 'fidelity', 'g1', 'g2', 'D', 'avg idling time', 'idling time', 'qubit lifetime', 'avg two qubit gate fidelity', 'two qubit gate fidelity', 'gates', 'gate_spec'])
+
 
         if args.benchmark == "qcnn":
             measure_at_end = False
@@ -346,6 +361,7 @@ if __name__ == "__main__":
                 writer = csv.writer(c)
                 data_list = create_list_from_data(data)
                 writer.writerow(data_list)
+
     
     
 
