@@ -249,15 +249,17 @@ def merge_gate(phy_qubit_num, data):
                 q_last_gate_list[g_pos[0]] = "sg"
                 q_last_gate_list[g_pos[1]] = "sg"
             else:   # measurement and v in qcnn
-                index = int(g[2:])
+                name = str(g).strip()
+                print(name)
+                index = int(name[1:])
                 if index not in measurement_pair:
                     measurement_pair[index] = [0,0]
-                if g[1] == "v":
+                if name[0] == "v":
                     measurement_pair[index][1] = len(new_gate_spec)
                     new_gate_spec.append("v"+str(index))
                     new_gate_pos.append([g_pos[0]])
                     q_last_gate_list[g_pos[0]] = "v"
-                elif g[1] == "m":
+                elif name[0] == "m":
                     measurement_pair[index][0] = len(new_gate_spec)
                     new_gate_spec.append("m"+str(index))
                     new_gate_pos.append([g_pos[0]])

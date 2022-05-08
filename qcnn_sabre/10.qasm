@@ -1,7 +1,7 @@
 OPENQASM 2.0;
 include "qelib1.inc";
 
-qreg q[18];
+qreg q[16];
 
 opaque u4 q0, q1;
 opaque v0 q0;

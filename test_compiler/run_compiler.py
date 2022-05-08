@@ -48,7 +48,7 @@ def run_sabre(benchmark, circuit_info, coupling, objective, count_physical_qubit
             gate_spec.append([gate[0].name])
             gates.append([(gate[1][0].index,)])
         elif gate[0].name[0] == 'm':
-            gate_spec.append(["m"])
+            gate_spec.append([gate[0].name[0]])
             gates.append([(gate[1][0].index,)])
         else:
             gate_spec.append(["SWAP"])
