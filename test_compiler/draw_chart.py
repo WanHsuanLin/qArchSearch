@@ -19,8 +19,8 @@ gMarks2 = ['.','*','s','2','p','1','d','h']
 gColors = ['lightcoral','orange','limegreen','cornflowerblue','gray','peru','teal','darkkhaki','slategray']
 width = 33
 height = 15
-linewidth = 11 #default 1.5
-markersize = 40
+linewidth = 9 #default 1.5
+markersize = 36
 
 file_type='.png'
 
@@ -49,6 +49,23 @@ def draw_normal(title:str, fileName:str, data_list, label, average = False, perc
     # plt.margins(0.5)
     plt.savefig(fileName, dpi=300, bbox_inches='tight')
 
+def draw_normal_mix(fileName:str, data_list, data_list2, label):
+    plt.figure(figsize=(width,height))
+    # plt.title(title, y=1.03)
+    x_value = np.arange(len(data_list[0]))
+    plt.xticks(x_value)
+    for data, data2, c, m, l in zip(data_list, data_list2, gColors, gMarks1, label):
+        if len(data) != len(x_value):
+            x_value = np.arange(len(data))
+        plt.plot(x_value, data, linestyle='--', marker=m, color=c, label=l,linewidth= linewidth, markersize=markersize)
+        plt.plot(x_value, data2, linestyle='--', alpha = 0.5, marker=m, color=c, linewidth= 0.7*linewidth, markersize=0.7*markersize)
+    # plt.legend(bbox_to_anchor=(1.0, 1.0), loc='lower center')
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.12), ncol = 5, frameon=False, labelspacing = 0.025, handletextpad = 0.2)
+    plt.xlabel(r'#$e_{extra}$')
+    plt.grid(axis='y')
+    # plt.margins(0.5)
+    plt.savefig(fileName, dpi=300, bbox_inches='tight')
+
 
 def draw_copmiler(filename, data):
     line_name = ["SABRE", r't$|$ket$\rangle$', "OLSQ", "TB-OLSQ"]
@@ -63,6 +80,13 @@ def draw_copmiler(filename, data):
         title = target
         new_fileName = 'fig/' + filename + '_' + target.replace(" ", "_").replace("/", "") + file_type
         draw_normal(title, new_fileName, Fidelity_list, line_name, True)
+    
+    
+    Fidelity_list = [data["SABRE"]["Fidelity"], data["tket"]["Fidelity"], data["OLSQ"]["Fidelity"], data["TB-OLSQ"]["Fidelity"]]
+    Fidelity_list2 = [data["SABRE"]["Fidelity w/o Crosstalk"], data["tket"]["Fidelity w/o Crosstalk"], data["OLSQ"]["Fidelity w/o Crosstalk"], data["TB-OLSQ"]["Fidelity w/o Crosstalk"]]
+    new_fileName = 'fig/' + filename + '_mix_fidelity' + file_type
+    draw_normal_mix(new_fileName, Fidelity_list, Fidelity_list2, line_name)
+
 
 def draw_architecture(filename, data):
     line_name = ["Heavy-hexagon", "Grid"]
@@ -77,6 +101,11 @@ def draw_architecture(filename, data):
         title = target
         new_fileName = 'fig/' + filename + '_' + target.replace(" ", "_").replace("/", "") + file_type
         draw_normal(title, new_fileName, Fidelity_list, line_name, False, True)
+
+    Fidelity_list = [data["hh"]["Fidelity"], data["grid"]["Fidelity"]]
+    Fidelity_list2 = [data["hh"]["Fidelity w/o Crosstalk"], data["grid"]["Fidelity w/o Crosstalk"]]
+    new_fileName = 'fig/' + filename + '_mix_fidelity' + file_type
+    draw_normal_mix(new_fileName, Fidelity_list, Fidelity_list2, line_name)
 
 def get_info(title, csv_name, edge_num):
     data = {"D": [0] * edge_num, "Average Two-Qubit Gate Fidelity": [0] * edge_num, "Fidelity": [0] * edge_num, "Fidelity w/o Crosstalk": [0] * edge_num, "Fidelity improvement": [0] * edge_num, "Fidelity Improvement w/o Crosstalk": [0] * edge_num}
