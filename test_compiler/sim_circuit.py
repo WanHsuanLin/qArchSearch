@@ -22,7 +22,7 @@ P1_PARALLEL_ERR = 0.005
 P2_PARALLEL_ERR = P1_PARALLEL_ERR * FACTOR
 
 T_1=15000
-T_PHI=2*T_1
+T_PHI=25000
 
 
 def sim_circuit(phy_qubit_num, data, coupling, measure_at_end = True):

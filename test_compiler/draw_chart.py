@@ -13,16 +13,16 @@ import ast
 
 plt.rcParams['font.family'] = 'serif'
 plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
-plt.rcParams.update({'font.size': 56})
+plt.rcParams.update({'font.size': 50})
 gMarks1 = ['o','X','D','s','^','p']
 gMarks2 = ['.','*','s','2','p','1','d','h']
 gColors = ['lightcoral','orange','limegreen','cornflowerblue','gray','peru','teal','darkkhaki','slategray']
-width = 33
-height = 15
-linewidth = 9 #default 1.5
-markersize = 36
+width = 23
+height = 12
+linewidth = 8 #default 1.5
+markersize = 20
 
-file_type='.png'
+file_type='.pdf'
 
 def draw_normal(title:str, fileName:str, data_list, label, average = False, percentage = False):
     plt.figure(figsize=(width,height))
@@ -43,13 +43,13 @@ def draw_normal(title:str, fileName:str, data_list, label, average = False, perc
         current_values = plt.gca().get_yticks()
         plt.gca().set_yticklabels(['{:,.0%}'.format(x) for x in current_values])
     # plt.legend(bbox_to_anchor=(1.0, 1.0), loc='lower center')
-    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.12), ncol = 5, frameon=False, labelspacing = 0.025, handletextpad = 0.2)
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.13), ncol = 4, frameon=False, columnspacing = 0.75, handletextpad = 0.2)
     plt.xlabel(r'#$e_{extra}$')
     plt.grid(axis='y')
     # plt.margins(0.5)
     plt.savefig(fileName, dpi=300, bbox_inches='tight')
 
-def draw_normal_mix(fileName:str, data_list, data_list2, label):
+def draw_normal_mix(fileName:str, data_list, data_list2, label, h_line = False):
     plt.figure(figsize=(width,height))
     # plt.title(title, y=1.03)
     x_value = np.arange(len(data_list[0]))
@@ -58,9 +58,12 @@ def draw_normal_mix(fileName:str, data_list, data_list2, label):
         if len(data) != len(x_value):
             x_value = np.arange(len(data))
         plt.plot(x_value, data, linestyle='--', marker=m, color=c, label=l,linewidth= linewidth, markersize=markersize)
-        plt.plot(x_value, data2, linestyle='--', alpha = 0.5, marker=m, color=c, linewidth= 0.7*linewidth, markersize=0.7*markersize)
+        plt.plot(x_value, data2, linestyle='--', alpha = 0.7, marker=m, color=c, linewidth= 0.65*linewidth, markersize=0.88*markersize)
+        if h_line:
+            plt.axhline(y=max(data), linestyle=':', linewidth= 0.65*linewidth)
+            # x_ticks = np.append(plt.get_xticks(), max(data))
     # plt.legend(bbox_to_anchor=(1.0, 1.0), loc='lower center')
-    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.12), ncol = 5, frameon=False, labelspacing = 0.025, handletextpad = 0.2)
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.13), ncol = 5, frameon=False, labelspacing = 0.025, handletextpad = 0.2)
     plt.xlabel(r'#$e_{extra}$')
     plt.grid(axis='y')
     # plt.margins(0.5)
@@ -68,44 +71,46 @@ def draw_normal_mix(fileName:str, data_list, data_list2, label):
 
 
 def draw_copmiler(filename, data):
-    line_name = ["SABRE", r't$|$ket$\rangle$', "OLSQ", "TB-OLSQ"]
-    for target in ["Fidelity", "Fidelity w/o Crosstalk", "Average Two-Qubit Gate Fidelity"]:
-        Fidelity_list = [data["SABRE"][target], data["tket"][target], data["OLSQ"][target], data["TB-OLSQ"][target]]
+    line_name = ["OLSQ", "TB-OLSQ", r't$|$ket$\rangle$', "SABRE"]
+    # for target in ["Fidelity", "Fidelity w/o Crosstalk", "Average Two-Qubit Gate Fidelity"]:
+    for target in ["Average Two-Qubit Gate Fidelity"]:
+        Fidelity_list = [data["OLSQ"][target], data["TB-OLSQ"][target], data["tket"][target], data["SABRE"][target]]
         title = target
         new_fileName = 'fig/' + filename + '_' + target.replace(" ", "_").replace("/", "") + file_type
         draw_normal(title, new_fileName, Fidelity_list, line_name)
 
+    line_name = ["OLSQ", "TB-OLSQ", r't$|$ket$\rangle$']
     for target in ["Fidelity improvement", "Fidelity Improvement w/o Crosstalk"]:
-        Fidelity_list = [data["SABRE"][target], data["tket"][target], data["OLSQ"][target], data["TB-OLSQ"][target]]
+        Fidelity_list = [data["OLSQ"][target], data["TB-OLSQ"][target], data["tket"][target]]
         title = target
         new_fileName = 'fig/' + filename + '_' + target.replace(" ", "_").replace("/", "") + file_type
         draw_normal(title, new_fileName, Fidelity_list, line_name, True)
     
-    
-    Fidelity_list = [data["SABRE"]["Fidelity"], data["tket"]["Fidelity"], data["OLSQ"]["Fidelity"], data["TB-OLSQ"]["Fidelity"]]
-    Fidelity_list2 = [data["SABRE"]["Fidelity w/o Crosstalk"], data["tket"]["Fidelity w/o Crosstalk"], data["OLSQ"]["Fidelity w/o Crosstalk"], data["TB-OLSQ"]["Fidelity w/o Crosstalk"]]
+    line_name = ["OLSQ", "TB-OLSQ", r't$|$ket$\rangle$', "SABRE"]
+    Fidelity_list = [data["OLSQ"]["Fidelity"], data["TB-OLSQ"]["Fidelity"], data["tket"]["Fidelity"], data["SABRE"]["Fidelity"]]
+    Fidelity_list2 = [data["OLSQ"]["Fidelity w/o Crosstalk"], data["TB-OLSQ"]["Fidelity w/o Crosstalk"], data["tket"]["Fidelity w/o Crosstalk"], data["SABRE"]["Fidelity w/o Crosstalk"]]
     new_fileName = 'fig/' + filename + '_mix_fidelity' + file_type
     draw_normal_mix(new_fileName, Fidelity_list, Fidelity_list2, line_name)
 
 
 def draw_architecture(filename, data):
     line_name = ["Heavy-hexagon", "Grid"]
-    for target in ["Fidelity", "Fidelity w/o Crosstalk", "Average Two-Qubit Gate Fidelity"]:
-        Fidelity_list = [data["hh"][target], data["grid"][target]]
-        title = target
-        new_fileName = 'fig/' + filename + '_' + target.replace(" ", "_").replace("/", "") + file_type
-        draw_normal(title, new_fileName, Fidelity_list, line_name)
+    # for target in ["Fidelity", "Fidelity w/o Crosstalk", "Average Two-Qubit Gate Fidelity"]:
+    #     Fidelity_list = [data["hh"][target], data["grid"][target]]
+    #     title = target
+    #     new_fileName = 'fig/' + filename + '_' + target.replace(" ", "_").replace("/", "") + file_type
+    #     draw_normal(title, new_fileName, Fidelity_list, line_name)
     
-    for target in ["Fidelity improvement", "Fidelity Improvement w/o Crosstalk"]:
-        Fidelity_list = [data["hh"][target], data["grid"][target]]
-        title = target
-        new_fileName = 'fig/' + filename + '_' + target.replace(" ", "_").replace("/", "") + file_type
-        draw_normal(title, new_fileName, Fidelity_list, line_name, False, True)
+    # for target in ["Fidelity improvement", "Fidelity Improvement w/o Crosstalk"]:
+    #     Fidelity_list = [data["hh"][target], data["grid"][target]]
+    #     title = target
+    #     new_fileName = 'fig/' + filename + '_' + target.replace(" ", "_").replace("/", "") + file_type
+    #     draw_normal(title, new_fileName, Fidelity_list, line_name, False, True)
 
     Fidelity_list = [data["hh"]["Fidelity"], data["grid"]["Fidelity"]]
     Fidelity_list2 = [data["hh"]["Fidelity w/o Crosstalk"], data["grid"]["Fidelity w/o Crosstalk"]]
     new_fileName = 'fig/' + filename + '_mix_fidelity' + file_type
-    draw_normal_mix(new_fileName, Fidelity_list, Fidelity_list2, line_name)
+    draw_normal_mix(new_fileName, Fidelity_list, Fidelity_list2, line_name, True)
 
 def get_info(title, csv_name, edge_num):
     data = {"D": [0] * edge_num, "Average Two-Qubit Gate Fidelity": [0] * edge_num, "Fidelity": [0] * edge_num, "Fidelity w/o Crosstalk": [0] * edge_num, "Fidelity improvement": [0] * edge_num, "Fidelity Improvement w/o Crosstalk": [0] * edge_num}
