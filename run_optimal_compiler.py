@@ -113,7 +113,8 @@ if __name__ == "__main__":
         for edge in device_spec[str_key]:
             coupling.append((edge[0], edge[1]))
         coupling += fix_coupling
-        for mode in ["transition", 'normal']:
+        # for mode in ["transition", 'normal']:
+        for mode in ['normal']:
             data = run_olsq_tbolsq(args.benchmark, circuit_info, coupling, count_physical_qubit, mode)
             data["#e"] = int(key)
             data["coupling"] = device_spec[str_key]
