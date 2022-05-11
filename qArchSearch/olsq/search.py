@@ -10,8 +10,8 @@ import pkgutil
 from enum import Enum
 
 TIMEOUT = 90000
-#MEMORY_MAX_SIZE = 1000 * 70
-MEMORY_MAX_SIZE = 0
+MEMORY_MAX_SIZE = 1000 * 58
+# MEMORY_MAX_SIZE = 0
 MAX_TREAD_NUM = 8
 VERBOSE = 10
 

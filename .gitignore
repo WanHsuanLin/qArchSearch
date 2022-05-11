@@ -13,5 +13,6 @@ __pycache__
 
 tmp.sh
 tmp_draw.sh
+tmp_exp.sh
 
 *.log

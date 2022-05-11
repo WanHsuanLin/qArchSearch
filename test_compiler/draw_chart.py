@@ -191,12 +191,19 @@ if __name__ == "__main__":
         raise ValueError("Invalid type")
     
     # print(data)
-    if args.type == 'c':
-        draw_copmiler(split_info[0], data)
-    elif args.type == 'a':
-        draw_architecture(split_info[0], data)
-    else:
-        raise ValueError("Invalid type")    
+    # if args.type == 'c':
+    #     draw_copmiler(split_info[0], data)
+    # elif args.type == 'a':
+    #     draw_architecture(split_info[0], data)
+    # else:
+    #     raise ValueError("Invalid type")    
 
     
 
+    line_name = ["OLSQ", "TB-OLSQ", r't$|$ket$\rangle$']
+    for target in ["Fidelity improvement"]:
+        Fidelity_list = [data["OLSQ"][target], data["TB-OLSQ"][target], data["tket"][target]]
+        title = target
+        np_data = np.array(Fidelity_list)
+        avg = np.mean(np_data, axis=0)
+        print(avg)
