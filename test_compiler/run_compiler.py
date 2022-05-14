@@ -76,6 +76,7 @@ def run_tket(benchmark, circuit_info, coupling, count_physical_qubit):
 
     qc_qikit = tk_to_qiskit(circuit)
     # qc_qikit.draw(scale=0.7, filename = "tketcir.png", output='mpl', style='color')
+    # qc_qikit.draw(scale=0.7, filename = "dcir.png", output='mpl', style='color')
     gates = []
     gate_spec = []
     for gate in qc_qikit.data:
@@ -94,7 +95,8 @@ def run_tket(benchmark, circuit_info, coupling, count_physical_qubit):
             p = str(int(gate[0].params[0]))
             gate_spec.append(["m"+p])
             gates.append([(gate[1][0].index,)])
-        elif gate[0].name == "SWAP":
+        # elif gate[0].name == "SWAP":
+        elif gate[0].name == "swap" or gate[0].name == "SWAP":
             gate_spec.append(["SWAP"])
             gates.append([(gate[1][0].index, gate[1][1].index)])
         else:
