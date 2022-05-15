@@ -69,6 +69,52 @@ def draw_normal_mix(fileName:str, data_list, data_list2, label, h_line = False):
     # plt.margins(0.5)
     plt.savefig(fileName, dpi=300, bbox_inches='tight')
 
+def draw_cross_test(ori_filename, data_list):
+    filename = 'fig/' + ori_filename + '_fidelity_improvement' + file_type
+    
+    plt.figure(figsize=(width,height))
+    # plt.title(title, y=1.03)
+    x_value = np.arange(len(data_list["0"]["Fidelity improvement"]))
+    plt.xticks(x_value)
+    
+    data = []
+    for key, c, m in zip(data_list, gColors, gMarks1):
+        data.append(data_list[key]["Fidelity improvement"])
+        if len(data_list[key]["Fidelity improvement"]) != len(x_value):
+            x_value = np.arange(len(data_list[key]["Fidelity improvement"]))
+        plt.plot(x_value, data_list[key]["Fidelity improvement"], linestyle='--', marker=m, color=c, label=key,linewidth= linewidth, markersize=markersize)
+    
+    np_data = np.array(data)
+    avg = np.mean(np_data, axis=0)
+    plt.plot(x_value, avg, linestyle='--', marker='d', color='violet', label='average', linewidth= linewidth, markersize=markersize)
+    current_values = plt.gca().get_yticks()
+    plt.gca().set_yticklabels(['{:,.0%}'.format(x) for x in current_values])
+    # plt.legend(bbox_to_anchor=(1.0, 1.0), loc='lower center')
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.13), ncol = 8, frameon=False, columnspacing = 0.75, handletextpad = 0.2)
+    plt.xlabel(r'#$e_{extra}$')
+    plt.grid(axis='y')
+    # plt.margins(0.5)
+    plt.savefig(filename, dpi=300, bbox_inches='tight')
+
+    filename = 'fig/' + ori_filename + '_fidelity_' + file_type
+    
+    plt.figure(figsize=(width,height))
+    # plt.title(title, y=1.03)
+    x_value = np.arange(len(data_list["0"]["Fidelity improvement"]))
+    plt.xticks(x_value)
+    
+    data = []
+    for key, c, m in zip(data_list, gColors, gMarks1):
+        data.append(data_list[key]["Fidelity"])
+        if len(data_list[key]["Fidelity"]) != len(x_value):
+            x_value = np.arange(len(data_list[key]["Fidelity"]))
+        plt.plot(x_value, data_list[key]["Fidelity"], linestyle='--', marker=m, color=c, label=key,linewidth= linewidth, markersize=markersize)
+    # plt.legend(bbox_to_anchor=(1.0, 1.0), loc='lower center')
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.13), ncol = 8, frameon=False, columnspacing = 0.75, handletextpad = 0.2)
+    plt.xlabel(r'#$e_{extra}$')
+    plt.grid(axis='y')
+    # plt.margins(0.5)
+    plt.savefig(filename, dpi=300, bbox_inches='tight')
 
 def draw_copmiler(filename, data):
     line_name = ["OLSQ", "TB-OLSQ", r't$|$ket$\rangle$', "SABRE"]
@@ -150,7 +196,20 @@ def get_info(title, csv_name, edge_num):
                     data["Fidelity"][e] = ast.literal_eval(row[3])
                     data["D"][e] = ast.literal_eval(row[6])
                     data["Average Two-Qubit Gate Fidelity"][e] = ast.literal_eval(row[10])
+        else:
+            for row in csvreader:
+                # print("hi")
+                if row[1] == "normal":
+                    # print(row[0])
+                    # print(row[1])
+                    # print(row[3])
+                    e = ast.literal_eval(row[0])
+                    data["Fidelity w/o Crosstalk"][e] = ast.literal_eval(row[2])
+                    data["Fidelity"][e] = ast.literal_eval(row[3])
+                    data["D"][e] = ast.literal_eval(row[6])
+                    data["Average Two-Qubit Gate Fidelity"][e] = ast.literal_eval(row[10])
     baseline = data["Fidelity"][0]
+    # print(data["Fidelity"][0])
     for i, fid in enumerate(data["Fidelity"]):
         data["Fidelity improvement"][i] = (fid - baseline)/baseline
     
@@ -177,7 +236,7 @@ if __name__ == "__main__":
     split_info = file_info[0].split(',')
     # print(split_info)
     data = dict()
-    if args.type == 'c':
+    if args.type == 'c' or args.type == 't' :
         for info in file_info[1:]:
             info_list = info.split(",")
             data[info_list[0]] = get_info(info_list[0], info_list[1].strip(), int(split_info[1])+1)
@@ -191,19 +250,21 @@ if __name__ == "__main__":
         raise ValueError("Invalid type")
     
     # print(data)
-    # if args.type == 'c':
-    #     draw_copmiler(split_info[0], data)
-    # elif args.type == 'a':
-    #     draw_architecture(split_info[0], data)
-    # else:
-    #     raise ValueError("Invalid type")    
+    if args.type == 'c':
+        draw_copmiler(split_info[0], data)
+    elif args.type == 'a':
+        draw_architecture(split_info[0], data)
+    elif args.type == 't':
+        draw_cross_test(split_info[0], data)
+    else:
+        raise ValueError("Invalid type")    
 
     
 
-    line_name = ["OLSQ", "TB-OLSQ", r't$|$ket$\rangle$']
-    for target in ["Fidelity improvement"]:
-        Fidelity_list = [data["OLSQ"][target], data["TB-OLSQ"][target], data["tket"][target]]
-        title = target
-        np_data = np.array(Fidelity_list)
-        avg = np.mean(np_data, axis=0)
-        print(avg)
+    # line_name = ["OLSQ", "TB-OLSQ", r't$|$ket$\rangle$']
+    # for target in ["Fidelity improvement"]:
+    #     Fidelity_list = [data["OLSQ"][target], data["TB-OLSQ"][target], data["tket"][target]]
+    #     title = target
+    #     np_data = np.array(Fidelity_list)
+    #     avg = np.mean(np_data, axis=0)
+        # print(avg)
