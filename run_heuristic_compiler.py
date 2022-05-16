@@ -72,10 +72,10 @@ if __name__ == "__main__":
     with open(args.device_spec) as f:
         device_spec = json.load(f)
 
-    csv_name1 = csv_name + "_sabre.csv" 
-    with open(csv_name1, 'w+') as c:
-        writer = csv.writer(c)
-        writer.writerow(['compiler', '#e','M', '#gates', 'gate_spec', 'coupling'])
+    # csv_name1 = csv_name + "_sabre.csv" 
+    # with open(csv_name1, 'w+') as c:
+    #     writer = csv.writer(c)
+    #     writer.writerow(['compiler', '#e','M', '#gates', 'gate_spec', 'coupling'])
 
     data = dict()
     data["benchmark"] = args.benchmark
