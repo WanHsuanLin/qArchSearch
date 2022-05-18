@@ -96,16 +96,16 @@ if __name__ == "__main__":
     with open(args.device_spec) as f:
         device_spec = json.load(f)
 
-    # with open(csv_name, 'w+') as c:
-    #     writer = csv.writer(c)
-    #     writer.writerow(['mode', '#e','M', 'gates', 'gate_spec', 'coupling'])
+    with open(csv_name, 'w+') as c:
+        writer = csv.writer(c)
+        writer.writerow(['mode', '#e','M', 'gates', 'gate_spec', 'coupling'])
 
     data = dict()
     data["benchmark"] = args.benchmark
     
-    test_set = [2,3]
-    for key in test_set:
-    # for key in range(17):
+    # test_set = [2,3]
+    # for key in test_set:
+    for key in range(17):
         str_key = str(key)
         if str_key not in device_spec.keys():
             break

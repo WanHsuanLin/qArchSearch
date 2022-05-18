@@ -2,6 +2,5 @@ QAOA_8_hh_crosstest,7
 0,results_diff_compiler/hh/qaoa/sim/hh_optimal_8_0_sim.csv
 1,results_diff_compiler/hh/qaoa/sim/8_0_gs_d_optimal_8_1_sim.csv
 3,results_diff_compiler/hh/qaoa/sim/8_0_gs_d_optimal_8_3_sim.csv
-3,results_diff_compiler/hh/qaoa/sim/8_0_gs_d_optimal_8_4_sim.csv
-3,results_diff_compiler/hh/qaoa/sim/8_0_gs_d_optimal_8_8_sim.csv
-3,results_diff_compiler/hh/qaoa/sim/8_0_gs_d_optimal_8_9_sim.csv
+4,results_diff_compiler/hh/qaoa/sim/8_0_gs_d_optimal_8_4_sim.csv
+9,results_diff_compiler/hh/qaoa/sim/8_0_gs_d_optimal_8_9_sim.csv

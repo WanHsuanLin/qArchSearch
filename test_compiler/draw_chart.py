@@ -12,6 +12,7 @@ import csv
 import ast
 
 plt.rcParams['font.family'] = 'serif'
+plt.rcParams['mathtext.fontset'] = 'stix'
 plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
 plt.rcParams.update({'font.size': 50})
 gMarks1 = ['o','X','D','s','^','p']
@@ -44,7 +45,7 @@ def draw_normal(title:str, fileName:str, data_list, label, average = False, perc
         plt.gca().set_yticklabels(['{:,.0%}'.format(x) for x in current_values])
     # plt.legend(bbox_to_anchor=(1.0, 1.0), loc='lower center')
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.13), ncol = 4, frameon=False, columnspacing = 0.75, handletextpad = 0.2)
-    plt.xlabel(r'#$e_{extra}$')
+    plt.xlabel(r'$\alpha$')
     plt.grid(axis='y')
     # plt.margins(0.5)
     plt.savefig(fileName, dpi=300, bbox_inches='tight')
@@ -64,7 +65,7 @@ def draw_normal_mix(fileName:str, data_list, data_list2, label, h_line = False):
             # x_ticks = np.append(plt.get_xticks(), max(data))
     # plt.legend(bbox_to_anchor=(1.0, 1.0), loc='lower center')
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.13), ncol = 5, frameon=False, labelspacing = 0.025, handletextpad = 0.2)
-    plt.xlabel(r'#$e_{extra}$')
+    plt.xlabel(r'$\alpha$')
     plt.grid(axis='y')
     # plt.margins(0.5)
     plt.savefig(fileName, dpi=300, bbox_inches='tight')
@@ -74,24 +75,31 @@ def draw_cross_test(ori_filename, data_list):
     
     plt.figure(figsize=(width,height))
     # plt.title(title, y=1.03)
-    x_value = np.arange(len(data_list["0"]["Fidelity improvement"]))
+    x_value = np.arange(len(data_list["1"]["Fidelity improvement"]))
     plt.xticks(x_value)
     
     data = []
     for key, c, m in zip(data_list, gColors, gMarks1):
-        data.append(data_list[key]["Fidelity improvement"])
-        if len(data_list[key]["Fidelity improvement"]) != len(x_value):
-            x_value = np.arange(len(data_list[key]["Fidelity improvement"]))
-        plt.plot(x_value, data_list[key]["Fidelity improvement"], linestyle='--', marker=m, color=c, label=key,linewidth= linewidth, markersize=markersize)
+        if key != "0":
+            data.append(data_list[key]["Fidelity improvement"])
+        else:
+            if len(data_list[key]["Fidelity improvement"]) != len(x_value):
+                x_value = np.arange(len(data_list[key]["Fidelity improvement"]))
+            plt.plot(x_value, data_list[key]["Fidelity improvement"], label="Target circuit",linestyle='--', marker=m, color=c, linewidth= linewidth, markersize=markersize)
     
     np_data = np.array(data)
     avg = np.mean(np_data, axis=0)
-    plt.plot(x_value, avg, linestyle='--', marker='d', color='violet', label='average', linewidth= linewidth, markersize=markersize)
+    # yerr = np.var(np_data, axis=0)
+    # print(np_data)
+    # print(avg)
+    # print(yerr)
+    # plt.errorbar(x_value, avg, yerr=yerr, linestyle='--', color='violet', label='average', linewidth= linewidth)
+    plt.plot(x_value, avg, linestyle='--', marker='d', color='violet', label='Average', linewidth= linewidth, markersize=markersize)
     current_values = plt.gca().get_yticks()
     plt.gca().set_yticklabels(['{:,.0%}'.format(x) for x in current_values])
     # plt.legend(bbox_to_anchor=(1.0, 1.0), loc='lower center')
-    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.13), ncol = 8, frameon=False, columnspacing = 0.75, handletextpad = 0.2)
-    plt.xlabel(r'#$e_{extra}$')
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.13), ncol = 5, frameon=False, labelspacing = 0.025, handletextpad = 0.2)
+    plt.xlabel(r'$\alpha$')
     plt.grid(axis='y')
     # plt.margins(0.5)
     plt.savefig(filename, dpi=300, bbox_inches='tight')
@@ -100,18 +108,21 @@ def draw_cross_test(ori_filename, data_list):
     
     plt.figure(figsize=(width,height))
     # plt.title(title, y=1.03)
-    x_value = np.arange(len(data_list["0"]["Fidelity improvement"]))
+    x_value = np.arange(len(data_list["1"]["Fidelity improvement"]))
     plt.xticks(x_value)
     
     data = []
     for key, c, m in zip(data_list, gColors, gMarks1):
+        if key == "0":
+            continue
         data.append(data_list[key]["Fidelity"])
         if len(data_list[key]["Fidelity"]) != len(x_value):
             x_value = np.arange(len(data_list[key]["Fidelity"]))
-        plt.plot(x_value, data_list[key]["Fidelity"], linestyle='--', marker=m, color=c, label=key,linewidth= linewidth, markersize=markersize)
+        plt.plot(x_value, data_list[key]["Fidelity"], linestyle='--', marker=m, color=c,linewidth= linewidth, markersize=markersize)
+        plt.plot(x_value, data_list[key]["Fidelity w/o Crosstalk"], linestyle='--', alpha = 0.7, marker=m, color=c, linewidth= 0.65*linewidth, markersize=0.88*markersize)
     # plt.legend(bbox_to_anchor=(1.0, 1.0), loc='lower center')
-    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.13), ncol = 8, frameon=False, columnspacing = 0.75, handletextpad = 0.2)
-    plt.xlabel(r'#$e_{extra}$')
+    # plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.13), ncol = 8, frameon=False, columnspacing = 0.75, handletextpad = 0.2)
+    plt.xlabel(r'$\alpha$')
     plt.grid(axis='y')
     # plt.margins(0.5)
     plt.savefig(filename, dpi=300, bbox_inches='tight')

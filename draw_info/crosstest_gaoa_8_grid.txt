@@ -1,8 +1,6 @@
 QAOA_8_grid_crosstest,3
 0,results_diff_compiler/grid/qaoa/sim/grid_optimal_8_0_sim.csv
 1,results_diff_compiler/grid/qaoa/sim/8_0_gs_d_optimal_8_1_sim.csv
-2,results_diff_compiler/grid/qaoa/sim/8_0_gs_d_optimal_8_2_sim.csv
 3,results_diff_compiler/grid/qaoa/sim/8_0_gs_d_optimal_8_3_sim.csv
 4,results_diff_compiler/grid/qaoa/sim/8_0_gs_d_optimal_8_4_sim.csv
-4,results_diff_compiler/grid/qaoa/sim/8_0_gs_d_optimal_8_9_sim.csv
-4,results_diff_compiler/grid/qaoa/sim/8_0_gs_d_optimal_8_10_sim.csv
+9,results_diff_compiler/grid/qaoa/sim/8_0_gs_d_optimal_8_9_sim.csv
