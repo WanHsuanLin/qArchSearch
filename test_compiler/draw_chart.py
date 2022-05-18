@@ -126,8 +126,11 @@ def draw_copmiler(filename, data):
         draw_normal(title, new_fileName, Fidelity_list, line_name)
 
     line_name = ["OLSQ", "TB-OLSQ", r't$|$ket$\rangle$']
-    for target in ["Fidelity improvement", "Fidelity Improvement w/o Crosstalk"]:
+    # line_name = ["OLSQ", "TB-OLSQ"]
+    # for target in ["Fidelity improvement", "Fidelity Improvement w/o Crosstalk"]:
+    for target in ["Fidelity improvement"]:
         Fidelity_list = [data["OLSQ"][target], data["TB-OLSQ"][target], data["tket"][target]]
+        # Fidelity_list = [data["OLSQ"][target], data["TB-OLSQ"][target]]
         title = target
         new_fileName = 'fig/' + filename + '_' + target.replace(" ", "_").replace("/", "") + file_type
         draw_normal(title, new_fileName, Fidelity_list, line_name, True)

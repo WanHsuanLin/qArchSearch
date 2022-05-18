@@ -404,8 +404,8 @@ if __name__ == "__main__":
     with open(args.csv_file, 'r') as r:
         print(args.csv_file)
         csvreader = csv.reader(r)
-        # header = []
-        # header = next(csvreader)
+        header = []
+        header = next(csvreader)
         data = dict()
         
         tmp = args.csv_file.split('/')
