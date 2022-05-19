@@ -16,7 +16,6 @@ MEASUREMENT_UNIT = 160
 TIME_LENGTH = 1500
 
 SINGLE_QUBIT_GATE_FID = 0.999
-TWO_QUBIT_GATE_FID = 0.991
 FACTOR = 0.1
 P1_PARALLEL_ERR = 0.005
 P2_PARALLEL_ERR = P1_PARALLEL_ERR * FACTOR
@@ -27,6 +26,13 @@ T_PHI=25000
 
 def sim_circuit(phy_qubit_num, data, coupling, measure_at_end = True):
     one_hot_distance, two_hot_distance = preprocess(phy_qubit_num, coupling)
+    
+    # suppose Sycamore has the same gateset as atom array
+    if data["gateset"] == "CZ":
+        two_qubit_gate_fid = 0.975
+    if data["gateset"] == "SYC":
+        two_qubit_gate_fid = 0.994
+
     # print("one hot dis:")
     # for q in one_hot_distance:
     #     print(f"qubit {q}:")
@@ -56,7 +62,7 @@ def sim_circuit(phy_qubit_num, data, coupling, measure_at_end = True):
     # print("gate scheduling:")
     # for qubit in range(phy_qubit_num):
     #     print(time_slot_matrix[qubit][:circuit_d + 2])
-    calculate_gate_fidelity(data, time_slot_matrix, time_two_qubit_gate_indicator, one_hot_distance, two_hot_distance)
+    calculate_gate_fidelity(data, time_slot_matrix, time_two_qubit_gate_indicator, one_hot_distance, two_hot_distance, two_qubit_gate_fid)
     # print("two_qubit_gates_fidelity:")
     # print(data["two_qubit_gates_fidelity"])
     # data["qubit_idling_time"] = calculate_qubit_idling_time(qubit_last_time, time_slot_matrix, measure_at_end)
@@ -66,7 +72,7 @@ def sim_circuit(phy_qubit_num, data, coupling, measure_at_end = True):
     data["g1"], data["g2"] = calculate_gate_number(data["gate_spec"])
     assert(data["g2"] == len(data["two_qubit_gates_fidelity"]))
     # print("g1: ", data["g1"])
-    calculate_cir_fidelity(data)
+    calculate_cir_fidelity(data, two_qubit_gate_fid)
     # print("fidelity: ", data["fidelity"])
 
 def calculate_gate_number(gate_spec):
@@ -79,13 +85,13 @@ def calculate_gate_number(gate_spec):
             g2 += 1
     return (g1, g2)
 
-def calculate_cir_fidelity(data):
+def calculate_cir_fidelity(data, two_qubit_gate_fid):
     fidelity = pow(SINGLE_QUBIT_GATE_FID,data["g1"])
     
     qubit_idling_list = data["qubit_idling_time"]
     for t in qubit_idling_list:
         fidelity *= (1 - ((1/3) * (1/T_1 + 1/T_PHI) * t))
-    fidelity_no_crosstalk = fidelity * pow(TWO_QUBIT_GATE_FID,data["g2"])
+    fidelity_no_crosstalk = fidelity * pow(two_qubit_gate_fid,data["g2"])
     two_qubit_fidelity_list = data["two_qubit_gates_fidelity"]
     assert(len(two_qubit_fidelity_list)==data["g2"])
     for f in two_qubit_fidelity_list:
@@ -107,7 +113,7 @@ def calculate_qubit_idling_time(qubit_last_time, time_slot_matrix, measure_at_en
                 per_q_time_slot = time_slot_matrix[q_id][:circuit_depth+1]
             else:
                 per_q_time_slot = time_slot_matrix[q_id][:q_last_time+1]
-            idling_time = per_q_time_slot.count(-1) - 1
+            idling_time = per_q_time_slot.count(-1) - 19
             # print(idling_time)
             qubit_idling_time.append(idling_time)
 
@@ -174,7 +180,7 @@ def new_calculate_qubit_idling_time(data, phy_qubit_num, qubit_last_time, time_s
             data["qubit_idling_time"].append(idling_time)
             data["qubit_lifetime"].append(lifetime)
 
-def calculate_gate_fidelity(data, time_slot_matrix, time_two_qubit_gate_indicator, one_hot_distance, two_hot_distance):
+def calculate_gate_fidelity(data, time_slot_matrix, time_two_qubit_gate_indicator, one_hot_distance, two_hot_distance, two_qubit_gate_fid):
     gate_spec = data["gate_spec"]
     gate_pos = data["gates"]
     gate_fidelity = []
@@ -189,7 +195,7 @@ def calculate_gate_fidelity(data, time_slot_matrix, time_two_qubit_gate_indicato
                     # print(f"check gate {g}")
                     checked_set = set()
                     g_pos = gate_pos[g]
-                    per_gate_fidelity = TWO_QUBIT_GATE_FID
+                    per_gate_fidelity = two_qubit_gate_fid
                     for g_p in time_slot:
                         if g_p != -1 and gate_spec[g_p] == "syc" and g != g_p and g_p not in checked_set:
                             g_p_pos = gate_pos[g_p]
@@ -306,18 +312,24 @@ def merge_gate(phy_qubit_num, data):
                     new_gate_pos.append([g_pos[1]])
                 q_last_gate_list[g_pos[0]] = "sg"
                 q_last_gate_list[g_pos[1]] = "sg"
-            elif g == " ZZ":
-                new_gate_spec.append("syc")
-                new_gate_pos.append(g_pos)
-                new_gate_spec.append("sg")
-                new_gate_pos.append([g_pos[0]])
-                new_gate_spec.append("sg")
-                new_gate_pos.append([g_pos[1]])
-                new_gate_spec.append("syc")
-                new_gate_pos.append(g_pos)
-                q_last_gate_list[g_pos[0]] = "syc"
-                q_last_gate_list[g_pos[1]] = "syc"
-            elif g == " swap" or g == "swap":
+            elif g == " ZZ" or g == "ZZ":
+                if data["gateset"] == "CZ":
+                    new_gate_spec.append("syc")
+                    new_gate_pos.append(g_pos)
+                    q_last_gate_list[g_pos[0]] = "syc"
+                    q_last_gate_list[g_pos[1]] = "syc"
+                else:
+                    new_gate_spec.append("syc")
+                    new_gate_pos.append(g_pos)
+                    new_gate_spec.append("sg")
+                    new_gate_pos.append([g_pos[0]])
+                    new_gate_spec.append("sg")
+                    new_gate_pos.append([g_pos[1]])
+                    new_gate_spec.append("syc")
+                    new_gate_pos.append(g_pos)
+                    q_last_gate_list[g_pos[0]] = "syc"
+                    q_last_gate_list[g_pos[1]] = "syc"
+            elif g == " swap" or g == "SWAP":
                 for _ in range(3):
                     new_gate_spec.append("syc")
                     new_gate_pos.append(g_pos)
@@ -329,7 +341,7 @@ def merge_gate(phy_qubit_num, data):
                 q_last_gate_list[g_pos[1]] = "sg"
             else:   # measurement and v in qcnn
                 name = str(g).strip()
-                # print(name)
+                print(name)
                 index = int(name[1:])
                 if index not in measurement_pair:
                     measurement_pair[index] = [0,0]
