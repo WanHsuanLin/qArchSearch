@@ -126,7 +126,7 @@ data["benchmark"] = "qaoa"
 data["#e"] = 0
 data["coupling"] = []
 data["compiler"] = "tket"
-data["gateset"] = "SYC"
+data["gateset"] = "CZ"
 
 jsondata_fid = {}
 jsondata_Ngate = {}
