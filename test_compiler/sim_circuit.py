@@ -146,7 +146,7 @@ def new_calculate_qubit_idling_time(data, phy_qubit_num, qubit_last_time, time_s
                 has_measurement = True
                 break
         for q in affective_q:
-            if not measure_at_end and qubit_last_time[q] > time:
+            if (not measure_at_end) and qubit_last_time[q] < time:
                 continue
             if has_measurement:
                 qubit_lifetime[q] += MEASUREMENT_DURATION
@@ -316,8 +316,12 @@ def merge_gate(phy_qubit_num, data):
                 if data["gateset"] == "CZ":
                     new_gate_spec.append("syc")
                     new_gate_pos.append(g_pos)
-                    q_last_gate_list[g_pos[0]] = "syc"
-                    q_last_gate_list[g_pos[1]] = "syc"
+                    new_gate_spec.append("sg")
+                    new_gate_pos.append([g_pos[0]])
+                    new_gate_spec.append("sg")
+                    new_gate_pos.append([g_pos[1]])
+                    q_last_gate_list[g_pos[0]] = "sg"
+                    q_last_gate_list[g_pos[1]] = "sg"
                 else:
                     new_gate_spec.append("syc")
                     new_gate_pos.append(g_pos)

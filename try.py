@@ -126,21 +126,32 @@ data["benchmark"] = "qaoa"
 data["#e"] = 0
 data["coupling"] = []
 data["compiler"] = "tket"
-data["gateset"] = "CZ"
+data["gateset"] = "SYC"
 
 jsondata_fid = {}
 jsondata_Ngate = {}
 
-for size in range(8, 24, 2):
+for size in range(22, 24 , 2):
     datapoints_fid = []
     datapoints_Ngate = []
+    data_fid = 1
+    gate_fid = 1
     for trial in range(10):
         circuit_info = (size, graphs[str(size)][trial], trial)
         data["gates"], data["gate_spec"] = run_tket("qaoa", circuit_info, sycamore_coupling, 23)
 
-        sim_circuit(23, data, sycamore_coupling, False)
+        sim_circuit(23, data, sycamore_coupling, measure_at_end=False)
         datapoints_fid.append(data["fidelity_no_crosstalk"])
         datapoints_Ngate.append(data["g2"])
+
+       # print(f"{size}, {trial}: {data['fidelity_no_crosstalk']}, {data['g2']}, {data['g1']}, {data['qubit_lifetime']}, {data['qubit_idling_time']}")
+        
+        data_fid *= data['fidelity_no_crosstalk']
+        this_fid = (0.994**data['g2'])*(0.999**data['g1'])
+        gate_fid *= this_fid
+        print(f"{size}, {trial}: {data['fidelity_no_crosstalk']}, {data['fidelity_no_crosstalk']/this_fid}, {data['g2']}, {data['g1']}")
+
+
     jsondata_fid[size] = datapoints_fid
     jsondata_Ngate[size] = datapoints_Ngate
 
