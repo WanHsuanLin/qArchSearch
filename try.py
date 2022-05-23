@@ -131,7 +131,7 @@ data["gateset"] = "SYC"
 jsondata_fid = {}
 jsondata_Ngate = {}
 
-for size in range(22, 24 , 2):
+for size in range(8, 10 , 2):
     datapoints_fid = []
     datapoints_Ngate = []
     data_fid = 1
