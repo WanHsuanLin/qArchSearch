@@ -136,6 +136,7 @@ data["compiler"] = "tket"
 
 
 jsondata_fid = {}
+jsondata_fid_nodecp = {}
 jsondata_Ngate = {}
 
 if __name__ == "__main__":
@@ -144,39 +145,48 @@ if __name__ == "__main__":
     # Adding optional argument
     parser.add_argument("gateset", metavar='GATESET', type=str,
         help="gateset: CZ or SYC")
+    parser.add_argument("note", metavar='NOTE', type=str)
+    # parser.add_argument("decoherence", metavar='DECOH', type=int)
     args = parser.parse_args()
     data["gateset"] = args.gateset
+    # data["decoherence"] = True if args.decoherence==1 else False
 
-    for size in range(22, 24, 2):
+    for size in range(8, 24, 2):
         datapoints_fid = []
         datapoints_Ngate = []
-        data_fid = 1
-        gate_fid = 1
+        datapoints_fid_nodeco = []
+        # data_fid = 1
+        # gate_fid = 1
 
         for trial in range(10):
             circuit_info = (size, graphs[str(size)][trial], trial)
             data["gates"], data["gate_spec"] = run_tket("qaoa", circuit_info, sycamore_coupling, 23)
 
-            sim_circuit(23, data, sycamore_coupling, measure_at_end=True)
+            sim_circuit(23, data)
             datapoints_fid.append(data["fidelity_no_crosstalk"])
+            datapoints_fid_nodeco.append(data["fidelity_no_decoherence"])
             datapoints_Ngate.append(data["g2"])
-
-        # print(f"{size}, {trial}: {data['fidelity_no_crosstalk']}, {data['g2']}, {data['g1']}, {data['qubit_lifetime']}, {data['qubit_idling_time']}")
             
-            data_fid *= data['fidelity_no_crosstalk']
-            this_fid = (0.994**data['g2'])*(0.999**data['g1'])
-            gate_fid *= this_fid
-            print(f"{size}, {trial}: {data['fidelity_no_crosstalk']}, {data['fidelity_no_crosstalk']/this_fid}, {data['g2']}, {data['g1']}")
+            # data_fid *= data['fidelity_no_crosstalk']
+            # this_fid = (two_qubit_gate_fid**data['g2'])*(single_qubit_gate_fid**data['g1'])
+            
+            # gate_fid *= this_fid
+            # print(f"{size}, {trial}: {fpqa_fid/data['fidelity_no_crosstalk']}, {fpqa_fid/this_fid}, {data['g2']}, {data['g1']}")
 
 
         jsondata_fid[size] = datapoints_fid
+        jsondata_fid_nodecp[size] = datapoints_fid_nodeco
         jsondata_Ngate[size] = datapoints_Ngate
 
-    with open(f"tket_{data['gateset']}_fid.json", 'w') as file_object:
+    with open(f"{data['gateset']}_{args.note}_fid.json", 'w') as file_object:
         json.dump(jsondata_fid, file_object)
     file_object.close()
 
-    with open(f"tket_{data['gateset']}_Ngate.json", 'w') as file_object:
+    with open(f"{data['gateset']}_{args.note}_fid_nodeco.json", 'w') as file_object:
+        json.dump(jsondata_fid_nodecp, file_object)
+    file_object.close()
+
+    with open(f"{data['gateset']}_{args.note}_Ngate.json", 'w') as file_object:
         json.dump(jsondata_Ngate, file_object)
     file_object.close()
 
