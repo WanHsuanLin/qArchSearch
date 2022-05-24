@@ -128,6 +128,7 @@ sycamore_coupling = [
 # for i in range(len(data["gates"])):
 #     print(f"{ data['gate_spec'][i] } {data['gates'][i]}")
 
+
 data = {}
 data["benchmark"] = "qaoa"
 data["#e"] = 0
@@ -162,7 +163,7 @@ if __name__ == "__main__":
             circuit_info = (size, graphs[str(size)][trial], trial)
             data["gates"], data["gate_spec"] = run_tket("qaoa", circuit_info, sycamore_coupling, 23)
 
-            sim_circuit(23, data)
+            sim_circuit(23, data, 100, single_qubit_gate_fid=0.9999, two_qubit_gate_fid=0.999)
             datapoints_fid.append(data["fidelity_no_crosstalk"])
             datapoints_fid_nodeco.append(data["fidelity_no_decoherence"])
             datapoints_Ngate.append(data["g2"])

@@ -10,24 +10,29 @@ T_PHI=25000
 MAX_NUM_LAYERS = 1500
 
 
-def sim_circuit(phy_qubit_num, data):
+def sim_circuit(phy_qubit_num, data, time_factor, single_qubit_gate_fid=None, two_qubit_gate_fid=None):
    
     # CZ means assuming native gate is C-phase like atom array
     # since we ignore the decoherence factor like atom array,
     # the duration of this hypothetical situation is not important
-    if data["gateset"] == "CZ":
-        two_qubit_gate_fid = 0.975
-        single_qubit_gate_fid = 0.9999
-    # SYC means like original experiments
-    if data["gateset"] == "SYC":
-        two_qubit_gate_fid = 0.994
-        single_qubit_gate_fid = 0.999
+    if not two_qubit_gate_fid:
+        if data["gateset"] == "CZ":
+            two_qubit_gate_fid = 0.975
+        # SYC means like original experiments
+        if data["gateset"] == "SYC":
+            two_qubit_gate_fid = 0.994
+    if not single_qubit_gate_fid:
+        if data["gateset"] == "CZ":
+            single_qubit_gate_fid = 0.9999
+        # SYC means like original experiments
+        if data["gateset"] == "SYC":
+            single_qubit_gate_fid = 0.999
 
     merge_gate(phy_qubit_num, data)
     qubit_last_layer, time_slot_matrix = scheduling(phy_qubit_num,data)
     new_calculate_qubit_idling_time(data, phy_qubit_num, qubit_last_layer, time_slot_matrix)
     data["g1"], data["g2"] = calculate_gate_number(data["gate_spec"])
-    calculate_cir_fidelity(data, two_qubit_gate_fid, single_qubit_gate_fid)
+    calculate_cir_fidelity(data, two_qubit_gate_fid, single_qubit_gate_fid, time_factor)
 
 def calculate_gate_number(gate_spec):
     g1 = 0
@@ -39,14 +44,14 @@ def calculate_gate_number(gate_spec):
             g2 += 1
     return (g1, g2)
 
-def calculate_cir_fidelity(data, two_qubit_gate_fid, single_qubit_gate_fid):
+def calculate_cir_fidelity(data, two_qubit_gate_fid, single_qubit_gate_fid, time_factor):
     fidelity = pow(single_qubit_gate_fid, data["g1"])
     fidelity *= pow(two_qubit_gate_fid, data["g2"])
     data["fidelity_no_decoherence"] = fidelity
     
     qubit_idling_list = data["qubit_idling_time"]
     for t in qubit_idling_list:
-        fidelity *= (1 - ((1/3) * (1/T_1 + 1/T_PHI) * t))
+        fidelity *= (1 - ((1/3) * ( 1/(time_factor*T_1) + 1/(time_factor*T_PHI) ) * t))
 
     data['fidelity_no_crosstalk'] = fidelity
 
@@ -153,9 +158,9 @@ def merge_gate(phy_qubit_num, data):
                     q_last_gate_list[g_pos[0]] = "sg"
                     q_last_gate_list[g_pos[1]] = "sg"
                 else:
-                    # --.--Rxz--.--
+                    # --.--Rxz--.--Rxz--
                     #   |       |
-                    # --.--Rxz--.--
+                    # --.--Rxz--.--Rxz--
                     new_gate_spec.append("tg")
                     new_gate_pos.append(g_pos)
                     new_gate_spec.append("sg")
@@ -164,8 +169,12 @@ def merge_gate(phy_qubit_num, data):
                     new_gate_pos.append([g_pos[1]])
                     new_gate_spec.append("tg")
                     new_gate_pos.append(g_pos)
-                    q_last_gate_list[g_pos[0]] = "tg"
-                    q_last_gate_list[g_pos[1]] = "tg"
+                    new_gate_spec.append("sg")
+                    new_gate_pos.append([g_pos[0]])
+                    new_gate_spec.append("sg")
+                    new_gate_pos.append([g_pos[1]])
+                    q_last_gate_list[g_pos[0]] = "sg"
+                    q_last_gate_list[g_pos[1]] = "sg"
             elif g == "SWAP":
                 # --.--Rxz--.--Rxz--.--Rxz--
                 #   |       |       |
