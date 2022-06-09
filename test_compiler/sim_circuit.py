@@ -80,11 +80,12 @@ def calculate_gate_number(gate_spec):
     return (g1, g2)
 
 def calculate_cir_fidelity(data):
-    fidelity = pow(SINGLE_QUBIT_GATE_FID,data["g1"])
-    
+    # fidelity = 1
+    fidelity  = pow(SINGLE_QUBIT_GATE_FID,data["g1"])
     qubit_idling_list = data["qubit_idling_time"]
     for t in qubit_idling_list:
         fidelity *= (1 - ((1/3) * (1/T_1 + 1/T_PHI) * t))
+    # print(fidelity)
     fidelity_no_crosstalk = fidelity * pow(TWO_QUBIT_GATE_FID,data["g2"])
     two_qubit_fidelity_list = data["two_qubit_gates_fidelity"]
     assert(len(two_qubit_fidelity_list)==data["g2"])
@@ -140,7 +141,7 @@ def new_calculate_qubit_idling_time(data, phy_qubit_num, qubit_last_time, time_s
                 has_measurement = True
                 break
         for q in affective_q:
-            if not measure_at_end and qubit_last_time[q] > time:
+            if not measure_at_end and qubit_last_time[q] < time:
                 continue
             if has_measurement:
                 qubit_lifetime[q] += MEASUREMENT_DURATION
@@ -251,8 +252,8 @@ def scheduling(measurement_pair, phy_qubit_num, data):
             time_slot_matrix[g_pos[0]][gate_start_time] = g_id
             time_slot_matrix[g_pos[1]][gate_start_time] = g_id
             time_two_qubit_gate_indicator[gate_start_time] = True
-            qubit_last_time[g_pos[0]] += 1
-            qubit_last_time[g_pos[1]] += 1
+            qubit_last_time[g_pos[0]] = gate_start_time
+            qubit_last_time[g_pos[1]] = gate_start_time
         # v and m may have some problem
         elif g[0] == "v":
             q_m = gate_pos[measurement_pair[int(g[1:])][0]][0]
@@ -306,7 +307,7 @@ def merge_gate(phy_qubit_num, data):
                     new_gate_pos.append([g_pos[1]])
                 q_last_gate_list[g_pos[0]] = "sg"
                 q_last_gate_list[g_pos[1]] = "sg"
-            elif g == " ZZ":
+            elif g == " ZZ" or g == "ZZ":
                 new_gate_spec.append("syc")
                 new_gate_pos.append(g_pos)
                 new_gate_spec.append("sg")
@@ -317,7 +318,7 @@ def merge_gate(phy_qubit_num, data):
                 new_gate_pos.append(g_pos)
                 q_last_gate_list[g_pos[0]] = "syc"
                 q_last_gate_list[g_pos[1]] = "syc"
-            elif g == " swap" or g == "swap":
+            elif g == " swap" or g == "swap" or g == "SWAP":
                 for _ in range(3):
                     new_gate_spec.append("syc")
                     new_gate_pos.append(g_pos)

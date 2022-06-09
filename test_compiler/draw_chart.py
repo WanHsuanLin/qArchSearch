@@ -1,7 +1,6 @@
 # python3 test_compiler/draw_chart.py draw_info/compiler_hh_qcnn_8.txt c      
 import os
 import matplotlib as mpl
-from sympy import true
 if os.environ.get('DISPLAY','') == '':
     print('no display found. Using non-interactive Agg backend')
     mpl.use('Agg')
@@ -15,7 +14,7 @@ plt.rcParams['font.family'] = 'serif'
 plt.rcParams['mathtext.fontset'] = 'stix'
 plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
 plt.rcParams.update({'font.size': 50})
-gMarks1 = ['o','X','D','s','^','p']
+gMarks1 = ['o','X','D','s','^','p','1']
 gMarks2 = ['.','*','s','2','p','1','d','h']
 gColors = ['lightcoral','orange','limegreen','cornflowerblue','gray','peru','teal','darkkhaki','slategray']
 width = 23
@@ -25,7 +24,7 @@ markersize = 20
 
 file_type='.pdf'
 
-def draw_normal(title:str, fileName:str, data_list, label, average = False, percentage = False):
+def draw_normal(title:str, fileName:str, data_list, label, average = False, percentage = False, h_line = False):
     plt.figure(figsize=(width,height))
     # plt.title(title, y=1.03)
     x_value = np.arange(len(data_list[0]))
@@ -34,6 +33,8 @@ def draw_normal(title:str, fileName:str, data_list, label, average = False, perc
         if len(data) != len(x_value):
             x_value = np.arange(len(data))
         plt.plot(x_value, data, linestyle='--', marker=m, color=c, label=l,linewidth= linewidth, markersize=markersize)
+        if h_line:
+            plt.axhline(y=max(data), linestyle=':', linewidth= 0.65*linewidth)
     if average:
         np_data = np.array(data_list)
         avg = np.mean(np_data, axis=0)
@@ -43,6 +44,7 @@ def draw_normal(title:str, fileName:str, data_list, label, average = False, perc
     if percentage:
         current_values = plt.gca().get_yticks()
         plt.gca().set_yticklabels(['{:,.0%}'.format(x) for x in current_values])
+    
     # plt.legend(bbox_to_anchor=(1.0, 1.0), loc='lower center')
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.13), ncol = 4, frameon=False, columnspacing = 0.75, handletextpad = 0.2)
     plt.xlabel(r'$\alpha$')
@@ -91,7 +93,7 @@ def draw_cross_test(ori_filename, data_list):
     avg = np.mean(np_data, axis=0)
     # yerr = np.var(np_data, axis=0)
     # print(np_data)
-    # print(avg)
+    print(avg)
     # print(yerr)
     # plt.errorbar(x_value, avg, yerr=yerr, linestyle='--', color='violet', label='average', linewidth= linewidth)
     plt.plot(x_value, avg, linestyle='--', marker='d', color='violet', label='Average', linewidth= linewidth, markersize=markersize)
@@ -119,7 +121,7 @@ def draw_cross_test(ori_filename, data_list):
         if len(data_list[key]["Fidelity"]) != len(x_value):
             x_value = np.arange(len(data_list[key]["Fidelity"]))
         plt.plot(x_value, data_list[key]["Fidelity"], linestyle='--', marker=m, color=c,linewidth= linewidth, markersize=markersize)
-        plt.plot(x_value, data_list[key]["Fidelity w/o Crosstalk"], linestyle='--', alpha = 0.7, marker=m, color=c, linewidth= 0.65*linewidth, markersize=0.88*markersize)
+        # plt.plot(x_value, data_list[key]["Fidelity w/o Crosstalk"], linestyle='--', alpha = 0.7, marker=m, color=c, linewidth= 0.65*linewidth, markersize=0.88*markersize)
     # plt.legend(bbox_to_anchor=(1.0, 1.0), loc='lower center')
     # plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.13), ncol = 8, frameon=False, columnspacing = 0.75, handletextpad = 0.2)
     plt.xlabel(r'$\alpha$')
@@ -128,29 +130,30 @@ def draw_cross_test(ori_filename, data_list):
     plt.savefig(filename, dpi=300, bbox_inches='tight')
 
 def draw_copmiler(filename, data):
-    line_name = ["OLSQ", "TB-OLSQ", r't$|$ket$\rangle$', "SABRE"]
-    # for target in ["Fidelity", "Fidelity w/o Crosstalk", "Average Two-Qubit Gate Fidelity"]:
-    for target in ["Average Two-Qubit Gate Fidelity"]:
-        Fidelity_list = [data["OLSQ"][target], data["TB-OLSQ"][target], data["tket"][target], data["SABRE"][target]]
-        title = target
-        new_fileName = 'fig/' + filename + '_' + target.replace(" ", "_").replace("/", "") + file_type
-        draw_normal(title, new_fileName, Fidelity_list, line_name)
+    # line_name = ["OLSQ", "TB-OLSQ", r't$|$ket$\rangle$', "SABRE"]
+    # # for target in ["Fidelity", "Fidelity w/o Crosstalk", "Average Two-Qubit Gate Fidelity"]:
+    # for target in ["Average Two-Qubit Gate Fidelity"]:
+    #     Fidelity_list = [data["OLSQ"][target], data["TB-OLSQ"][target], data["tket"][target], data["SABRE"][target]]
+    #     title = target
+    #     new_fileName = 'fig/' + filename + '_' + target.replace(" ", "_").replace("/", "") + file_type
+    #     draw_normal(title, new_fileName, Fidelity_list, line_name)
 
-    line_name = ["OLSQ", "TB-OLSQ", r't$|$ket$\rangle$']
+    line_name = ["OLSQ"]
     # line_name = ["OLSQ", "TB-OLSQ"]
     # for target in ["Fidelity improvement", "Fidelity Improvement w/o Crosstalk"]:
     for target in ["Fidelity improvement"]:
-        Fidelity_list = [data["OLSQ"][target], data["TB-OLSQ"][target], data["tket"][target]]
+        Fidelity_list = [data["OLSQ"][target]]
         # Fidelity_list = [data["OLSQ"][target], data["TB-OLSQ"][target]]
         title = target
         new_fileName = 'fig/' + filename + '_' + target.replace(" ", "_").replace("/", "") + file_type
-        draw_normal(title, new_fileName, Fidelity_list, line_name, True)
+        draw_normal(title, new_fileName, Fidelity_list, line_name, False, True)
     
     line_name = ["OLSQ", "TB-OLSQ", r't$|$ket$\rangle$', "SABRE"]
     Fidelity_list = [data["OLSQ"]["Fidelity"], data["TB-OLSQ"]["Fidelity"], data["tket"]["Fidelity"], data["SABRE"]["Fidelity"]]
     Fidelity_list2 = [data["OLSQ"]["Fidelity w/o Crosstalk"], data["TB-OLSQ"]["Fidelity w/o Crosstalk"], data["tket"]["Fidelity w/o Crosstalk"], data["SABRE"]["Fidelity w/o Crosstalk"]]
     new_fileName = 'fig/' + filename + '_mix_fidelity' + file_type
-    draw_normal_mix(new_fileName, Fidelity_list, Fidelity_list2, line_name)
+    # draw_normal(title, new_fileName, Fidelity_list, line_name, False)
+    draw_normal_mix(new_fileName, Fidelity_list, Fidelity_list2, line_name, False)
 
 
 def draw_architecture(filename, data):
@@ -170,6 +173,8 @@ def draw_architecture(filename, data):
     Fidelity_list = [data["hh"]["Fidelity"], data["grid"]["Fidelity"]]
     Fidelity_list2 = [data["hh"]["Fidelity w/o Crosstalk"], data["grid"]["Fidelity w/o Crosstalk"]]
     new_fileName = 'fig/' + filename + '_mix_fidelity' + file_type
+    title = ''
+    # draw_normal(title, new_fileName, Fidelity_list, line_name, False, False, True)
     draw_normal_mix(new_fileName, Fidelity_list, Fidelity_list2, line_name, True)
 
 def get_info(title, csv_name, edge_num):
@@ -263,7 +268,6 @@ if __name__ == "__main__":
     else:
         raise ValueError("Invalid type")
     
-    # print(data)
     if args.type == 'c':
         draw_copmiler(split_info[0], data)
     elif args.type == 'a':
@@ -272,13 +276,3 @@ if __name__ == "__main__":
         draw_cross_test(split_info[0], data)
     else:
         raise ValueError("Invalid type")    
-
-    
-
-    # line_name = ["OLSQ", "TB-OLSQ", r't$|$ket$\rangle$']
-    # for target in ["Fidelity improvement"]:
-    #     Fidelity_list = [data["OLSQ"][target], data["TB-OLSQ"][target], data["tket"][target]]
-    #     title = target
-    #     np_data = np.array(Fidelity_list)
-    #     avg = np.mean(np_data, axis=0)
-        # print(avg)
