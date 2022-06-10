@@ -1,5 +1,6 @@
 import math
 import datetime
+from pickle import NONE
 from numpy import insert
 
 from z3 import Int, IntVector, Bool, Optimize, Implies, And, Or, If, sat, Solver, set_option
@@ -452,7 +453,7 @@ class OLSQ:
                     print("FAIL to find depth witnin {}.".format(bound_depth))
                     break
         if not find_min_depth:
-            return True, model
+            return True, None
         lsqc.add([tight_bound_depth >= time[l] + 1 for l in range(count_gate)])
         # for swap optimization
         find_min_swap = False
