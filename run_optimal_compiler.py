@@ -74,7 +74,7 @@ if __name__ == "__main__":
     if args.benchmark == "qcnn":
         circuit_info = args.filename
         tmp = args.device_spec.split('/')[-1].split('.')[0]
-        csv_name = args.folder+"/"+tmp+"_optimal_"+args.filename[5:-4]+"csv"
+        csv_name = args.folder+"/"+tmp+"_optimal_time_"+args.filename[5:-4]+"csv"
     elif args.benchmark == "qaoa":
         circuit_info = (args.size, get_qaoa_graph(args.size, args.trial), args.trial)
         tmp = args.device_spec.split('/')[-1].split('.')[0]
