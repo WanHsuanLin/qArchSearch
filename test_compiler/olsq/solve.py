@@ -393,17 +393,17 @@ class OLSQ:
             not_solved, model = self._optimize_circuit(lsqc, preprossess_only, time, count_gate, count_swap, bound_depth, swap_bound)
             if not_solved:
                 bound_depth *= 2
-                break
-            if preprossess_only:
-                swap_bound = (0 , model[count_swap].as_long())
-                break
-            if swap_bound != None:
-                swap_bound = (swap_bound[0],model[count_swap].as_long())
             else:
-                swap_bound = (0,model[count_swap].as_long())
-            com_time = datetime.datetime.now() - start_time
-            print(f"Compilation time = {com_time}.")
-            result = self.write_results(model, time, pi, sigma, space, com_time, output_mode, output_file_name)
+                if preprossess_only:
+                    swap_bound = (0 , model[count_swap].as_long())
+                    break
+                if swap_bound != None:
+                    swap_bound = (swap_bound[0],model[count_swap].as_long())
+                else:
+                    swap_bound = (0,model[count_swap].as_long())
+                com_time = datetime.datetime.now() - start_time
+                print(f"Compilation time = {com_time}.")
+                result = self.write_results(model, time, pi, sigma, space, com_time, output_mode, output_file_name)
                 
         print(f"Total compilation time = {datetime.datetime.now() - start_time}.")
         return swap_bound, result
