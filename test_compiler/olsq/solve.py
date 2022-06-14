@@ -348,6 +348,8 @@ class OLSQ:
             bound_depth = 8 * self.bound_depth
         else:
             bound_depth = 2 * self.bound_depth
+        
+        iteration = 1
         while not_solved:
             print("start adding constraints...")
             # variable setting 
@@ -388,11 +390,11 @@ class OLSQ:
             self._add_transformation_constraints(bound_depth, list_qubit_edge, lsqc, sigma, pi)
 
             # TODO: iterate each swap num
-            start = datetime.datetime.now()
             
-            not_solved, model = self._optimize_circuit(lsqc, preprossess_only, time, count_gate, count_swap, bound_depth, swap_bound)
+            not_solved, model = self._optimize_circuit(iteration, lsqc, preprossess_only, time, count_gate, count_swap, bound_depth, swap_bound)
             if not_solved:
                 bound_depth *= 2
+                iteration += 1
             else:
                 if preprossess_only:
                     swap_bound = (0 , model[count_swap].as_long())
@@ -408,7 +410,7 @@ class OLSQ:
         print(f"Total compilation time = {datetime.datetime.now() - start_time}.")
         return swap_bound, result
 
-    def _optimize_circuit(self, lsqc, preprossess_only, time, count_gate, count_swap, bound_depth, swap_bound):
+    def _optimize_circuit(self, iteration, lsqc, preprossess_only, time, count_gate, count_swap, bound_depth, swap_bound):
         if swap_bound != None:
             print(f"optimizing circuit with swap range ({swap_bound[0]},{swap_bound[1]}) ")
         if swap_bound != None:
@@ -421,7 +423,7 @@ class OLSQ:
         lsqc.push()
         find_min_depth = False
         # incremental solving use pop and push
-        tight_bound_depth = self.bound_depth
+        tight_bound_depth = self.bound_depth * iteration
         if preprossess_only:
             tight_bound_depth = 1
         while not find_min_depth:
