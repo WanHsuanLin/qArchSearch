@@ -8,7 +8,7 @@ import json
 
 def create_list_from_data(data, coupling, count_physical_qubit):
     # print(data)
-    run_only_gate_absorption(data["benchmark"], data, coupling, count_physical_qubit)
+#    run_only_gate_absorption(data["benchmark"], data, coupling, count_physical_qubit)
     data_list = []  # create an empty list
     # append the items to the list in the same order.
     data_list.append(data.get('mode'))
@@ -21,7 +21,7 @@ def create_list_from_data(data, coupling, count_physical_qubit):
 
 def run_olsq_tbolsq(benchmark, circuit_info, coupling, count_physical_qubit, mode):
     lsqc_solver = OLSQ(objective_name="swap", mode=mode)
-    gate_duration = {"u4": 3, "v0" : 1, "v1" : 1, "v2" : 1, "v3" : 1, "v4" : 1, "v5" : 1, "v6" : 1, "m0": 10, "m1" : 10, "m2" : 10, "m3": 10, "m4": 10, "m5" : 10, "m6" : 10}
+    gate_duration = {"u4": 2, "v0" : 1, "v1" : 1, "v2" : 1, "v3" : 1, "v4" : 1, "v5" : 1, "v6" : 1, "m0": 5, "m1" : 5, "m2" : 5, "m3": 5, "m4": 5, "m5" : 5, "m6" : 5}
     if benchmark == "qcnn":
         file = open(circuit_info)
         lsqc_solver.setprogram("qcnn", file.read(), gate_duration=gate_duration)
