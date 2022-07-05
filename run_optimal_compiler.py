@@ -20,7 +20,7 @@ def create_list_from_data(data, coupling, count_physical_qubit):
     return data_list
 
 def run_olsq_tbolsq(benchmark, circuit_info, coupling, count_physical_qubit, mode):
-    lsqc_solver = OLSQ(objective_name="swap", mode=mode)
+    lsqc_solver = OLSQ(mode=mode)
     gate_duration = {"u4": 2, "v0" : 1, "v1" : 1, "v2" : 1, "v3" : 1, "v4" : 1, "v5" : 1, "v6" : 1, "m0": 5, "m1" : 5, "m2" : 5, "m3": 5, "m4": 5, "m5" : 5, "m6" : 5}
     if benchmark == "qcnn":
         file = open(circuit_info)
