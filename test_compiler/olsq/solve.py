@@ -3,9 +3,9 @@ import datetime
 
 from z3 import Bool, Implies, And, Or, sat, unsat, Solver, set_option, BitVec, ULT, ULE, UGE, BitVecVal, PbLe, Not
 
-from olsq.input import input_qasm
-from olsq.output import output_qasm
-from olsq.device import qcdevice
+from test_compiler.olsq.input import input_qasm
+from test_compiler.olsq.output import output_qasm
+from test_compiler.olsq.device import qcdevice
 import pkgutil
 from enum import Enum
 
