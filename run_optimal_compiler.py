@@ -102,8 +102,8 @@ if __name__ == "__main__":
         writer = csv.writer(c)
         writer.writerow(['mode', '#e','M', 'gates', 'gate_spec', 'coupling'])
 
-    data = dict()
-    data["benchmark"] = args.benchmark
+    info = dict()
+    info["benchmark"] = args.benchmark
     
     # test_set = [2,3]
     # for key in test_set:
@@ -118,7 +118,6 @@ if __name__ == "__main__":
         # for mode in ["transition", 'normal']:
         for mode in ['normal']:
             results = run_olsq_tbolsq(args.benchmark, circuit_info, coupling, count_physical_qubit, mode)
-            info = dict()
             info["M"] = args.size
             if args.benchmark == "qcnn":
                 info["M"] = args.filename.split('_')[0]
