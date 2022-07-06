@@ -43,6 +43,7 @@ def run_olsq_tbolsq(benchmark, circuit_info, coupling, count_physical_qubit, mod
         program = [circuit_info[0],
             circuit_info[1],
             ["ZZ" for _ in range( (circuit_info[0] * 3) // 2 )] ]
+            print(program)
         lsqc_solver.setprogram("qaoa", program, "IR")
 
     device = qcdevice(name="none", nqubits=count_physical_qubit, connection=coupling, swap_duration=1)
