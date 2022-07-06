@@ -24,7 +24,7 @@ def run_olsq_tbolsq(benchmark, circuit_info, coupling, count_physical_qubit, mod
     gate_duration = {"u4": 2, "v0" : 1, "v1" : 1, "v2" : 1, "v3" : 1, "v4" : 1, "v5" : 1, "v6" : 1, "m0": 5, "m1" : 5, "m2" : 5, "m3": 5, "m4": 5, "m5" : 5, "m6" : 5}
     if benchmark == "qcnn":
         file = open(circuit_info)
-        lsqc_solver.setprogram("qcnn", file.read(), gate_duration=gate_duration)
+        lsqc_solver.setprogram(file.read(), gate_duration=gate_duration)
         file.close()
         measurement = dict()
         single_qubit_gate = dict()
@@ -43,8 +43,8 @@ def run_olsq_tbolsq(benchmark, circuit_info, coupling, count_physical_qubit, mod
         program = [circuit_info[0],
             circuit_info[1],
             ["ZZ" for _ in range( (circuit_info[0] * 3) // 2 )] ]
-            print(program)
-        lsqc_solver.setprogram("qaoa", program, "IR")
+        print(program)
+        lsqc_solver.setprogram(program, "IR")
 
     device = qcdevice(name="none", nqubits=count_physical_qubit, connection=coupling, swap_duration=1)
     lsqc_solver.setdevice(device)
