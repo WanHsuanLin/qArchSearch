@@ -718,7 +718,7 @@ class OLSQ:
             else:
                 if satisfiable == unsat:
                     core = lsqc.unsat_core()
-                    print(core)
+                    # print(core)
                 lower_b_swap = bound_swap_num + 1
                 if upper_b_swap <= lower_b_swap:
                     satisfiable = lsqc.check(PbLe([(sigma[k][t],1) for k in range(count_qubit_edge)

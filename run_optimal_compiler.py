@@ -117,11 +117,20 @@ if __name__ == "__main__":
         coupling += fix_coupling
         # for mode in ["transition", 'normal']:
         for mode in ['normal']:
-            data = run_olsq_tbolsq(args.benchmark, circuit_info, coupling, count_physical_qubit, mode)
-            data["#e"] = key
-            data["coupling"] = device_spec[str_key]
-            data["mode"] = mode
-            data_list = create_list_from_data(data, coupling, count_physical_qubit)
+            results = run_olsq_tbolsq(args.benchmark, circuit_info, coupling, count_physical_qubit, mode)
+            info = dict()
+            info["M"] = args.size
+            if args.benchmark == "qcnn":
+                info["M"] = args.filename.split('_')[0]
+            else:
+                info["M"] = args.size
+                info["trial"] = args.trial
+            info["gates"] = results[2]
+            info["gate_spec"] = results[1]
+            info["#e"] = key
+            info["coupling"] = device_spec[str_key]
+            info["mode"] = mode
+            data_list = create_list_from_data(info, coupling, count_physical_qubit)
             with open(csv_name, 'a') as c:
                 writer = csv.writer(c)
                 writer.writerow(data_list)
