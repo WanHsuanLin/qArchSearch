@@ -43,7 +43,7 @@ def run_olsq_tbolsq(benchmark, circuit_info, coupling, count_physical_qubit, mod
         program = [circuit_info[0],
             circuit_info[1],
             ["ZZ" for _ in range( (circuit_info[0] * 3) // 2 )] ]
-        print(program)
+        # print(program)
         lsqc_solver.setprogram(program, "IR")
 
     device = qcdevice(name="none", nqubits=count_physical_qubit, connection=coupling, swap_duration=1)
@@ -118,7 +118,7 @@ if __name__ == "__main__":
         # for mode in ["transition", 'normal']:
         for mode in ['normal']:
             data = run_olsq_tbolsq(args.benchmark, circuit_info, coupling, count_physical_qubit, mode)
-            data["#e"] = int(key)
+            data["#e"] = key
             data["coupling"] = device_spec[str_key]
             data["mode"] = mode
             data_list = create_list_from_data(data, coupling, count_physical_qubit)
