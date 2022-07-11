@@ -708,7 +708,7 @@ class qArchEval:
                     not_solved = False
                 else:
                     bound_swap_num = (upper_b_swap + lower_b_swap)//2
-        return tight_bound_depth, not_solved, model, n_swap
+        return tight_bound_depth, not_solved, model, bound_swap_num
 
 
     def _extract_results(self, model, time, pi, sigma, space, u):
