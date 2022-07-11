@@ -371,9 +371,9 @@ class qArchEval:
             # # No swap for t<s
             # # swap gates can not overlap with swap
             if preprossess_only or self.mode == Mode.transition:
-                self._add_swap_constraints(bound_depth, sigma, lsqc)
+                self._add_swap_constraints(bound_depth, sigma, lsqc, model)
             else:
-                self._add_swap_constraints(bound_depth, sigma, lsqc, True, time, space)
+                self._add_swap_constraints(bound_depth, sigma, lsqc, model, True, time, space)
             # Mapping Not Transformations by SWAP Gates.
             # Mapping Transformations by SWAP Gates.
             self._add_transformation_constraints(bound_depth, list_qubit_edge, lsqc, sigma, pi)
