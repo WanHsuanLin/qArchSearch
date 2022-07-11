@@ -700,6 +700,7 @@ class qArchEval:
             else:
                 lower_b_swap = bound_swap_num + 1
                 if upper_b_swap <= lower_b_swap:
+                    print("Bound of Trying min swap = {}...".format(upper_b_swap))
                     satisfiable = lsqc.check(PbLe([(sigma[k][t],1) for k in range(count_qubit_edge)
                          for t in range(bound_depth)], upper_b_swap) )
                     assert(satisfiable == sat)
@@ -849,6 +850,9 @@ class qArchEval:
         for i in range(count_extra_edge):
             if model[u[i]]:
                 extra_edge.append(list_qubit_edge[list_extra_qubit_edge_idx[i]])
+
+        print(list_scheduled_gate_name)
+        print(list_scheduled_gate_qubits)
 
         return (result_depth,
                 list_scheduled_gate_name,
