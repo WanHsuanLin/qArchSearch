@@ -658,7 +658,7 @@ class qArchEval:
         if  tight_depth != None:
             find_min_depth == True
             tight_bound_depth = tight_depth
-        while not find_min_depth and num_e > 0:
+        while not find_min_depth and num_e == 0:
             print("Trying maximal depth = {}...".format(tight_bound_depth))
             # for depth optimization
             satisfiable = lsqc.check([UGE(tight_bound_depth, time[l]) for l in range(count_gate)])
@@ -679,7 +679,7 @@ class qArchEval:
                 if tight_bound_depth > bound_depth:
                     print("FAIL to find depth witnin {}.".format(bound_depth))
                     break
-        if not find_min_depth and num_e > 0:
+        if not find_min_depth and num_e == 0:
             return True, model
         # lsqc.add([UGE(tight_bound_depth, time[l]) for l in range(count_gate)])
         # for swap optimization
@@ -728,6 +728,7 @@ class qArchEval:
         for l in range(count_gate):
             result_time.append(model[time[l]].as_long())
             result_depth = max(result_depth, result_time[-1])
+        result_depth += 1
         list_result_swap = []
         for k in range(count_qubit_edge):
             for t in range(result_depth):
@@ -748,7 +749,7 @@ class qArchEval:
                 print(f"Gate {l}: {list_gate_name[l]} {qq}, {qqq} on qubits "\
                     + f"{model[pi[qq][tt]].as_long()} and "\
                     + f"{model[pi[qqq][tt]].as_long()} at time {tt}")
-        tran_detph = result_depth + 1
+        tran_detph = result_depth
 
         # transition based
         if self.mode == Mode.transition:
