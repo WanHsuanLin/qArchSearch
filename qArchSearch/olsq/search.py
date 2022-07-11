@@ -385,6 +385,7 @@ class qArchEval:
             # TODO: iterate each swap num
             tight_depth = None
             for num_e in range(len(self.list_extra_qubit_edge)):
+                print(f"solving with max number of activate flexible edge = {num_e}")
                 per_start = datetime.datetime.now()
                 tight_depth, not_solved, model, n_swap = self._optimize_circuit(tight_depth, lsqc, preprossess_only, num_e, u, sigma, time, bound_depth, swap_bound)
                 if not_solved:
@@ -409,7 +410,6 @@ class qArchEval:
                         results[num_e]['crosstalk'] = cal_crosstalk(results[num_e], self.benchmark, self.list_qubit_edge, self.device.count_physical_qubit)
                         results[num_e]['fidelity'], results[num_e]['fidelity_ct']  = cal_fidelity(results[num_e])
                         json.dump(results[num_e], file_object)
-                lsqc.pop()
                 if num_e < 4:
                     continue
                 if results[-1]['extra_edge_num'] <= results[-2]['extra_edge_num']:
@@ -641,9 +641,8 @@ class qArchEval:
         count_qubit_edge = len(self.list_qubit_edge)
         if swap_bound != None:
             print(f"optimizing circuit with swap range ({swap_bound[0]},{swap_bound[1]}) ")
-        if swap_bound != None:
             lower_b_swap = swap_bound[0]
-            upper_b_swap = swap_bound[-1]
+            upper_b_swap = swap_bound[1]
         else:
             upper_b_swap = count_gate
             lower_b_swap = 0
@@ -710,6 +709,7 @@ class qArchEval:
                     bound_swap_num = upper_b_swap
                 else:
                     bound_swap_num = (upper_b_swap + lower_b_swap)//2
+        lsqc.pop()
         return tight_bound_depth, not_solved, model, bound_swap_num
 
 
