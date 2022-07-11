@@ -893,23 +893,5 @@ class qArchEval:
             info["olsq_mode"] = "normal"
         else:
             info["olsq_mode"] = "mix"
-        if self.benchmark == "qcnn":
-            info["D"], info["g2"], info["g1"] = cal_QCNN_depth_g2_g1(info["gates"], info["gate_spec"], self.device.count_physical_qubit)
-        elif self.benchmark == "qaoa":
-            info["D"] = cal_QAOA_depth(info["gates"], info["gate_spec"], self.device.count_physical_qubit)
-            nZZ = 0
-            nSwap = 0
-            for gate_type in info["gate_spec"]:
-                for gtype in gate_type:
-                    if gtype == "SWAP":
-                        nSwap += 1
-                    else:
-                        nZZ += 1
-            info["g2"] = nZZ*2 + nSwap*3
-            info["g1"] = nZZ
-            # run gate absorption
-        # info["cost"] = cal_cost(len(results[5]))
-        info['crosstalk'] = cal_crosstalk(info, self.benchmark, self.list_qubit_edge, self.device.count_physical_qubit)
-        info['fidelity'], info['fidelity_ct']  = cal_fidelity(info)
         # info['cost-scaled fidelity'], info['cost-scaled fidelity_ct'] = cal_cost_scaled_fidelity(info)
         return info
