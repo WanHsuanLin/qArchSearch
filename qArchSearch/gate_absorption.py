@@ -1,5 +1,3 @@
-from qArchSearch.olsq.util import cal_QCNN_depth_g2_g1, cal_QAOA_depth
-
 def compactify(gate_qubits, gate_specs, edges, num_qubits, remove_final_swap):
     gate_qubits_tmp = list()
     for qubits in gate_qubits:
