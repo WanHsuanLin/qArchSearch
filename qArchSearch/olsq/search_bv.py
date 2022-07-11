@@ -633,7 +633,7 @@ class qArchEval:
                 idxs = []
                 for edge in edge_set:
                     idxs.append(list_extra_qubit_edge_idx.index(self.dict_extra_qubit_edge_idx[edge]))
-                model.add(PbLe([(u[idx],1) for idx in idxs], 2) )                  
+                model.add(PbLe([(u[idx],1) for idx in idxs], 1) )                  
                 
 
     def _optimize_circuit(self, tight_depth, lsqc, preprossess_only, num_e, u, sigma, time, bound_depth, swap_bound):
