@@ -731,6 +731,7 @@ class qArchEval:
             result_time.append(model[time[l]].as_long())
             result_depth = max(result_depth, result_time[-1])
         list_result_swap = []
+        tran_detph = result_depth + 1
         for k in range(count_qubit_edge):
             for t in range(result_depth):
                 if model[sigma[k][t]]:
@@ -750,7 +751,7 @@ class qArchEval:
                 print(f"Gate {l}: {list_gate_name[l]} {qq}, {qqq} on qubits "\
                     + f"{model[pi[qq][tt]].as_long()} and "\
                     + f"{model[pi[qqq][tt]].as_long()} at time {tt}")
-        tran_detph = result_depth + 1
+        tran_detph = result_depth
 
         # transition based
         if self.mode == Mode.transition:
