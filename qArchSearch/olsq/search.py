@@ -4,7 +4,6 @@ from z3 import Int, IntVector, Bool, Implies, And, Or, If, sat, unsat, Solver, s
 
 from qArchSearch.olsq.input import input_qasm
 from qArchSearch.olsq.device import qcDeviceSet
-from qArchSearch.gate_absorption import run_gate_absorption
 import pkgutil
 from enum import Enum
 
@@ -412,10 +411,6 @@ class qArchEval:
                     import json
                     with open(f"./{folder}/extra_edge_{num_e}.json", 'w') as file_object:
                         json.dump(results[num_e], file_object)
-                    # with open(f"./{folder}_gs/extra_edge_{num_e}.json", 'w') as file_object:
-                    #     device_connection = results[num_e]["extra_edge"] + list(self.list_basic_qubit_edge )
-                    #     run_gate_absorption(self.benchmark, results[num_e], device_connection, self.device.count_physical_qubit)
-                    #     json.dump(results[num_e], file_object)
                 lsqc.pop()
                 if num_e < 4:
                     continue
@@ -485,6 +480,7 @@ class qArchEval:
             # constraint = [tight_bound_depth >= time[l] + 1 for l in range(count_gate)]
             # constraint.append(count_swap <= bound_swap_num)
             satisfiable = lsqc.check(count_swap <= bound_swap_num)
+            print(f"status: {satisfiable}")
             if satisfiable == sat:
                 model = lsqc.model()
                 cur_swap = model[count_swap].as_long()
@@ -501,6 +497,7 @@ class qArchEval:
                     print(core)
                 lower_b_swap = bound_swap_num + 1
                 if upper_b_swap <= lower_b_swap:
+                    print("Bound of Trying min swap = {}...".format(upper_b_swap))
                     # lsqc.pop()
                     # lsqc.add(count_swap <= upper_b_swap)
                     satisfiable = lsqc.check(count_swap <= upper_b_swap)
