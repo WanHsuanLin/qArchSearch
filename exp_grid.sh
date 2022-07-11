@@ -49,6 +49,7 @@ for benchmarks in qaoa; do
                     mkdir $folderName   
                     mkdir "${folderName}_gs"
                 fi
+                echo "Start solving circuit with size $size"
                 python3 -u run_qas.py $device_set $benchmarks $folderName --size $size --trial $trial --mode $mode --memory_max_size $max_memory_usage | tee "$folderName/output_${size}.log"
             done
         done
