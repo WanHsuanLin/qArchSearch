@@ -852,8 +852,8 @@ class qArchEval:
             if model[u[i]]:
                 extra_edge.append(list_qubit_edge[list_extra_qubit_edge_idx[i]])
 
-        print(list_scheduled_gate_name)
-        print(list_scheduled_gate_qubits)
+        # print(list_scheduled_gate_name)
+        # print(list_scheduled_gate_qubits)
 
         return (result_depth,
                 list_scheduled_gate_name,
