@@ -394,7 +394,7 @@ class qArchEval:
                     swap_bound = (self.bound_depth-1 , n_swap)
                     break
                 if swap_bound != None:
-                    swap_bound = (swap_bound[0], n_swap)
+                    swap_bound = (0, swap_bound[0])
                 else:
                     swap_bound = (0, n_swap)
                 results.append(self.write_results(model, time, pi, sigma, space, u))

@@ -234,7 +234,7 @@ def run_gate_absorption(benchmark:str, data, coupling_graph:list, num_qubit):
                 tmp_params.append(gtype) #U4
 
 
-    tmp1_qubits, tmp1_params = compactify(tmp_qubits, tmp_params, coupling_graph, num_qubit)
+    tmp1_qubits, tmp1_params = compactify(tmp_qubits, tmp_params, coupling_graph, num_qubit, True)
     depth, swap_count, u4gate_qubits, u4gate_params = push_left_layers(tmp1_qubits, tmp1_params, num_qubit, True)
 
     data["gates"] = u4gate_qubits
