@@ -412,10 +412,10 @@ class qArchEval:
                     import json
                     with open(f"./{folder}/extra_edge_{num_e}.json", 'w') as file_object:
                         json.dump(results[num_e], file_object)
-                    with open(f"./{folder}_gs/extra_edge_{num_e}.json", 'w') as file_object:
-                        device_connection = results[num_e]["extra_edge"] + list(self.list_basic_qubit_edge )
-                        run_gate_absorption(self.benchmark, results[num_e], device_connection, self.device.count_physical_qubit)
-                        json.dump(results[num_e], file_object)
+                    # with open(f"./{folder}_gs/extra_edge_{num_e}.json", 'w') as file_object:
+                    #     device_connection = results[num_e]["extra_edge"] + list(self.list_basic_qubit_edge )
+                    #     run_gate_absorption(self.benchmark, results[num_e], device_connection, self.device.count_physical_qubit)
+                    #     json.dump(results[num_e], file_object)
                 lsqc.pop()
                 if num_e < 4:
                     continue
