@@ -451,8 +451,6 @@ class qArchEval:
                 find_min_depth = True
                 model = lsqc.model()
                 upper_b_swap = min(model[count_swap].as_long(), upper_b_swap)
-                if self.mode == Mode.transition:
-                    lower_b_swap = tight_bound_depth - 1
                 bound_swap_num = (upper_b_swap+lower_b_swap)//2
                 # lsqc.add(tight_bound_depth >= time[l] + 1)
             else:
