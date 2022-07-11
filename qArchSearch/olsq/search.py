@@ -658,7 +658,7 @@ class qArchEval:
         if  tight_depth != None:
             find_min_depth == True
             tight_bound_depth = tight_depth
-        while not find_min_depth and num_e == 0:
+        while not find_min_depth:
             print("Trying maximal depth = {}...".format(tight_bound_depth))
             # for depth optimization
             satisfiable = lsqc.check([UGE(tight_bound_depth, time[l]) for l in range(count_gate)])
@@ -679,9 +679,9 @@ class qArchEval:
                 if tight_bound_depth > bound_depth:
                     print("FAIL to find depth witnin {}.".format(bound_depth))
                     break
-        if not find_min_depth and num_e == 0:
+        if not find_min_depth:
             return True, model
-        # lsqc.add([UGE(tight_bound_depth, time[l]) for l in range(count_gate)])
+        lsqc.add([UGE(tight_bound_depth, time[l]) for l in range(count_gate)])
         # for swap optimization
         find_min_swap = False
         while not find_min_swap:
