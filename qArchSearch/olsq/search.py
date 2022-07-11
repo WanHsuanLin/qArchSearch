@@ -731,7 +731,7 @@ class qArchEval:
             result_time.append(model[time[l]].as_long())
             result_depth = max(result_depth, result_time[-1])
         list_result_swap = []
-        tran_detph = result_depth + 1
+        result_depth += 1
         for k in range(count_qubit_edge):
             for t in range(result_depth):
                 if model[sigma[k][t]]:
