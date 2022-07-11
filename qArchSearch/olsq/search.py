@@ -459,10 +459,9 @@ class qArchEval:
                 for mm in range(m):
                     model.add(pi[m][t] != pi[mm][t])
 
-    def _add_consistency_gate_constraints(self, bound_depth, pi, space, time, model):
+    def _add_consistency_gate_constraints(self, bound_depth, list_qubit_edge, pi, space, time, model):
     # def _add_consistency_gate_constraints(self, bound_depth, list_qubit_edge, f_map, space, time, model):
         # Consistency between Mapping and Space Coordinates.
-        list_qubit_edge = self.list_qubit_edge
         list_gate_qubits = self.list_gate_qubits
         count_gate = len(list_gate_qubits)
         count_qubit_edge = len(list_qubit_edge)
