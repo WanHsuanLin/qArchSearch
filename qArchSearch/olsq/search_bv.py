@@ -679,6 +679,7 @@ class qArchEval:
                     print("FAIL to find depth witnin {}.".format(bound_depth))
                     break
         if not find_min_depth:
+            lsqc.pop()
             return True, model
         lsqc.add([UGE(tight_bound_depth, time[l]) for l in range(count_gate)])
         # for swap optimization

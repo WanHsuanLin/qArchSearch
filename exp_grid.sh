@@ -15,7 +15,7 @@ if [ ! -d "results/$device_set/$mode" ]; then
 fi
 
 
-for benchmarks in qaoa; do
+for benchmarks in qcnn; do
     if [ ! -d "results/$device_set/$mode/$benchmarks" ]; then
         mkdir "results/$device_set/$mode/$benchmarks"
     fi

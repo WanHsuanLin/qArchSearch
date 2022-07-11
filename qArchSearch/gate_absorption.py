@@ -239,13 +239,6 @@ def run_gate_absorption(benchmark:str, data, coupling_graph:list, num_qubit):
 
     data["gates"] = u4gate_qubits
     data["gate_spec"] = u4gate_params
-    if benchmark == "qaoa":
-        data["D"] = cal_QAOA_depth(data["gates"], data["gate_spec"], num_qubit)
-        nZZ = (len(tmp1_params)-swap_count)
-        data["g2"] = nZZ*2 + swap_count*3
-        data["g1"] = nZZ
-    elif benchmark == "qcnn":
-        data["D"], data["g2"], data["g1"] = cal_QCNN_depth_g2_g1(data["gates"], data["gate_spec"], num_qubit)
 
     
 def run_only_gate_absorption(benchmark:str, data, coupling_graph:list, num_qubit):
