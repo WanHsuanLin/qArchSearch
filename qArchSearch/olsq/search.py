@@ -706,6 +706,7 @@ class qArchEval:
                     model = lsqc.model()
                     find_min_swap = True
                     not_solved = False
+                    bound_swap_num = upper_b_swap
                 else:
                     bound_swap_num = (upper_b_swap + lower_b_swap)//2
         return tight_bound_depth, not_solved, model, bound_swap_num
