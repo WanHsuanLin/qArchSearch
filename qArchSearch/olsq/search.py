@@ -731,7 +731,9 @@ class qArchEval:
         result_depth += 1
         list_result_swap = []
         for k in range(count_qubit_edge):
+            print("k= ", k)
             for t in range(result_depth):
+                print("t= ", t)
                 if model[sigma[k][t]]:
                     list_result_swap.append((k, t))
                     print(f"SWAP on physical edge ({list_qubit_edge[k][0]},"\
