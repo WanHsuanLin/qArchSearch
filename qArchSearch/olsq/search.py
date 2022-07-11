@@ -4,7 +4,6 @@ from z3 import Int, IntVector, Bool, Implies, And, Or, If, sat, unsat, Solver, s
 
 from qArchSearch.olsq.input import input_qasm
 from qArchSearch.olsq.device import qcDeviceSet
-from qArchSearch.olsq.util import cal_crosstalk, cal_fidelity, cal_QCNN_depth_g2_g1, cal_QAOA_depth
 from qArchSearch.gate_absorption import run_gate_absorption
 import pkgutil
 from enum import Enum
@@ -416,8 +415,6 @@ class qArchEval:
                     with open(f"./{folder}_gs/extra_edge_{num_e}.json", 'w') as file_object:
                         device_connection = results[num_e]["extra_edge"] + list(self.list_basic_qubit_edge )
                         run_gate_absorption(self.benchmark, results[num_e], device_connection, self.device.count_physical_qubit)
-                        results[num_e]['crosstalk'] = cal_crosstalk(results[num_e], self.benchmark, self.list_qubit_edge, self.device.count_physical_qubit)
-                        results[num_e]['fidelity'], results[num_e]['fidelity_ct']  = cal_fidelity(results[num_e])
                         json.dump(results[num_e], file_object)
                 lsqc.pop()
                 if num_e < 4:
