@@ -42,14 +42,14 @@ for benchmarks in qaoa; do
     fi
 
     if [ "$benchmarks" == "qaoa" ]; then
-        for size in 12; do
-            for trial in 0 1 2 3 4; do
+        for size in 8 10 12; do
+            for trial in 0; do
                 folderName="results/$device_set/$mode/qaoa/${size}_${trial}"
                 if [ ! -d "$folderName"    ]; then 
                     mkdir $folderName   
                     mkdir "${folderName}_gs"
                 fi
-                python3 -u run_qas.py $device_set $benchmarks $folderName --size $size --trial $trial --mode $mode --memory_max_size $max_memory_usage | tee "$folderName/output.log"
+                python3 -u run_qas.py $device_set $benchmarks $folderName --size $size --trial $trial --mode $mode --memory_max_size $max_memory_usage | tee "$folderName/output_${size}.log"
             done
         done
     fi
