@@ -420,9 +420,7 @@ class qArchEval:
 
     def _construct_variable(self, bound_depth, count_qubit_edge):
         # at cycle t, logical qubit q is mapped to pi[q][t]
-        num_phy_q = int(math.log2(self.count_physical_qubit))+1
-        num_phy_edge = int(math.log2(max(count_qubit_edge, self.count_physical_qubit)))+1
-        length = max(num_phy_q, num_phy_edge)
+        length = int(math.log2(max(count_qubit_edge, self.count_physical_qubit)))+1
         pi = [[BitVec(("map_q{}_t{}".format(i, j)), length) for j in range(bound_depth)]
                 for i in range(self.count_program_qubit)]
 
