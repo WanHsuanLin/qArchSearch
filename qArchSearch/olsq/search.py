@@ -5,7 +5,6 @@ from z3 import Bool, Implies, And, Or, sat, unsat, Solver, set_option, BitVec, U
 from qArchSearch.olsq.input import input_qasm
 from qArchSearch.olsq.device import qcDeviceSet
 from qArchSearch.olsq.util import cal_crosstalk, cal_fidelity, cal_QCNN_depth_g2_g1, cal_QAOA_depth
-from qArchSearch.gate_absorption import run_gate_absorption
 import math
 import pkgutil
 from enum import Enum
