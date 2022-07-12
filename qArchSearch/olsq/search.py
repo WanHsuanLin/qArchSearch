@@ -421,17 +421,19 @@ class qArchEval:
     def _construct_variable(self, bound_depth, count_qubit_edge):
         # at cycle t, logical qubit q is mapped to pi[q][t]
         num_phy_q = int(math.log2(self.count_physical_qubit))+1
-
-        pi = [[BitVec(("map_q{}_t{}".format(i, j)), num_phy_q) for j in range(bound_depth)]
+        num_phy_edge = int(math.log2(max(count_qubit_edge, self.count_physical_qubit)))+1
+        length = max(num_phy_q, num_phy_edge)
+        pi = [[BitVec(("map_q{}_t{}".format(i, j)), length) for j in range(bound_depth)]
                 for i in range(self.count_program_qubit)]
 
+        # space coordinate for gate l is space[l]
+        space = [BitVec("space{}".format(i), length) for i in range(len(self.list_gate_qubits))]
+        
         # time coordinate for gate l is time[l]
         length = int(math.log2(bound_depth))+1
         time = [BitVec("time_{}".format(i), length) for i in range(len(self.list_gate_qubits))]
 
-        # space coordinate for gate l is space[l]
-        length = int(math.log2(max(count_qubit_edge, self.count_physical_qubit)))+1
-        space = [BitVec("space{}".format(i), length) for i in range(len(self.list_gate_qubits))]
+        
 
 
         # if at cycle t, a SWAP finishing on edge k, then sigma[k][t]=1
