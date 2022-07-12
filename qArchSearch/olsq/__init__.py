@@ -1,1 +1,1 @@
-from qArchSearch.olsq.search import qArchEval
+from qArchSearch.olsq.search_ori import qArchEval
