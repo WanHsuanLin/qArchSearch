@@ -14,13 +14,15 @@ plt.rcParams['font.family'] = 'serif'
 plt.rcParams['mathtext.fontset'] = 'stix'
 plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
 plt.rcParams.update({'font.size': 50})
-gMarks1 = ['o','X','D','s','^','p','1']
-gMarks2 = ['.','*','s','2','p','1','d','h']
-gColors = ['lightcoral','orange','limegreen','cornflowerblue','gray','peru','teal','darkkhaki','slategray']
+gMarks1 = ['o','X','D','s','^','p','1', 'o','X','D','s','^','p','1', 'o','X','D','s','^','p','1', 'o','X','D','s','^','p','1', 'o','X','D','s','^','p','1']
+gMarks2 = ['.','*','s','2','p','1','d','h', '.','*','s','2','p','1','d','h', '.','*','s','2','p','1','d','h', '.','*','s','2','p','1','d','h']
+gColors = ['lightcoral','orange','limegreen','cornflowerblue','gray','peru','teal','darkkhaki','slategray', 'lightcoral','orange','limegreen','cornflowerblue','gray','peru','teal','darkkhaki','slategray', 'lightcoral','orange','limegreen','cornflowerblue','gray','peru','teal','darkkhaki','slategray', 'lightcoral','orange','limegreen','cornflowerblue','gray','peru','teal','darkkhaki','slategray', 'lightcoral','orange','limegreen','cornflowerblue','gray','peru','teal','darkkhaki','slategray']
 width = 23
 height = 12
 linewidth = 8 #default 1.5
 markersize = 20
+# linewidth = 1.5 #default 1.5
+# markersize = 5
 
 file_type='.pdf'
 
@@ -96,7 +98,7 @@ def draw_cross_test(ori_filename, data_list):
     print(avg)
     # print(yerr)
     # plt.errorbar(x_value, avg, yerr=yerr, linestyle='--', color='violet', label='average', linewidth= linewidth)
-    plt.plot(x_value, avg, linestyle='--', marker='d', color='violet', label='Average', linewidth= linewidth, markersize=markersize)
+    plt.plot(x_value, avg, linestyle='--', marker='d', color='violet', label='Geomean', linewidth= linewidth, markersize=markersize)
     current_values = plt.gca().get_yticks()
     plt.gca().set_yticklabels(['{:,.0%}'.format(x) for x in current_values])
     # plt.legend(bbox_to_anchor=(1.0, 1.0), loc='lower center')
@@ -106,7 +108,7 @@ def draw_cross_test(ori_filename, data_list):
     # plt.margins(0.5)
     plt.savefig(filename, dpi=300, bbox_inches='tight')
 
-    filename = 'fig/' + ori_filename + '_fidelity_' + file_type
+    filename = 'fig/' + ori_filename + '_fidelity' + file_type
     
     plt.figure(figsize=(width,height))
     # plt.title(title, y=1.03)
@@ -120,7 +122,7 @@ def draw_cross_test(ori_filename, data_list):
         data.append(data_list[key]["Fidelity"])
         if len(data_list[key]["Fidelity"]) != len(x_value):
             x_value = np.arange(len(data_list[key]["Fidelity"]))
-        plt.plot(x_value, data_list[key]["Fidelity"], linestyle='--', marker=m, color=c,linewidth= linewidth, markersize=markersize)
+        plt.plot(x_value, data_list[key]["Fidelity"], linestyle='--', marker=m, color=c,linewidth= 4, markersize=10)
         # plt.plot(x_value, data_list[key]["Fidelity w/o Crosstalk"], linestyle='--', alpha = 0.7, marker=m, color=c, linewidth= 0.65*linewidth, markersize=0.88*markersize)
     # plt.legend(bbox_to_anchor=(1.0, 1.0), loc='lower center')
     # plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.13), ncol = 8, frameon=False, columnspacing = 0.75, handletextpad = 0.2)

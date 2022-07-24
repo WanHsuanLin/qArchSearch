@@ -1,11 +1,11 @@
 import math
 import datetime
 
-from z3 import Bool, Implies, And, Or, sat, unsat, Solver, set_option, BitVec, ULT, ULE, UGE, BitVecVal, PbLe, Not
+from z3 import Bool, Implies, And, Or, sat, unsat, Solver, set_option, BitVec, ULT, ULE, UGE, BitVecVal, PbLe, Not, Function, BitVecSort, Distinct, BoolSort
 
-from test_compiler.olsq.input import input_qasm
-from test_compiler.olsq.output import output_qasm
-from test_compiler.olsq.device import qcdevice
+from olsq.input import input_qasm
+from olsq.output import output_qasm
+from olsq.device import qcdevice
 import pkgutil
 from enum import Enum
 
@@ -256,7 +256,6 @@ class OLSQ:
         self.list_gate_dependency = dependency
         self.inpput_dependency = True
 
-
     def dump(self, output_file_name: str = None):
         """
         dump constraints for OLSQ mode
@@ -265,17 +264,15 @@ class OLSQ:
         bound_depth = 21
         print("start adding constraints...")
         # variable setting 
-        pi, time, space, sigma = self._construct_variable(bound_depth)
-        # f, f_inv, time, space, sigma, count_swap = self._construct_variable(bound_depth, len(list_qubit_edge))
-
+        self.list_gate_dependency = collision_extracting(self.list_gate_qubits)
+        pi, time, sigma = self._construct_variable(bound_depth)
         lsqc = Solver()
-        # constraint setting
         self._add_injective_mapping_constraints(bound_depth, pi, lsqc)
-        self._add_consistency_gate_constraints(bound_depth, pi, space, time, lsqc)
+        self._add_consistency_gate_constraints(bound_depth, pi, time, lsqc)
         self._add_dependency_constraints(False, lsqc, time, bound_depth)
-        self._add_swap_constraints(bound_depth, sigma, lsqc, True, time, space)
+        self._add_swap_constraints(bound_depth, sigma, lsqc, True, time, pi)
         self._add_transformation_constraints(bound_depth, lsqc, sigma, pi)
-            
+        lsqc.add([UGE(bound_depth, time[l]) for l in range(len(self.list_gate_qubits))])
         constraints = lsqc.sexpr()
         f = open(output_file_name, "w")
         f.write(constraints)
@@ -304,6 +301,8 @@ class OLSQ:
               final_mapping
               objective_value
         """
+        if self.count_physical_qubit < self.count_program_qubit:
+            raise ValueError("[ERROR] number of physical qubits is less than number of program qubits")
         if not self.inpput_dependency:
             self.list_gate_dependency = collision_extracting(self.list_gate_qubits)
         if self.mode == Mode.transition:
@@ -341,11 +340,11 @@ class OLSQ:
             bound_depth = 8 * self.bound_depth
         else:
             bound_depth = 2 * self.bound_depth
+        # bound_depth = 21
         while not_solved:
             print("start adding constraints...")
             # variable setting 
-            pi, time, space, sigma = self._construct_variable(bound_depth)
-
+            pi, time, sigma = self._construct_variable(bound_depth)
             lsqc = Solver()
             set_option("memory_max_size", memory_max_size)
             set_option("verbose", verbose)
@@ -354,7 +353,7 @@ class OLSQ:
             self._add_injective_mapping_constraints(bound_depth, pi, lsqc)
 
             # Consistency between Mapping and Space Coordinates.
-            self._add_consistency_gate_constraints(bound_depth, pi, space, time, lsqc)
+            self._add_consistency_gate_constraints(bound_depth, pi, time, lsqc)
             
             # Avoiding Collisions and Respecting Dependencies. 
             self._add_dependency_constraints(preprossess_only, lsqc, time, bound_depth)
@@ -364,10 +363,12 @@ class OLSQ:
             if preprossess_only or self.mode == Mode.transition:
                 self._add_swap_constraints(bound_depth, sigma, lsqc)
             else:
-                self._add_swap_constraints(bound_depth, sigma, lsqc, True, time, space)
+                self._add_swap_constraints(bound_depth, sigma, lsqc, True, time, pi)
             # Mapping Not Transformations by SWAP Gates.
             # Mapping Transformations by SWAP Gates.
             self._add_transformation_constraints(bound_depth, lsqc, sigma, pi)
+            lsqc.add([UGE(bound_depth, time[l]) for l in range(len(self.list_gate_qubits))])
+            constraints = lsqc.sexpr()
             start_time = datetime.datetime.now()
             # TODO: iterate each swap num
             not_solved, model, n_swap = self._optimize_circuit(iteration, lsqc, preprossess_only, time, sigma, count_gate, bound_depth, swap_bound)
@@ -381,8 +382,7 @@ class OLSQ:
                     swap_bound = (swap_bound[0], n_swap)
                 else:
                     swap_bound = (0, n_swap)
-            result = self._extract_results(model, time, pi, sigma, space, output_mode, output_file_name)
-                # result = self._extract_results(model, time, f_map, sigma, space, output_mode, output_file_name)
+            result = self._extract_results(model, time, pi, sigma, output_mode, output_file_name)
                 
         print(f"compilation time = {datetime.datetime.now() - start_time}.")
         return swap_bound, result
@@ -390,105 +390,60 @@ class OLSQ:
     def _construct_variable(self, bound_depth):
         # at cycle t, logical qubit q is mapped to pi[q][t]
         count_qubit_edge = len(self.list_qubit_edge)
-        length = int(math.log2(bound_depth))+1
-        num_pro_q = int(math.log2(self.count_program_qubit))+1
-        num_phy_q = int(math.log2(self.count_physical_qubit))+1
+        
+        
+        count_qubit_edge = len(self.list_qubit_edge)
+        length = int(math.log2(max(count_qubit_edge, self.count_physical_qubit)))+1
 
-        pi = [[BitVec(("map_q{}_t{}".format(i, j)), num_phy_q) for j in range(bound_depth)]
+        pi = [[BitVec(("map_q{}_t{}".format(i, j)), length) for j in range(bound_depth)]
                 for i in range(self.count_program_qubit)]
 
-        # f_map = Function('mapping', IntSort(), IntSort(), IntSort())
-        # f_map_inv = Function('mapping_inv', IntSort(), IntSort(), IntSort())
-        
-        # f_map = Function('mapping', BitVecSort(num_pro_q), BitVecSort(length), BitVecSort(num_phy_q))
-        # f_map_inv = Function('mapping_inv', BitVecSort(num_phy_q), BitVecSort(length), BitVecSort(num_pro_q))
-
+        length = int(math.log2(bound_depth))+1
         # time coordinate for gate l is time[l]
-        # time = IntVector('time', len(self.list_gate_qubits))
         time = [BitVec("time_{}".format(i), length) for i in range(len(self.list_gate_qubits))]
-
-        # space coordinate for gate l is space[l]
-        # space = IntVector('space', len(self.list_gate_qubits))
-        length = int(math.log2(max(count_qubit_edge, self.count_physical_qubit)))+1
-        space = [BitVec("space{}".format(i), length) for i in range(len(self.list_gate_qubits))]
 
         # if at cycle t, a SWAP finishing on edge k, then sigma[k][t]=1
         sigma = [[Bool("ifswap_e{}_t{}".format(i, j))
             for j in range(bound_depth)] for i in range(count_qubit_edge)]
 
-        return pi, time, space, sigma
-        # return f_map, f_map_inv, time, space, sigma, count_swap
+        return pi, time, sigma
 
+    # def _construct_is_edge_function(self, model):
+    #     num_phy_q = int(math.log2(self.count_physical_qubit))+1
+    #     is_edge = Function('is_edge', BitVecSort(num_phy_q), BitVecSort(num_phy_q), BoolSort())
+    #     edge_matrix = [[0 for i in range(self.count_physical_qubit)] for i in range(self.count_physical_qubit)]
+    #     # print(edge_matrix)
+    #     for e in self.list_qubit_edge:
+    #         edge_matrix[e[0]][e[1]] = 1
+    #         edge_matrix[e[1]][e[0]] = 1
+    #     # print(edge_matrix)
+    #     for i in range(self.count_physical_qubit):
+    #         for j in range(self.count_physical_qubit):
+    #             if edge_matrix[i][j] == 1:
+    #                 model.add(is_edge(i,j))
+    #             else:
+    #                 model.add(Not(is_edge(i,j)))
+    #     return is_edge
 
     def _add_injective_mapping_constraints(self, bound_depth, pi, model):
-    # def _add_injective_mapping_constraints(self, bound_depth, f_map, f_map_inv, model):
         # Injective Mapping
         for t in range(bound_depth):
+            model.add(Distinct([pi[m][t] for m in range(self.count_program_qubit)]))
             for m in range(self.count_program_qubit):
-                model.add(ULE(0,pi[m][t]), ULT(pi[m][t], self.count_physical_qubit))
-                for mm in range(m):
-                    model.add(pi[m][t] != pi[mm][t])
-        # for t in range(bound_depth):
-        #     for m in range(self.count_program_qubit):
-        #         model.add(f_map_inv(f_map(m,t),t) == m)
-        #         model.add(UGE(f_map(m,t), 0))
-        #         model.add(ULT(f_map(m,t), self.count_physical_qubit))
+                model.add(UGE(pi[m][t], 0))
+                model.add(ULT(pi[m][t], self.count_physical_qubit))
 
-    def _add_consistency_gate_constraints(self, bound_depth, pi, space, time, model):
-    # def _add_consistency_gate_constraints(self, bound_depth, list_qubit_edge, f_map, space, time, model):
+    def _add_consistency_gate_constraints(self, bound_depth, pi, time, model):
         # Consistency between Mapping and Space Coordinates.
-        list_qubit_edge = self.list_qubit_edge
         list_gate_qubits = self.list_gate_qubits
-        count_gate = len(list_gate_qubits)
-        count_qubit_edge = len(list_qubit_edge)
+        count_gate = len(self.list_gate_qubits)
         list_gate_two = self.list_gate_two
-        list_gate_single = self.list_gate_single
-
-        length = int(math.log2(max(count_qubit_edge, self.count_physical_qubit)))+1
-        bv_zero = BitVecVal(0, length)
-        bv_count_qubit = BitVecVal(self.count_physical_qubit, length)
-        bv_count_qubit_edge = BitVecVal(count_qubit_edge, length)
-
 
         for l in range(count_gate):
-            # model.add(time[l] >= 0, time[l] < bound_depth)
-            # model.add(ULT(time[l], bit_bound_depth))
-            # print(time[l].size())
-            # print(bit_bound_depth.size())
-            # model.add(ULT(time[l], bit_bound_depth))
-            # model.add(UGE(time[l], 0))
-            if l in list_gate_single:
-                # model.add(space[l] >= 0, space[l] < self.count_physical_qubit)
-                model.add(ULE(bv_zero, space[l]), ULT(space[l], bv_count_qubit))
-                for t in range(bound_depth):
-                    model.add(Implies(time[l] == t,
-                        pi[list_gate_qubits[l][0]][t] == space[l]))
-                    # model.add(Implies(time[l] == t,
-                    #     f_map(list_gate_qubits[l][0],t) == space[l]))
-            elif l in list_gate_two:
-                # model.add(space[l] >= 0, space[l] < count_qubit_edge)
-                model.add(ULE(bv_zero, space[l]), ULT(space[l], bv_count_qubit_edge))
-                for k in range(count_qubit_edge):
-                    for t in range(bound_depth):
-                        model.add(Implies(And(time[l] == t, space[l] == k),
-                            Or(And(list_qubit_edge[k][0] == \
-                                    pi[list_gate_qubits[l][0]][t],
-                                list_qubit_edge[k][1] == \
-                                    pi[list_gate_qubits[l][1]][t]),
-                            And(list_qubit_edge[k][1] == \
-                                    pi[list_gate_qubits[l][0]][t],
-                                list_qubit_edge[k][0] == \
-                                    pi[list_gate_qubits[l][1]][t])  )    ))
-                        # model.add(Implies(And(time[l] == t, space[l] == k),
-                        #     Or(And(list_qubit_edge[k][0] == \
-                        #             f_map(list_gate_qubits[l][0],t),
-                        #         list_qubit_edge[k][1] == \
-                        #             f_map(list_gate_qubits[l][1],t)),
-                        #     And(list_qubit_edge[k][1] == \
-                        #             f_map(list_gate_qubits[l][0],t),
-                        #         list_qubit_edge[k][0] == \
-                        #             f_map(list_gate_qubits[l][1],t))  )    ))
-
+            for t in range(bound_depth):
+                if l in list_gate_two:
+                    model.add(Or(Not(time[l] == t), Or([Or(And(pi[list_gate_qubits[l][0]][t] == edge[0], pi[list_gate_qubits[l][1]][t] == edge[1]), \
+                                    And(pi[list_gate_qubits[l][0]][t] == edge[1], pi[list_gate_qubits[l][1]][t] == edge[0])) for edge in self.list_qubit_edge ] )))
 
     def _add_dependency_constraints(self, preprossess_only, model, time, bound_depth):
         list_gate_duration = self.list_gate_duration
@@ -504,17 +459,12 @@ class OLSQ:
             bit_duration_minus_one_list = [BitVecVal(list_gate_duration[l]-1, length) for l in range(count_gate)]
 
             for d in list_gate_dependency:
-                # lsqc.add(time[d[0]] < time[d[1]])
-                
                 model.add(ULE(time[d[0]] + bit_duration_list[d[1]], time[d[1]]))
-                # lsqc.add(time[d[0]] + list_gate_duration[d[1]] <= time[d[1]])
             # add initial condition for gates
             for l in range(count_gate):
-                # lsqc.add(list_gate_duration[l] - 1 <= time[l])
-                # lsqc.add(ULE(UDiv(list_gate_duration[l], one_duration), time[l]))
                 model.add(ULE(bit_duration_minus_one_list[l], time[l]))
 
-    def _add_swap_constraints(self, bound_depth, sigma, model, normal = False, time = None, space = None):
+    def _add_swap_constraints(self, bound_depth, sigma, model, normal = False, time = None, pi = None):
         # if_overlap_edge takes in two edge indices _e_ and _e'_,
         # and returns whether or not they overlap
         list_qubit_edge = self.list_qubit_edge
@@ -527,6 +477,7 @@ class OLSQ:
         # list_count_overlap_edge is the list of lengths of
         # overlap edge lists of all the _e_
         list_count_overlap_edge = list()
+        list_gate_qubits = self.list_gate_qubits
         for k in range(count_qubit_edge):
             list_overlap_edge.append(list())
         for k in range(count_qubit_edge):
@@ -556,14 +507,6 @@ class OLSQ:
                     for kk in list_overlap_edge[k]:
                         model.add(Implies(sigma[k][t] == True,
                             sigma[kk][tt] == False))
-
-        # model.add(
-        #         count_swap == sum([If(sigma[k][t], 1, 0)
-        #             for k in range(count_qubit_edge)
-        #                 for t in range(bound_depth)]))
-        # model.add(PbLe([(sigma[k][t],1)
-        #             for k in range(count_qubit_edge)
-        #                 for t in range(bound_depth)], count_swap))
         
         if normal:
             # swap gates can not ovelap with other gates
@@ -575,21 +518,20 @@ class OLSQ:
                         for tt in range(t - self.swap_duration + 1, t + self.list_gate_duration[l]):
                             if l in self.list_gate_single:
                                 model.add(Implies(And(time[l] == tt,
-                                    Or(space[l] == list_qubit_edge[k][0],
-                                        space[l] == list_qubit_edge[k][1])),
+                                    Or(pi[list_gate_qubits[l][0]][time[l]] == list_qubit_edge[k][0],
+                                        pi[list_gate_qubits[l][0]][time[l]] == list_qubit_edge[k][1])),
                                         sigma[k][t] == False             ))
                             elif l in self.list_gate_two:
-                                model.add(Implies(And(
-                                    time[l] == tt, space[l] == k),
+                                model.add(Implies(And( \
+                                    time[l] == tt, \
+                                        Or(pi[list_gate_qubits[l][0]][tt] == list_qubit_edge[k][0], \
+                                        pi[list_gate_qubits[l][0]][tt] == list_qubit_edge[k][1], \
+                                        pi[list_gate_qubits[l][1]][tt] == list_qubit_edge[k][0], \
+                                        pi[list_gate_qubits[l][1]][tt] == list_qubit_edge[k][1])), \
                                         sigma[k][t] == False           ))
-                                for kk in list_overlap_edge[k]:
-                                    model.add(Implies(And(
-                                        time[l] == tt, space[l] == kk),
-                                            sigma[k][t] == False       ))          
 
      
     def _add_transformation_constraints(self, bound_depth, model, sigma, pi):
-    # def _add_transformation_constraints(self, bound_depth, list_qubit_edge, model, sigma, f_map):
         # list_adjacency_qubit takes in a physical qubit index _p_, and
         # returns the list of indices of physical qubits adjacent to _p_
         list_adjacent_qubit = list()
@@ -613,17 +555,9 @@ class OLSQ:
         for t in range(bound_depth - 1):
             for n in range(self.count_physical_qubit):
                 for m in range(self.count_program_qubit):
-                    # model.add(
-                    #     Implies(And(Sum([If(sigma[k][t], 1, 0)
-                    #         for k in list_span_edge[n]]) == 0,
-                    #             pi[m][t] == n), pi[m][t + 1] == n))
                     model.add(
                         Implies(And(Not(Or([sigma[k][t] for k in list_span_edge[n]])),
                                 pi[m][t] == n), pi[m][t + 1] == n))
-                    # model.add(
-                    #     Implies(And(Sum([If(sigma[k][t], 1, 0)
-                    #         for k in list_span_edge[n]]) == 0,
-                    #             f_map(m,t) == n), f_map(m,t + 1) == n))
         
         # Mapping Transformations by SWAP Gates.
         for t in range(bound_depth - 1):
@@ -635,12 +569,6 @@ class OLSQ:
                     model.add(Implies(And(sigma[k][t] == True,
                         pi[m][t] == list_qubit_edge[k][1]),
                             pi[m][t + 1] == list_qubit_edge[k][0]))
-                    # model.add(Implies(And(sigma[k][t] == True,
-                    #     f_map(m,t) == list_qubit_edge[k][0]),
-                    #         f_map(m,t + 1) == list_qubit_edge[k][1]))
-                    # model.add(Implies(And(sigma[k][t] == True,
-                    #     f_map(m,t) == list_qubit_edge[k][1]),
-                    #         f_map(m,t + 1) == list_qubit_edge[k][0]))
            
 
     def _count_swap(self, model, sigma, result_depth):
@@ -695,7 +623,7 @@ class OLSQ:
                     print("FAIL to find depth witnin {}.".format(bound_depth))
                     break
         if not find_min_depth:
-            return True, None
+            return True, None, None
         lsqc.add([UGE(bit_tight_bound_depth, time[l]) for l in range(count_gate)])
         # for swap optimization
         find_min_swap = False
@@ -718,7 +646,7 @@ class OLSQ:
             else:
                 if satisfiable == unsat:
                     core = lsqc.unsat_core()
-                    # print(core)
+                    print(core)
                 lower_b_swap = bound_swap_num + 1
                 if upper_b_swap <= lower_b_swap:
                     satisfiable = lsqc.check(PbLe([(sigma[k][t],1) for k in range(count_qubit_edge)
@@ -733,9 +661,8 @@ class OLSQ:
                     bound_swap_num = (upper_b_swap + lower_b_swap)//2
         return not_solved, model, upper_b_swap
 
-
-    def _extract_results(self, model, time, pi, sigma, space, output_mode, output_file_name):
-    # def _extract_results(self, model, time, f_map, sigma, space, output_mode, output_file_name):
+    
+    def _extract_results(self, model, time, pi, sigma, output_mode, output_file_name):
         # post-processing
         list_gate_two = self.list_gate_two
         list_gate_single = self.list_gate_single
@@ -841,7 +768,7 @@ class OLSQ:
             t = result_time[l]
             list_scheduled_gate_name[t].append(list_gate_name[l])
             if l in list_gate_single:
-                q = model[space[l]].as_long()
+                q = model[pi[list_gate_qubits[l][0]][t]].as_long()
                 list_scheduled_gate_qubits[t].append((q,))
             elif l in list_gate_two:
                 [q0, q1] = list_gate_qubits[l]
