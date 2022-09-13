@@ -42,15 +42,13 @@ We use a minimalist class `qcDeviceSet` to store the properties of the device th
 
 ## Setting the Input Program
 
-Apart from the device, we need the quantum program/circuit to execute, which can be set with the `setprogram` method.
+Apart from the architecture space, we need the quantum program/circuit to execute, which can be set with the `setprogram` method.
 _To be safe, always set the device first and then the program._
 
-OLSQ has an intermediate representation (IR) of quantum programs. (For details, refer to [a later part](#olsq-ir) of this tutorial.)
-In general, there are four ways to set the program: 
-1. Use OLSQ IR
+In general, there are three ways to set the program: 
+1. Use [OLSQ](https://github.com/tbcdebug/OLSQ) IR
 2. Use a string in QASM format
 3. Use an QASM file, e.g., one of programs used in the paper in `olsq/benchmarks/`.
-4. Use programs defined in other packages: refer to later parts of this tutorial on [Cirq](#cirq-interface) and [Qiskit](#qiskit-interface).
 
 ```
 circuit_str = "OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[3];\nh q[2];\n" \
@@ -91,19 +89,14 @@ However, there are no such triangles on device `ourense`.
 This means that no matter how the qubits in the program are mapped to physical qubits, we need to insert SWAP gates.
 
 ```
-# solve LSQC
-result = lsqc_solver.solve()
+# Optimize architecture for the input program LSQC
+result = arch_searcher.search('optimized_devices')
 ```
 
-The `solve` method can take two optional arguemnts
-- `output_mode`: can be `"IR"`. Refer [here](#olsq-ir) on what would be returned in this case.
-- `output_file_name`
-
-If `output_mode` is default, the return is a tuple of three things:
-- A string representing the output quantum program in QASM format.
-If `output_file_name` is provided, then the QASM string would be written to that file.
-- final_mapping: from each program qubit to the corresponding physical qubit at the end of execution.
-- objective_value
+The `search` method takes three arguments and two of them are optional.
+- `folder`: forders to store the optimized architecture.
+- `memory_max_size`: (optional) maximum memory use for SMT solver (default: no limit)
+- `verbose`: (optional) verbose for z3 (default: no verbose information)
 
 The result of the Toffoli example is shown below.
 Note that a SWAP gate, decomposed into three CX gates, has been inserted.
@@ -123,88 +116,6 @@ Note that a SWAP gate, decomposed into three CX gates, has been inserted.
 # c: 5/═════════════════════════════════════════════════════════════════════════════╩══╩══╩═
 #                                                                                   2  0  1
 ```
-
-## Cirq Interface
-
-We can input a `networkx.Graph` object representing the devie to `setdevicegraph`.
-Note that the method name is different from `setdevice`.
-(Such a representation is used in some components in Cirq, e.g.,`device_graph` on [this line](https://github.com/quantumlib/Cirq/blob/8f9d8597364b8bd0d29833cbbd014ebf1c62f3db/cirq/contrib/quantum_volume/quantum_volume.py#L215).)
-
-We can input a `cirq.Circuit` object as program in `setprogram`.
-```
-from olsq.olsq_cirq import OLSQ_cirq
-
-lsqc_solver = OLSQ_cirq("depth", "normal")
-
-# use a cirq.Circuit object as program
-lsqc_solver.setprogram(circuit)
-
-# use a networkx.Graph object representing the device
-lsqc_solver.setdevicegraph(device_graph)
-
-# result_circuit is a cirq.Circuit object
-result_circuit, final_mapping, objective_value = lsqc_solver.solve()
-```
-## Qiskit Interface
-
-A `backend` from `IBMQ` can be input to the `setdevice` method with the second argument set to `"ibm"`.
-
-There are two arguments for the `setprogram` method of `OLSQ_qiskit`: if the second is `"qasm"`, input a QASM string representing the quantum program as the first argument; if the second is none, then input a `QuantumCircuit` object in Qiskit as the first argument.
-
-```
-from qiskit import IBMQ
-from olsq.olsq_qiskit import OLSQ_qiskit
-
-lsqc_solver = OLSQ_qiskit("depth", "normal")
-
-# use a qiskit.QuantumCircuit object as program
-lsqc_solver.setprogram(circuit)
-
-provider = IBMQ.load_account()
-backend = provider.get_backend("ibmq_lima") # change to your backend of choice
-# use an IBMQ backend as the device
-lsqc_solver.setdevice(backend, "ibm")
-
-# result_circuit is a qiskit.QuantumCircuit object
-result_circuit, final_mapping, objective_value = lsqc_solver.solve()
-```
-
-## TB-OLSQ
-
-The transition-based mode is enabled if chosen at the initiation of `OLSQ`.
-Roughly speaking, we only use a kind of coarse-grain time in this mode, so the runtime is much shorter.
-For theoretical details, please refer to [the paper](https://doi.org/10.1145/3400302.3415620).
-The returned QASM string and `final_mapping` should be similar to what they were before.
-Only if the objective is `"depth"`, the objective value would be very different from the normal mode.
-There is only one SWAP inserted, so there are only two coarse-grain time steps, separated by the SWAP, whereas there are 14 time steps if using exact time.
-
-## OLSQ IR
-
-OLSQ IR contains three things:
-1. `count_program_qubit`: the number of qubits in the program.
-2. `gates`: a list of tuples representing qubit(s) acted on by a gate, each tuple has one index if it is a single-qubit gate, two indices if it is a two-qubit gate.
-3. `gate_spec`: list of type/name of each gate, which is not important to OLSQ, and only needed when generating output.
-
-```
-# For the following circuit
-# q_0: ───────────────────■───
-#                         │  
-# q_1: ───────■───────────┼───
-#      ┌───┐┌─┴─┐┌─────┐┌─┴─┐
-# q_2: ┤ H ├┤ X ├┤ TDG ├┤ X ├─
-#      └───┘└───┘└─────┘└───┘ 
-
-# count_program_qubit = 3
-# gates = ((2,), (1,2), (2,), (0,1))
-# gate_spec = ("h", "cx", "tdg", "cx")
-```
-
-If in the `solve` method, `output_mode` is set to `"IR"`, the return is a tuple of five things
-1. `result_depth`: depth of the resulting quantum program
-2. `list_scheduled_gate_name`: similar to `gate_spec` in the IR
-3. `list_scheduled_gate_qubits`: similar to `gates` in the IR
-4. `final_mapping`
-5. `objective_value`
 
 ## BibTeX Citation
 ```

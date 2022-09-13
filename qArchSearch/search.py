@@ -333,7 +333,7 @@ class qArchSearch:
             for num_e in range(len(self.list_extra_qubit_edge)):
                 print(f"[INFO] solving with max number of activate flexible edge = {num_e}")
                 per_start = datetime.datetime.now()
-                tight_depth, not_solved, model, n_swap = self._optimize_circuit(tight_depth, lsqc, preprossess_only, num_e, u, sigma, time, bound_depth, swap_bound)
+                tight_depth, not_solved, result, n_swap = self._optimize_circuit(tight_depth, lsqc, num_e, u, sigma, time, bound_depth, swap_bound, pi, space)
                 if not_solved:
                     bound_depth *= 2
                     break
@@ -344,7 +344,7 @@ class qArchSearch:
                     swap_bound = (swap_bound[0], n_swap)
                 else:
                     swap_bound = (0, n_swap)
-                results.append(self.write_results(model, time, pi, sigma, space, u))
+                results.append(result)
                 print(f"   <RESULT> Compilation time = {datetime.datetime.now() - per_start}.")
                 if folder != None:
                     import json
@@ -541,7 +541,7 @@ class qArchSearch:
                 model.add(PbLe([(u[idx],1) for idx in idxs], 1) )                  
                 
 
-    def _optimize_circuit(self, tight_depth, lsqc, preprossess_only, num_e, u, sigma, time, bound_depth, swap_bound):
+    def _optimize_circuit(self, tight_depth, lsqc, num_e, u, sigma, time, bound_depth, swap_bound, pi, space):
         count_gate = len(self.list_gate_qubits)
         count_qubit_edge = len(self.list_qubit_edge)
         if swap_bound != None:
@@ -586,6 +586,7 @@ class qArchSearch:
         lsqc.add([UGE(tight_bound_depth, time[l]) for l in range(count_gate)])
         # for swap optimization
         find_min_swap = False
+        results = None
         while not find_min_swap:
             lsqc.push()
             print("[INFO] Bound of Trying min swap = {}...".format(upper_b_swap))
@@ -601,22 +602,15 @@ class qArchSearch:
                 else: 
                     find_min_swap = True
                     not_solved = False
+
+                results = self.write_results(model, time, pi, sigma, space, u)
             else:
-                lsqc.pop()
-                upper_b_swap += 1
-                print("[INFO] Bound of Trying min swap = {}...".format(upper_b_swap))
-                lsqc.push()
-                lsqc.add(PbLe([(sigma[k][t],1) for k in range(count_qubit_edge)
-                        for t in range(bound_depth)], upper_b_swap) )
-                satisfiable = lsqc.check()
-                assert(satisfiable == sat)
-                model = lsqc.model()
                 find_min_swap = True
                 not_solved = False
-                bound_swap_num = upper_b_swap
+                bound_swap_num = upper_b_swap + 1
             lsqc.pop()
         lsqc.pop()
-        return tight_bound_depth, not_solved, model, bound_swap_num
+        return tight_bound_depth, not_solved, results, bound_swap_num
 
 
     def _extract_results(self, model, time, pi, sigma, space, u):
@@ -748,12 +742,7 @@ class qArchSearch:
         # print(list_scheduled_gate_name)
         # print(list_scheduled_gate_qubits)
 
-        return (result_depth,
-                list_scheduled_gate_name,
-                list_scheduled_gate_qubits,
-                initial_mapping,
-                final_mapping,
-                extra_edge)
+        return extra_edge
     
     def write_results(self, model, time, pi, sigma, space, u):
         results = self._extract_results(model, time, pi, sigma, space, u)
