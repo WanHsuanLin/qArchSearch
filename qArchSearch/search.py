@@ -592,8 +592,7 @@ class qArchSearch:
         if not find_min_depth:
             lsqc.pop()
             return 0, True, None, 0
-        if swap_bound == None:
-            lsqc.add([UGE(tight_bound_depth, time[l]) for l in range(count_gate)])
+        lsqc.add([UGE(tight_bound_depth, time[l]) for l in range(count_gate)])
         # for swap optimization
         find_min_swap = False
         while not find_min_swap:
