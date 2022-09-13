@@ -569,7 +569,7 @@ class qArchSearch:
         if  tight_depth != None:
             find_min_depth == True
             tight_bound_depth = tight_depth
-        if swap_bound == None:
+        if swap_bound != None:
             find_min_depth = True
         while not find_min_depth:
             print("[INFO] Trying maximal depth = {}...".format(tight_bound_depth))
