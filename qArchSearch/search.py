@@ -253,7 +253,7 @@ class qArchSearch:
             verbose: verbose stats in Z3
         """
         print("========================================================================")
-        print("=                 Domain-Specific Quantum Optimization                 =")
+        print("=          Domain-Specific Quantum Architectrue Optimization           =")
         print("========================================================================")
         if not self.inpput_dependency:
             self.list_gate_dependency = collision_extracting(self.list_gate_qubits)
@@ -580,7 +580,6 @@ class qArchSearch:
                 model = lsqc.model()
                 n_swap = self._count_swap(model, sigma, tight_bound_depth)
                 upper_b_swap = min(n_swap, upper_b_swap)
-                bound_swap_num = (upper_b_swap+lower_b_swap)//2
                 print("[INFO] Find solution with SWAP count = {}...".format(n_swap))
 
             else:
@@ -598,31 +597,28 @@ class qArchSearch:
         # for swap optimization
         find_min_swap = False
         while not find_min_swap:
-            print("[INFO] Bound of Trying min swap = {}...".format(bound_swap_num))
+            print("[INFO] Bound of Trying min swap = {}...".format(upper_b_swap))
             satisfiable = lsqc.check(PbLe([(sigma[k][t],1) for k in range(count_qubit_edge)
-                         for t in range(bound_depth)], bound_swap_num) )
+                         for t in range(bound_depth)], upper_b_swap) )
             if satisfiable == sat:
                 model = lsqc.model()
                 cur_swap = self._count_swap(model, sigma, tight_bound_depth)
-                if cur_swap > lower_b_swap:
-                    upper_b_swap = cur_swap
-                    bound_swap_num = (upper_b_swap + lower_b_swap)//2
+                if upper_b_swap > 0:
+                    upper_b_swap -= 1
+                    upper_b_swap = min(upper_b_swap, cur_swap)
                 else: 
                     find_min_swap = True
                     not_solved = False
             else:
-                lower_b_swap = bound_swap_num + 1
-                if upper_b_swap <= lower_b_swap:
-                    print("[INFO] Bound of Trying min swap = {}...".format(upper_b_swap))
-                    satisfiable = lsqc.check(PbLe([(sigma[k][t],1) for k in range(count_qubit_edge)
-                         for t in range(bound_depth)], upper_b_swap) )
-                    assert(satisfiable == sat)
-                    model = lsqc.model()
-                    find_min_swap = True
-                    not_solved = False
-                    bound_swap_num = upper_b_swap
-                else:
-                    bound_swap_num = (upper_b_swap + lower_b_swap)//2
+                upper_b_swap += 1
+                print("[INFO] Bound of Trying min swap = {}...".format(upper_b_swap))
+                satisfiable = lsqc.check(PbLe([(sigma[k][t],1) for k in range(count_qubit_edge)
+                        for t in range(bound_depth)], upper_b_swap) )
+                assert(satisfiable == sat)
+                model = lsqc.model()
+                find_min_swap = True
+                not_solved = False
+                bound_swap_num = upper_b_swap
         lsqc.pop()
         return tight_bound_depth, not_solved, model, bound_swap_num
 
