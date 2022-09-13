@@ -40,6 +40,7 @@ if __name__ == "__main__":
         program = [args.size,
             get_qaoa_graph(size=args.size, trial=args.trial),
             ["ZZ" for _ in range( (args.size * 3) // 2 )] ]
+        print(program)
         arch_searcher.setprogram(args.benchmark, program, "IR")
     else:
         file = open(args.filename)

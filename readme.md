@@ -48,7 +48,7 @@ _To be safe, always set the device first and then the program._
 In general, there are three ways to set the program: 
 1. Use [OLSQ](https://github.com/tbcdebug/OLSQ) IR
 2. Use a string in QASM format
-3. Use an QASM file, e.g., one of programs used in the paper in `olsq/benchmarks/`.
+3. Use an QASM file
 
 ```
 circuit_str = "OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[3];\nh q[2];\n" \
@@ -60,36 +60,19 @@ circuit_str = "OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[3];\nh q[2];\n" \
 lsqc_solver.setprogram(circuit_str)
 ```
 
-The example above is a Toffoli gate.
 We can also load an QASM file of it.
 ```
-# load one of the QASM files from olsq/benchmarks
-lsqc_solver.setprogram("toffoli", input_mode="benchmark")
-
 # load your own QASM file
 # circuit_file = open("my-qasm-file", "r").read()
 
 lsqc_solver.setprogram(circuit_file)
-
-# Toffoli Gate:
-#                                                        ┌───┐      
-# q_0: ───────────────────■─────────────────────■────■───┤ T ├───■──
-#                         │             ┌───┐   │  ┌─┴─┐┌┴───┴┐┌─┴─┐
-# q_1: ───────■───────────┼─────────■───┤ T ├───┼──┤ X ├┤ TDG ├┤ X ├
-#      ┌───┐┌─┴─┐┌─────┐┌─┴─┐┌───┐┌─┴─┐┌┴───┴┐┌─┴─┐├───┤└┬───┬┘└───┘
-# q_2: ┤ H ├┤ X ├┤ TDG ├┤ X ├┤ T ├┤ X ├┤ TDG ├┤ X ├┤ T ├─┤ H ├──────
-#      └───┘└───┘└─────┘└───┘└───┘└───┘└─────┘└───┘└───┘ └───┘      
 """
 ```
 
 ## Solving and Output
 
-It can be seen that in the Toffoli gate above, there are two-qubit gates on pair `(q_0,q_1)`, `(q_1,q_2)`, and `(q_2,q_0)`.
-However, there are no such triangles on device `ourense`.
-This means that no matter how the qubits in the program are mapped to physical qubits, we need to insert SWAP gates.
-
 ```
-# Optimize architecture for the input program LSQC
+# Optimize architecture for the input program
 result = arch_searcher.search('optimized_devices')
 ```
 
@@ -98,24 +81,10 @@ The `search` method takes three arguments and two of them are optional.
 - `memory_max_size`: (optional) maximum memory use for SMT solver (default: no limit)
 - `verbose`: (optional) verbose for z3 (default: no verbose information)
 
-The result of the Toffoli example is shown below.
-Note that a SWAP gate, decomposed into three CX gates, has been inserted.
-```
-# a LSQC solution to the Toffoli gate on device 'ourense'
-#                                                  ┌───┐     ┌───┐┌───┐ ┌───┐      ┌─┐      
-# q_0: ───────────────────■─────────────────────■──┤ X ├──■──┤ X ├┤ T ├─┤ H ├──────┤M├──────
-#      ┌───┐┌───┐┌─────┐┌─┴─┐┌───┐┌───┐┌─────┐┌─┴─┐└─┬─┘┌─┴─┐└─┬─┘└───┘ ├───┤      └╥┘┌─┐   
-# q_1: ┤ H ├┤ X ├┤ TDG ├┤ X ├┤ T ├┤ X ├┤ TDG ├┤ X ├──■──┤ X ├──■────■───┤ T ├───■───╫─┤M├───
-#      └───┘└─┬─┘└─────┘└───┘└───┘└─┬─┘└┬───┬┘└───┘     └───┘     ┌─┴─┐┌┴───┴┐┌─┴─┐ ║ └╥┘┌─┐
-# q_2: ───────■─────────────────────■───┤ T ├─────────────────────┤ X ├┤ TDG ├┤ X ├─╫──╫─┤M├
-#                                       └───┘                     └───┘└─────┘└───┘ ║  ║ └╥┘
-# q_3: ─────────────────────────────────────────────────────────────────────────────╫──╫──╫─
-#                                                                                   ║  ║  ║
-# q_4: ─────────────────────────────────────────────────────────────────────────────╫──╫──╫─
-#                                                                                   ║  ║  ║
-# c: 5/═════════════════════════════════════════════════════════════════════════════╩══╩══╩═
-#                                                                                   2  0  1
-```
+The outputs of qArchSearch are (1) compilation results and (2) optimized architectures
+During each edge selection iteration, the SMT solver will be invoked for coarse-grained circuit depth optimization and SWAP optimization. After each SMT solver invokation, the compilation results will be printed. 
+After optimization, qArchSearch will output files named by "extra_edge_$i.json", where i = 0..max_num_activate_edges is the number of activated flexible edges in the optimized architectures.
+Each file stores the best compilation result with the optimized architecture and the activated flexible edges for the architecture.
 
 ## BibTeX Citation
 ```
