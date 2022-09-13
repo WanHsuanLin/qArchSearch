@@ -742,7 +742,12 @@ class qArchSearch:
         # print(list_scheduled_gate_name)
         # print(list_scheduled_gate_qubits)
 
-        return extra_edge
+        return (result_depth,
+                list_scheduled_gate_name,
+                list_scheduled_gate_qubits,
+                initial_mapping,
+                final_mapping,
+                extra_edge)
     
     def write_results(self, model, time, pi, sigma, space, u):
         results = self._extract_results(model, time, pi, sigma, space, u)
