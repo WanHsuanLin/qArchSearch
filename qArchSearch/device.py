@@ -60,6 +60,7 @@ class qcDeviceSet:
         
         
         # set parameters from inputs with value checking
+        self.name = name
         if nqubits is not None:
             self.count_physical_qubit = nqubits
         if "count_physical_qubit" not in self.__dict__:
