@@ -31,10 +31,10 @@ if __name__ == "__main__":
 
     if args.device_set == "hh":
         arch_searcher.setdevice(
-            get_device_set_hh(benchmark=args.benchmark))
+            get_device_set_hh())
     else:
         arch_searcher.setdevice(
-            get_device_set_square_4by4(benchmark=args.benchmark))
+            get_device_set_square_4by4())
 
     if args.benchmark == "qaoa":
         program = [args.size,

@@ -108,7 +108,7 @@ def get_char_graph(coupling:list):
         graph += line + "\n"
     return graph
 
-def get_device_set_square_4by4(benchmark:str):
+def get_device_set_square_4by4():
     # basic couplings, i.e., edges, of a 4*4 grid, i.e., device0
     basic_coupling = [(0,1), (1,2), (2,3), (4,5), (5,6), (6,7), (8,9),
         (9,10), (10,11), (12,13), (13,14), (14,15), (0,4), (4,8),
@@ -120,12 +120,9 @@ def get_device_set_square_4by4(benchmark:str):
     conflict_coupling_set = [[(0,5), (1,4)],[(1,6), (2,5)], [(3,6), (2,7)], [(4,9), (5,8)], [(5,10), (6,9)], [(6,11), (7,10)], [(9,12), (8,13)], [(9,14), (10,13)], [(10,15), (11,14)], ]
     # qaoa and qcnn: swap_duration=1 since SWAP is comparable to the gates
     # for arith, use 3
-    my_swap_duration = 1
-    if benchmark == "arith":
-        my_swap_duration = 3
 
     return qcDeviceSet(name="square_4by4", nqubits=16,
-        connection=basic_coupling, extra_connection = extra_coupling, conflict_coupling_set=conflict_coupling_set, swap_duration=my_swap_duration)
+        connection=basic_coupling, extra_connection = extra_coupling, conflict_coupling_set=conflict_coupling_set)
 
 # def get_device_set_hsquare(benchmark:str):
 #     # basic couplings, i.e., edges, of a 4*4 grid, i.e., device0
