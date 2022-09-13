@@ -31,37 +31,14 @@ arch_searcher = qArchSearch()
 The architecture space is defined by (1) base architecture space, (2) flexible connections, and (3) flexible connection activation constraints
 
 We are going to use the `setdevice` method.
-In general, there are three ways: 
-1. Directly construct an architecture space with these features.
-2. Use one of the hard-coded devices (including all the devices appeared in the paper).
-3. Use device defined in other packages: refer to later parts of this tutorial on [Cirq](#cirq-interface) and [Qiskit](#qiskit-interface).
-
-```
-from olsq.device import qcdevice
-
-# directly construct a device from properties needed by olsq
-lsqc_solver.setdevice( qcdevice(name="dev", nqubits=5, 
-     connection=[(0, 1), (1, 2), (1, 3), (3, 4)], swap_duration=3) )
-```
-
-We use a minimalist class `qcdevice` to store the properties of the device that we need, which can be constructed with these arguments.
+We use a minimalist class `qcDeviceSet` to store the properties of the device that we need, which can be constructed with these arguments.
 (The last three are only for fidelity optimization.)
 - `name`
 - `nqubits`: the number of physical qubits
-- `connection`: a list of physical qubit pairs corresponding to edges in the coupling graph
-- `swap_duration`: number of cycles a SWAP gate takes.
-   Usually it is either one, or three meaning three CX gates.
-- `fmeas`: a list of measurement fidelity
-- `fsingle`: a list of single-qubit gate fidelity
-- `ftwo`: a list of two-qubit gate fidelity, indices aligned with `connection`
+- `connection`: a list of physical qubit pairs corresponding to edges in the base architecture
+- `extra_connection`: a list of physical qubit pairs corresponding to flexible edges in the flexible edge set
+- `conflict_coupling_set`: a list of pairs of qubit connections that cannot be actiavted at the same time
 
-If `name` starts with `"default_"`, a hard-coded device stored in `olsq/devices/` would be loaded.
-Other arguments can still be specified, in which case the original device properties would be replaced by the input.
-```
-# use a hard-coded device in olsq/devices/ called ourense
-# which actually has the same properties as the device we constructed above
-lsqc_solver.setdevice( qcdevice("default_ourense") )
-```
 
 ## Setting the Input Program
 

@@ -133,7 +133,6 @@ class qArchSearch:
         # print("device basic edge: ", self.list_basic_qubit_edge)
         # print("device extra edge: ", self.list_extra_qubit_edge)
         # print("device all edge: ", self.list_qubit_edge)
-        self.swap_duration = device.swap_duration
         # print("show edge idx:")
         for e in self.list_extra_qubit_edge:
             idx = self.list_qubit_edge.index(e)

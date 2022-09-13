@@ -8,8 +8,7 @@ class qcDeviceSet:
     """
 
     def __init__(self, name: str, nqubits: int = None, connection: list = None, extra_connection: list = None,
-                 conflict_coupling_set: list = None, swap_duration: int = None, fmeas: list = None, 
-                 fsingle: list = None, ftwo: list = None):
+                 conflict_coupling_set: list = None):
         """ Create a QC device.
         The user can either input the device parameters, or use existing
         ones stored in olsq/devices/ in json format (especially for
@@ -42,9 +41,6 @@ class qcDeviceSet:
         if nqubits is not None:
             if not isinstance(nqubits, int):
                 raise TypeError("nqubits should be an integer.")
-        if swap_duration is not None:
-            if not isinstance(swap_duration, int):
-                raise TypeError("swap_duration should be an integer.")
         
         if connection is not None:
             if not isinstance(connection, (list, tuple)):
@@ -74,27 +70,6 @@ class qcDeviceSet:
                     if not isinstance(edge[1], int):
                         raise TypeError(f"{edge[1]} is not an integer.")
         
-        if fmeas is not None:
-            if not isinstance(fmeas, (list, tuple)):
-                raise TypeError("fmeas should be a list or tuple.")
-            else:
-                for fmeas_i in fmeas:
-                    if not isinstance(fmeas_i, (int, float)):
-                        raise TypeError(f"{fmeas_i} is not a number.")
-        if fsingle is not None:
-            if not isinstance(fsingle, (list, tuple)):
-                raise TypeError("fsingle should be a list or tuple.")
-            else:
-                for fsingle_i in fsingle:
-                    if not isinstance(fsingle_i, (int, float)):
-                        raise TypeError(f"{fsingle_i} is not a number.")
-        if ftwo is not None:
-            if not isinstance(ftwo, (list, tuple)):
-                raise TypeError("ftwo should be a list or tuple.")
-            else:
-                for ftwo_i in ftwo:
-                    if not isinstance(ftwo_i, (int, float)):
-                        raise TypeError(f"{ftwo_i} is not a number.")
         
         if name.startswith("default_"):
             # use an existing device
@@ -156,34 +131,3 @@ class qcDeviceSet:
         if "list_qubit_edge" not in self.__dict__:
             raise AttributeError("No edge set is specified.")
         
-        if swap_duration is not None: 
-            self.swap_duration = swap_duration
-        else:
-            self.swap_duration = 3
-        
-        if fmeas is not None:
-            if len(fmeas) != self.count_physical_qubit:
-                raise ValueError( ("fmeas should have "
-                                   f"{self.count_physical_qubit} data.") )
-            self.list_fidelity_measure = tuple(fmeas)
-        if "list_fidelity_measure" not in self.__dict__:
-            self.list_fidelity_measure = \
-                tuple(1 for _ in range(self.count_physical_qubit))
-        
-        if fsingle is not None:
-            if len(fsingle) != self.count_physical_qubit:
-                raise ValueError( ("fsingle should have "
-                                   f"{self.count_physical_qubit} data.") )
-            self.list_fidelity_single = tuple(fsingle)
-        if "list_fidelity_single" not in self.__dict__:
-            self.list_fidelity_single = \
-                tuple(1 for _ in range(self.count_physical_qubit))
-        
-        if ftwo is not None:
-            if len(ftwo) != len(self.list_qubit_edge):
-                raise ValueError( ("ftwo should have "
-                                   f"{len(self.list_qubit_edge)} data.") )
-            self.list_fidelity_two = tuple(ftwo)
-        if "list_fidelity_two" not in self.__dict__:
-            self.list_fidelity_two = \
-                tuple(1 for _ in range(len(self.list_qubit_edge)))
