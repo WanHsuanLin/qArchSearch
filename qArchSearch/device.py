@@ -21,18 +21,6 @@ class qcDeviceSet:
             nqubits: (optional) the number of physical qubits.
             connection: set of edges connecting qubits.
             extra_connection: set of extra edges that can be added to the connection.
-            swap_duration: (optional) how many time units a SWAP takes.
-            fmeas: (optional) measurement fidelity of each qubit.
-            fsingle: (optional) single-qubit gate fidelity of each qubit
-            ftwo: (optional) two-qubit gate fidelity of each edge.
-
-        Example:
-            To use existing "defualt_ourense" device
-            >>> dev = qcdevice(name="default_ourense")
-            To set up a new device
-            >>> dev = qcdevice(name="dev", nqubits=5,
-                    connection=[(0, 1), (1, 2), (1, 3), (3, 4)],
-                    swap_duration=3)
         """
 
         # typechecking for inputs
@@ -70,25 +58,6 @@ class qcDeviceSet:
                     if not isinstance(edge[1], int):
                         raise TypeError(f"{edge[1]} is not an integer.")
         
-        
-        if name.startswith("default_"):
-            # use an existing device
-            f = pkgutil.get_data(__name__, "devices/" + name + ".json")
-            data = json.loads(f)
-            self.name = data["name"]
-            self.count_physical_qubit = data["count_physical_qubit"]
-            self.list_qubit_edge = tuple( tuple(edge)
-                                          for edge in data["list_qubit_edge"])
-            self.swap_duration = data["swap_duration"]
-            if "list_fidelity_measure" in data:
-                self.list_fidelity_measure = \
-                    tuple(data["list_fidelity_measure"])
-            if "list_fidelity_single" in data:
-                self.list_fidelity_single = tuple(data["list_fidelity_single"])
-            if "list_fidelity_two" in data:
-                self.list_fidelity_two = tuple(data["list_fidelity_two"])
-        else:
-            self.name = name
         
         # set parameters from inputs with value checking
         if nqubits is not None:

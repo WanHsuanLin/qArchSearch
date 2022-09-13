@@ -95,7 +95,6 @@ class qArchSearch:
         self.list_extra_qubit_edge = []
         self.list_basic_qubit_edge = []
         self.list_conflict_edge_set = []
-        self.swap_duration = 0
         self.dict_gate_duration = dict()
         self.list_gate_duration = []
         self.list_extra_qubit_edge_idx = []
@@ -118,7 +117,6 @@ class qArchSearch:
 
     def setdevice(self, device: qcDeviceSet):
         """Pass in parameters from the given device.  If in TB mode,
-           swap_duration is set to 1 without modifying the device.
 
         Args:
             device: a qcdevice object for OLSQ
@@ -463,17 +461,13 @@ class qArchSearch:
         for k in range(count_qubit_edge):
             list_count_overlap_edge.append(len(list_overlap_edge[k]))
 
-        # No swap for t<s
-        for t in range(min(self.swap_duration - 1, bound_depth)):
-            for k in range(count_qubit_edge):
-                model.add(sigma[k][t] == False)
         # swap gates can not overlap with swap
-        for t in range(self.swap_duration - 1, bound_depth):
+        for t in range(bound_depth):
             for k in range(count_qubit_edge):
-                for tt in range(t - self.swap_duration + 1, t):
-                    model.add(Implies(sigma[k][t] == True,
-                        sigma[k][tt] == False))
-                for tt in range(t - self.swap_duration + 1, t + 1):
+                # for tt in range(t - self.swap_duration + 1, t):
+                #     model.add(Implies(sigma[k][t] == True,
+                #         sigma[k][tt] == False))
+                for tt in range(t, t + 1):
                     for kk in list_overlap_edge[k]:
                         model.add(Implies(sigma[k][t] == True,
                             sigma[kk][tt] == False))
@@ -666,7 +660,7 @@ class qArchSearch:
         tran_detph = result_depth
 
         # transition based
-        self.swap_duration = self.device.swap_duration
+
         real_time = [0] * count_gate
         list_depth_on_qubit = [-1] * self.count_physical_qubit
         list_real_swap = []
@@ -699,7 +693,7 @@ class qArchSearch:
                         p1 = list_qubit_edge[k][1]
                         tmp_time = max(list_depth_on_qubit[p0],
                             list_depth_on_qubit[p1]) \
-                            + self.swap_duration
+                            + 1
                         list_depth_on_qubit[p0] = tmp_time
                         list_depth_on_qubit[p1] = tmp_time
                         list_real_swap.append((k, tmp_time))
@@ -743,18 +737,8 @@ class qArchSearch:
         for (k, t) in list_result_swap:
             q0 = list_qubit_edge[k][0]
             q1 = list_qubit_edge[k][1]
-            if self.swap_duration == 1:
-                list_scheduled_gate_qubits[t].append((q0, q1))
-                list_scheduled_gate_name[t].append("SWAP")
-            elif self.swap_duration == 3:
-                list_scheduled_gate_qubits[t].append((q0, q1))
-                list_scheduled_gate_name[t].append("cx")
-                list_scheduled_gate_qubits[t - 1].append((q1, q0))
-                list_scheduled_gate_name[t - 1].append("cx")
-                list_scheduled_gate_qubits[t - 2].append((q0, q1))
-                list_scheduled_gate_name[t - 2].append("cx")
-            else:
-                raise ValueError("Expect SWAP duration one, or three")
+            list_scheduled_gate_qubits[t].append((q0, q1))
+            list_scheduled_gate_name[t].append("SWAP")
 
         extra_edge = []
         for i in range(count_extra_edge):
