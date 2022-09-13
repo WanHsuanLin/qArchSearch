@@ -569,7 +569,9 @@ class qArchSearch:
         if  tight_depth != None:
             find_min_depth == True
             tight_bound_depth = tight_depth
-        while not find_min_depth and swap_bound == None:
+        if swap_bound == None:
+            find_min_depth = True
+        while not find_min_depth:
             print("[INFO] Trying maximal depth = {}...".format(tight_bound_depth))
             # for depth optimization
             satisfiable = lsqc.check([UGE(tight_bound_depth, time[l]) for l in range(count_gate)])
@@ -590,7 +592,7 @@ class qArchSearch:
         # return tight_bound_depth, False, model, bound_swap_num
         if not find_min_depth:
             lsqc.pop()
-            return True, model
+            return 0, True, None, 0
         if swap_bound == None:
             lsqc.add([UGE(tight_bound_depth, time[l]) for l in range(count_gate)])
         # for swap optimization
