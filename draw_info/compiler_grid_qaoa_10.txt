@@ -1,5 +1,0 @@
-QAOA_10_grid,6
-SABRE,results_diff_compiler/grid/qaoa/sim/grid_heuristic_10_0_sabre_sim.csv
-tket,results_diff_compiler/grid/qaoa/sim/grid_heuristic_10_0_tket_sim.csv
-OLSQ,results_diff_compiler/grid/qaoa/sim/grid_optimal_10_0_sim.csv
-TB-OLSQ,results_diff_compiler/grid/qaoa/sim/grid_optimal_10_0_sim.csv

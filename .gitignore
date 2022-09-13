@@ -11,8 +11,6 @@ __pycache__
 /docs/source/_static
 /docs/source/_templates
 
-tmp.sh
-tmp_draw.sh
-tmp_exp.sh
-
 *.log
+
+/jetcas_exp/

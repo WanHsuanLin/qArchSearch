@@ -1,4 +1,4 @@
-from qArchSearch.olsq.device import qcDeviceSet
+from qArchSearch.qArchSearch.device import qcDeviceSet
 
 
 def get_char_graph(coupling:list):

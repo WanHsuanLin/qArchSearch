@@ -1,3 +1,0 @@
-a_qcnn_8,4,3
-hh,results_diff_compiler/hh/qcnn/sim/hh_optimal_8-4-2_fix_sim.csv
-grid,results_diff_compiler/grid/qcnn/sim/8-4-2_gs_d_optimal_time_8-4-2_sim.csv

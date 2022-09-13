@@ -1,5 +1,0 @@
-QCNN_8_hh,4
-SABRE,results_diff_compiler/hh/qcnn/sim/hh_heuristic_8_sabre_sim.csv
-tket,results_diff_compiler/hh/qcnn/sim/hh_heuristic_8_tket_sim.csv
-OLSQ,results_diff_compiler/hh/qcnn/sim/hh_optimal_8-4-2_fix_sim.csv
-TB-OLSQ,results_diff_compiler/hh/qcnn/sim/hh_optimal_8-4-2_fix_sim.csv

@@ -1,8 +1,8 @@
-from qArchSearch.olsq import qArchEval
+from qArchSearch.qArchSearch import qArchSearch
 import argparse
 
 from qArchSearch.device import get_device_set_hh, get_device_set_square_4by4
-from qArchSearch.olsq.util import get_qaoa_graph
+from qArchSearch.qArchSearch.util import get_qaoa_graph
 #from memory_profiler import memory_usage
 
 if __name__ == "__main__":
@@ -37,7 +37,7 @@ if __name__ == "__main__":
     else:
         my_mode = "mixed"
 
-    lsqc_searcher = qArchEval(mode=my_mode)
+    lsqc_searcher = qArchSearch(mode=my_mode)
 
     if args.device_set == "hh":
         lsqc_searcher.setdevice(
