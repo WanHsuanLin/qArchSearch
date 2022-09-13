@@ -27,27 +27,27 @@ if __name__ == "__main__":
         help="verbose level for Z3")
     args = parser.parse_args()
 
-    lsqc_searcher = qArchSearch()
+    arch_searcher = qArchSearch()
 
     if args.device_set == "hh":
-        lsqc_searcher.setdevice(
+        arch_searcher.setdevice(
             get_device_set_hh(benchmark=args.benchmark))
     else:
-        lsqc_searcher.setdevice(
+        arch_searcher.setdevice(
             get_device_set_square_4by4(benchmark=args.benchmark))
 
     if args.benchmark == "qaoa":
         program = [args.size,
             get_qaoa_graph(size=args.size, trial=args.trial),
             ["ZZ" for _ in range( (args.size * 3) // 2 )] ]
-        lsqc_searcher.setprogram(args.benchmark, program, "IR")
+        arch_searcher.setprogram(args.benchmark, program, "IR")
     else:
         file = open(args.filename)
-        lsqc_searcher.setprogram(args.benchmark, file.read())
+        arch_searcher.setprogram(args.benchmark, file.read())
         file.close()
 
     #mem_usage = memory_usage(f)
-    results = lsqc_searcher.search(args.folder, memory_max_size=args.memory_max_size*1000, verbose=args.verbose)
+    results = arch_searcher.search(args.folder, memory_max_size=args.memory_max_size*1000, verbose=args.verbose)
 
     # for i, result in enumerate(results):
     #     with open(f"./{args.folder}/extra_edge_{i}.json", 'a') as file_object:

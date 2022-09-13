@@ -23,21 +23,16 @@ Please make sure that you have `networkx` version `>=2.5` and `z3-solver` versio
 ```
 from qArchSearch.search import qArchSearch
 
-# initiate olsq with depth as objective, in normal mode
-lsqc_solver = OLSQ("depth", "normal")
+# initiate qArchSearch
+arch_searcher = qArchSearch()
 ```
+## Setting the architecture space
 
-There are two argument in the constructor of OLSQ: `objective_name` and `mode`.
-- `objective_name`: `"depth"`, `"swap"`, or `"fidelity"`.
-- `mode`:  `"normal"` or `"transition"`.
-The latter stands for TB-OLSQ in the paper, which is usually much faster with little loss of optimality.
+The architecture space is defined by (1) base architecture space, (2) flexible connections, and (3) flexible connection activation constraints
 
-## Setting the device
-
-To perform LSQC, we need to know the connections between the qubits, which is information about the physical device.
 We are going to use the `setdevice` method.
 In general, there are three ways: 
-1. Directly construct a device with some properties.
+1. Directly construct an architecture space with these features.
 2. Use one of the hard-coded devices (including all the devices appeared in the paper).
 3. Use device defined in other packages: refer to later parts of this tutorial on [Cirq](#cirq-interface) and [Qiskit](#qiskit-interface).
 

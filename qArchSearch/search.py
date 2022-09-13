@@ -8,8 +8,8 @@ import math
 import pkgutil
 
 TIMEOUT = 90000
-MEMORY_MAX_SIZE = 1000 * 58
-# MEMORY_MAX_SIZE = 0
+# MEMORY_MAX_SIZE = 1000 * 58
+MEMORY_MAX_SIZE = 0
 MAX_TREAD_NUM = 8
 VERBOSE = 0
 
@@ -564,8 +564,6 @@ class qArchSearch:
         find_min_depth = False
         # incremental solving use pop and push
         tight_bound_depth = self.bound_depth
-        if preprossess_only:
-            tight_bound_depth = 1
         if  tight_depth != None:
             find_min_depth == True
             tight_bound_depth = tight_depth
