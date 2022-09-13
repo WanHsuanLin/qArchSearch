@@ -32,7 +32,7 @@ for benchmarks in qcnn qaoa; do
             if [ ! -d "$folderName"    ]; then 
                 mkdir $folderName   
             fi
-            python3 -u run_qas.py $device_set $benchmarks $folderName --filename $circuit --mode $mode --memory_max_size $max_memory_usage | tee "$folderName/output.log"
+            python3 -u run_qas.py $device_set $benchmarks $folderName --filename $circuit --memory_max_size $max_memory_usage | tee "$folderName/output.log"
         done
     fi
 
@@ -43,7 +43,7 @@ for benchmarks in qcnn qaoa; do
                 if [ ! -d "$folderName"    ]; then 
                     mkdir $folderName   
                 fi
-                python3 -u run_qas.py $device_set $benchmarks $folderName --size $size --trial $trial --mode $mode --memory_max_size $max_memory_usage | tee "$folderName/output.log"
+                python3 -u run_qas.py $device_set $benchmarks $folderName --size $size --trial $trial --memory_max_size $max_memory_usage | tee "$folderName/output.log"
             done
         done
     fi

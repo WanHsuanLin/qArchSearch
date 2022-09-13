@@ -14,14 +14,14 @@ Below is a brief tutorial on how to use the package.
 ## Installation
 
 ```
-pip install -U olsq
+python3 -m pip install qArchSearch
 ```
 Please make sure that you have `networkx` version `>=2.5` and `z3-solver` version `>=4.8.9.0` in your Python environment.
 
 ## Initialization
 
 ```
-from olsq import OLSQ
+from qArchSearch.search import qArchSearch
 
 # initiate olsq with depth as objective, in normal mode
 lsqc_solver = OLSQ("depth", "normal")

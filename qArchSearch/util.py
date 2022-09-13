@@ -1,7 +1,7 @@
 import os
 import numpy as np
 # from qArchSearch.olsq.device import qcDeviceSet
-from qArchSearch.device import getNeighboringQubit
+from qArchSearch.devices.device import getNeighboringQubit
 
 SINGLE_QUBIT_GATE_FID = 0.999
 TWO_QUBIT_GATE_FID = 0.99

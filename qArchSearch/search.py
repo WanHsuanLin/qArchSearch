@@ -2,22 +2,16 @@ import datetime
 
 from z3 import Bool, Implies, And, Or, sat, unsat, Solver, set_option, BitVec, ULT, ULE, UGE, BitVecVal, PbLe, Not
 
-from qArchSearch.qArchSearch.input import input_qasm
-from qArchSearch.qArchSearch.device import qcDeviceSet
+from qArchSearch.input import input_qasm
+from qArchSearch.device import qcDeviceSet
 import math
 import pkgutil
-from enum import Enum
 
 TIMEOUT = 90000
 MEMORY_MAX_SIZE = 1000 * 58
 # MEMORY_MAX_SIZE = 0
 MAX_TREAD_NUM = 8
-VERBOSE = 10
-
-class Mode(Enum):
-    transition = 1
-    normal = 2
-    mix = 3
+VERBOSE = 0
 
 def collision_extracting(list_gate_qubits):
     """Extract collision relations between the gates,
@@ -87,22 +81,12 @@ def dependency_extracting(list_gate_qubits, count_program_qubit: int):
     return tuple(list_dependency)
 
 class qArchSearch:
-    def __init__(self, mode):
+    def __init__(self):
         """Set the objective of OLSQ, and whether it is transition-based
 
         Args:
             objective_name: can be "depth", "swap", or "fidelity"
-            mode: can be "normal" or "transition" (TB-OLSQ in the paper)       
         """
-
-        if mode == "transition":
-            self.mode = Mode.transition
-        elif mode == "normal":
-            self.mode = Mode.normal
-        elif mode == "mixed":
-            self.mode = Mode.mix
-        else:
-            raise ValueError("Invalid Choice of Transition-Based or Not")
 
         # These values should be updated in setdevice(...)
         self.device = None
@@ -150,8 +134,6 @@ class qArchSearch:
         # print("device extra edge: ", self.list_extra_qubit_edge)
         # print("device all edge: ", self.list_qubit_edge)
         self.swap_duration = device.swap_duration
-        if self.mode == Mode.transition:
-            self.swap_duration = 1
         # print("show edge idx:")
         for e in self.list_extra_qubit_edge:
             idx = self.list_qubit_edge.index(e)
@@ -220,22 +202,7 @@ class qArchSearch:
 
         # calculate the initial depth
         # increasing depth will depends on the gate duration
-        if self.mode == Mode.transition:
-            self.bound_depth = 1
-        else:
-            push_forward_depth = [0 for i in range(self.count_program_qubit)]
-            # for qubits in self.list_gate_qubits:
-            for qubits, g_time in zip(self.list_gate_qubits, self.list_gate_duration):
-                if len(qubits) == 1:
-                    # push_forward_depth[qubits[0]] += 1
-                    push_forward_depth[qubits[0]] += g_time
-                else:
-                    tmp_depth = push_forward_depth[qubits[0]]
-                    if tmp_depth < push_forward_depth[qubits[1]]:
-                        tmp_depth = push_forward_depth[qubits[1]]
-                    push_forward_depth[qubits[1]] = tmp_depth + g_time
-                    push_forward_depth[qubits[0]] = tmp_depth + g_time
-            self.bound_depth = max(push_forward_depth)
+        self.bound_depth = 1
         # print("bound_depth: ", self.bound_depth)
 
         count_gate = len(self.list_gate_qubits)
@@ -285,23 +252,13 @@ class qArchSearch:
             memory_max_alloc_count: set hard upper limit for memory allocations in Z3 (G)
             verbose: verbose stats in Z3
         """
+        print("========================================================================")
+        print("=                 Domain-Specific Quantum Optimization                 =")
+        print("========================================================================")
         if not self.inpput_dependency:
             self.list_gate_dependency = collision_extracting(self.list_gate_qubits)
-        if self.mode == Mode.transition:
-            print("Using transition based mode...")
-            _, results = self._search(False, None, folder, memory_max_size, verbose)
-        elif self.mode == Mode.normal:
-            print("Using normal mode...")
-            _, results = self._search(False, None, folder, memory_max_size, verbose)
-        elif self.mode == Mode.mix:
-            print("Using mixed mode...")
-            print("Perform preprocessing to find swap bound...")
-            swap_bound, _ = self._search(True, None, None, memory_max_size, verbose)
-            print(f"Finish proprocessing. SWAP bound is ({swap_bound[0]},{swap_bound[1]})")
-            print("Start normal searching...")
-            _, results = self._search(False, swap_bound, folder, memory_max_size, verbose)
-        else:
-            raise ValueError( ("Wrong type") )
+        print("[INFO] Using transition based mode...")
+        _, results = self._search(False, None, folder, memory_max_size, verbose)
         return results
 
     def _search(self, preprossess_only, swap_bound, folder = None, memory_max_size=MEMORY_MAX_SIZE, verbose = VERBOSE):
@@ -339,12 +296,9 @@ class qArchSearch:
         # tight_bound_depth: use for depth constraint
 
         # bound_depth: generate constraints until t = bound_depth
-        if preprossess_only or self.mode == Mode.transition:
-            bound_depth = 8 * self.bound_depth
-        else:
-            bound_depth = 2 * self.bound_depth
+        bound_depth = 8 * self.bound_depth
         while not_solved:
-            print("start adding constraints...")
+            print("[INFO] Start adding constraints...")
             # variable setting 
             pi, time, space, sigma, u = self._construct_variable(bound_depth, len(list_qubit_edge))
 
@@ -368,10 +322,7 @@ class qArchSearch:
 
             # # No swap for t<s
             # # swap gates can not overlap with swap
-            if preprossess_only or self.mode == Mode.transition:
-                self._add_swap_constraints(bound_depth, sigma, lsqc, model)
-            else:
-                self._add_swap_constraints(bound_depth, sigma, lsqc, model, True, time, space)
+            self._add_swap_constraints(bound_depth, sigma, lsqc, model)
             # Mapping Not Transformations by SWAP Gates.
             # Mapping Transformations by SWAP Gates.
             self._add_transformation_constraints(bound_depth, list_qubit_edge, lsqc, sigma, pi)
@@ -383,7 +334,7 @@ class qArchSearch:
             # TODO: iterate each swap num
             tight_depth = None
             for num_e in range(len(self.list_extra_qubit_edge)):
-                print(f"solving with max number of activate flexible edge = {num_e}")
+                print(f"[INFO] solving with max number of activate flexible edge = {num_e}")
                 per_start = datetime.datetime.now()
                 tight_depth, not_solved, model, n_swap = self._optimize_circuit(tight_depth, lsqc, preprossess_only, num_e, u, sigma, time, bound_depth, swap_bound)
                 if not_solved:
@@ -397,7 +348,7 @@ class qArchSearch:
                 else:
                     swap_bound = (0, n_swap)
                 results.append(self.write_results(model, time, pi, sigma, space, u))
-                print(f"Compilation time = {datetime.datetime.now() - per_start}.")
+                print(f"   <RESULT> Compilation time = {datetime.datetime.now() - per_start}.")
                 if folder != None:
                     import json
                     with open(f"./{folder}/extra_edge_{num_e}.json", 'w') as file_object:
@@ -407,7 +358,7 @@ class qArchSearch:
                 if results[-1]['extra_edge_num'] <= results[-2]['extra_edge_num']:
                     break
                 
-        print(f"Total compilation time = {datetime.datetime.now() - start_time}.")
+        print(f"   <RESULT> Total compilation time = {datetime.datetime.now() - start_time}.")
         return swap_bound, results
 
     def _count_swap(self, model, sigma, result_depth):
@@ -486,7 +437,7 @@ class qArchSearch:
                                 list_qubit_edge[k][0] == \
                                     pi[list_gate_qubits[l][1]][t])  )    ))
 
-    def _add_swap_constraints(self, bound_depth, list_qubit_edge, sigma, model, normal = False, time = None, space = None):
+    def _add_swap_constraints(self, bound_depth, list_qubit_edge, sigma, model):
         # if_overlap_edge takes in two edge indices _e_ and _e'_,
         # and returns whether or not they overlap
         count_qubit_edge = len(list_qubit_edge)
@@ -528,44 +479,13 @@ class qArchSearch:
                         model.add(Implies(sigma[k][t] == True,
                             sigma[kk][tt] == False))
         
-        if normal:
-            # swap gates can not ovelap with other gates
-            # the time interval should be modified
-            count_gate = len(self.list_gate_qubits)
-            for t in range(self.swap_duration - 1, bound_depth):
-                for k in range(count_qubit_edge):
-                    for l in range(count_gate):
-                        for tt in range(t - self.swap_duration + 1, t + self.list_gate_duration[l]):
-                            if l in self.list_gate_single:
-                                model.add(Implies(And(time[l] == tt,
-                                    Or(space[l] == list_qubit_edge[k][0],
-                                        space[l] == list_qubit_edge[k][1])),
-                                        sigma[k][t] == False             ))
-                            elif l in self.list_gate_two:
-                                model.add(Implies(And(
-                                    time[l] == tt, space[l] == k),
-                                        sigma[k][t] == False           ))
-                                for kk in list_overlap_edge[k]:
-                                    model.add(Implies(And(
-                                        time[l] == tt, space[l] == kk),
-                                            sigma[k][t] == False       ))
 
     def _add_dependency_constraints(self, preprossess_only, model, time, bound_depth):
         list_gate_duration = self.list_gate_duration
         list_gate_dependency = self.list_gate_dependency
         count_gate = len(self.list_gate_qubits)
-        if preprossess_only or self.mode == Mode.transition:
-            for d in list_gate_dependency:
-                model.add(ULE(time[d[0]],time[d[1]]))
-        else:
-            length = int(math.log2(bound_depth))+1
-            bit_duration_list = [BitVecVal(list_gate_duration[l], length) for l in range(count_gate)]
-            bit_duration_minus_one_list = [BitVecVal(list_gate_duration[l]-1, length) for l in range(count_gate)]
-            for d in list_gate_dependency:
-                model.add(ULE(time[d[0]] + bit_duration_list[d[1]], time[d[1]]))
-            # add initial condition for gates
-            for l in range(count_gate):
-                model.add(ULE(bit_duration_minus_one_list[l], time[l]))
+        for d in list_gate_dependency:
+            model.add(ULE(time[d[0]],time[d[1]]))
 
     def _add_transformation_constraints(self, bound_depth, list_qubit_edge, model, sigma, pi):
         # list_adjacency_qubit takes in a physical qubit index _p_, and
@@ -632,7 +552,7 @@ class qArchSearch:
         count_gate = len(self.list_gate_qubits)
         count_qubit_edge = len(self.list_qubit_edge)
         if swap_bound != None:
-            print(f"optimizing circuit with swap range ({swap_bound[0]},{swap_bound[1]}) ")
+            print(f"[INFO] optimizing circuit with swap range ({swap_bound[0]},{swap_bound[1]}) ")
             lower_b_swap = swap_bound[0]
             upper_b_swap = swap_bound[1]
         else:
@@ -649,8 +569,8 @@ class qArchSearch:
         if  tight_depth != None:
             find_min_depth == True
             tight_bound_depth = tight_depth
-        while not find_min_depth:
-            print("Trying maximal depth = {}...".format(tight_bound_depth))
+        while not find_min_depth and swap_bound == None:
+            print("[INFO] Trying maximal depth = {}...".format(tight_bound_depth))
             # for depth optimization
             satisfiable = lsqc.check([UGE(tight_bound_depth, time[l]) for l in range(count_gate)])
             if satisfiable == sat:
@@ -659,23 +579,24 @@ class qArchSearch:
                 n_swap = self._count_swap(model, sigma, tight_bound_depth)
                 upper_b_swap = min(n_swap, upper_b_swap)
                 bound_swap_num = (upper_b_swap+lower_b_swap)//2
+                print("[INFO] Find solution with SWAP count = {}...".format(n_swap))
+
             else:
                 # lsqc.pop()
-                if preprossess_only or self.mode == Mode.transition:
-                    tight_bound_depth += 1
-                else:
-                    tight_bound_depth = int(1.3 * tight_bound_depth)
+                tight_bound_depth += 1
                 if tight_bound_depth > bound_depth:
-                    print("FAIL to find depth witnin {}.".format(bound_depth))
+                    print("[INFO] FAIL to find depth witnin {}.".format(bound_depth))
                     break
+        # return tight_bound_depth, False, model, bound_swap_num
         if not find_min_depth:
             lsqc.pop()
             return True, model
-        lsqc.add([UGE(tight_bound_depth, time[l]) for l in range(count_gate)])
+        if swap_bound == None:
+            lsqc.add([UGE(tight_bound_depth, time[l]) for l in range(count_gate)])
         # for swap optimization
         find_min_swap = False
         while not find_min_swap:
-            print("Bound of Trying min swap = {}...".format(bound_swap_num))
+            print("[INFO] Bound of Trying min swap = {}...".format(bound_swap_num))
             satisfiable = lsqc.check(PbLe([(sigma[k][t],1) for k in range(count_qubit_edge)
                          for t in range(bound_depth)], bound_swap_num) )
             if satisfiable == sat:
@@ -690,7 +611,7 @@ class qArchSearch:
             else:
                 lower_b_swap = bound_swap_num + 1
                 if upper_b_swap <= lower_b_swap:
-                    print("Bound of Trying min swap = {}...".format(upper_b_swap))
+                    print("[INFO] Bound of Trying min swap = {}...".format(upper_b_swap))
                     satisfiable = lsqc.check(PbLe([(sigma[k][t],1) for k in range(count_qubit_edge)
                          for t in range(bound_depth)], upper_b_swap) )
                     assert(satisfiable == sat)
@@ -727,74 +648,73 @@ class qArchSearch:
             for t in range(result_depth):
                 if model[sigma[k][t]]:
                     list_result_swap.append((k, t))
-                    print(f"SWAP on physical edge ({list_qubit_edge[k][0]},"\
+                    print(f"   <RESULT> SWAP on physical edge ({list_qubit_edge[k][0]},"\
                         + f"{list_qubit_edge[k][1]}) at time {t}")
         for l in range(count_gate):
             if len(list_gate_qubits[l]) == 1:
                 qq = list_gate_qubits[l][0]
                 tt = result_time[l]
-                print(f"Gate {l}: {list_gate_name[l]} {qq} on qubit "\
+                print(f"   <RESULT> Gate {l}: {list_gate_name[l]} {qq} on qubit "\
                     + f"{model[pi[qq][tt]].as_long()} at time {tt}")
             else:
                 qq = list_gate_qubits[l][0]
                 qqq = list_gate_qubits[l][1]
                 tt = result_time[l]
-                print(f"Gate {l}: {list_gate_name[l]} {qq}, {qqq} on qubits "\
+                print(f"   <RESULT> Gate {l}: {list_gate_name[l]} {qq}, {qqq} on qubits "\
                     + f"{model[pi[qq][tt]].as_long()} and "\
                     + f"{model[pi[qqq][tt]].as_long()} at time {tt}")
         tran_detph = result_depth
 
         # transition based
-        if self.mode == Mode.transition:
-            self.swap_duration = self.device.swap_duration
-            real_time = [0] * count_gate
-            list_depth_on_qubit = [-1] * self.count_physical_qubit
-            list_real_swap = []
-            for block in range(result_depth):
-                for tmp_gate in range(count_gate):
-                    if result_time[tmp_gate] == block:
-                        qubits = list_gate_qubits[tmp_gate]
-                        if len(qubits) == 1:
-                            p0 = model[pi[qubits[0]][block]].as_long()
-                            real_time[tmp_gate] = \
-                                list_depth_on_qubit[p0] + 1
-                            list_depth_on_qubit[p0] = \
-                                real_time[tmp_gate]
-                        else:
-                            p0 = model[pi[qubits[0]][block]].as_long()
-                            p1 = model[pi[qubits[1]][block]].as_long()
-                            real_time[tmp_gate] = max(
-                                list_depth_on_qubit[p0],
-                                list_depth_on_qubit[p1]) + 1
-                            list_depth_on_qubit[p0] = \
-                                real_time[tmp_gate]
-                            list_depth_on_qubit[p1] = \
-                                real_time[tmp_gate]
-                            # print(f"{tmp_gate} {p0} {p1} real-time={real_time[tmp_gate]}")
+        self.swap_duration = self.device.swap_duration
+        real_time = [0] * count_gate
+        list_depth_on_qubit = [-1] * self.count_physical_qubit
+        list_real_swap = []
+        for block in range(result_depth):
+            for tmp_gate in range(count_gate):
+                if result_time[tmp_gate] == block:
+                    qubits = list_gate_qubits[tmp_gate]
+                    if len(qubits) == 1:
+                        p0 = model[pi[qubits[0]][block]].as_long()
+                        real_time[tmp_gate] = \
+                            list_depth_on_qubit[p0] + 1
+                        list_depth_on_qubit[p0] = \
+                            real_time[tmp_gate]
+                    else:
+                        p0 = model[pi[qubits[0]][block]].as_long()
+                        p1 = model[pi[qubits[1]][block]].as_long()
+                        real_time[tmp_gate] = max(
+                            list_depth_on_qubit[p0],
+                            list_depth_on_qubit[p1]) + 1
+                        list_depth_on_qubit[p0] = \
+                            real_time[tmp_gate]
+                        list_depth_on_qubit[p1] = \
+                            real_time[tmp_gate]
+                        # print(f"{tmp_gate} {p0} {p1} real-time={real_time[tmp_gate]}")
 
-                if block < result_depth - 1:
-                    for (k, t) in list_result_swap:
-                        if t == block:
-                            p0 = list_qubit_edge[k][0]
-                            p1 = list_qubit_edge[k][1]
-                            tmp_time = max(list_depth_on_qubit[p0],
-                                list_depth_on_qubit[p1]) \
-                                + self.swap_duration
-                            list_depth_on_qubit[p0] = tmp_time
-                            list_depth_on_qubit[p1] = tmp_time
-                            list_real_swap.append((k, tmp_time))
-                # print(list_depth_on_qubit)
-            result_time = real_time
-            real_depth = 0
-            for tmp_depth in list_depth_on_qubit:
-                if real_depth < tmp_depth + 1:
-                    real_depth = tmp_depth + 1
-            result_depth = real_depth
-            list_result_swap = list_real_swap
-            # print(list_result_swap)
+            if block < result_depth - 1:
+                for (k, t) in list_result_swap:
+                    if t == block:
+                        p0 = list_qubit_edge[k][0]
+                        p1 = list_qubit_edge[k][1]
+                        tmp_time = max(list_depth_on_qubit[p0],
+                            list_depth_on_qubit[p1]) \
+                            + self.swap_duration
+                        list_depth_on_qubit[p0] = tmp_time
+                        list_depth_on_qubit[p1] = tmp_time
+                        list_real_swap.append((k, tmp_time))
+            # print(list_depth_on_qubit)
+        result_time = real_time
+        real_depth = 0
+        for tmp_depth in list_depth_on_qubit:
+            if real_depth < tmp_depth + 1:
+                real_depth = tmp_depth + 1
+        result_depth = real_depth
+        list_result_swap = list_real_swap
+        # print(list_result_swap)
 
-        print(f"result- additional SWAP count = {len(list_result_swap)}.")
-        print(f"result- circuit depth = {result_depth}.")
+        print(f"   <RESULT> - additional SWAP count = {len(list_result_swap)}.")
+        print(f"   <RESULT> - circuit depth = {result_depth}.")
 
         list_scheduled_gate_qubits = [[] for i in range(result_depth)]
         list_scheduled_gate_name = [[] for i in range(result_depth)]
@@ -807,8 +727,7 @@ class qArchSearch:
             elif l in list_gate_two:
                 [q0, q1] = list_gate_qubits[l]
                 tmp_t = t
-                if self.mode == Mode.transition:
-                    tmp_t = model[time[l]].as_long()
+                tmp_t = model[time[l]].as_long()
                 q0 = model[pi[q0][tmp_t]].as_long()
                 q1 = model[pi[q1][tmp_t]].as_long()
                 list_scheduled_gate_qubits[t].append((q0, q1))
@@ -816,8 +735,7 @@ class qArchSearch:
                 raise ValueError("Expect single-qubit or two-qubit gate.")
 
         tmp_depth = result_depth - 1
-        if self.mode == Mode.transition:
-            tmp_depth = tran_detph - 1
+        tmp_depth = tran_detph - 1
         final_mapping = [model[pi[m][tmp_depth]].as_long() for m in range(count_program_qubit)]
 
         initial_mapping = [model[pi[m][0]].as_long() for m in range(count_program_qubit)]
@@ -882,11 +800,4 @@ class qArchSearch:
         info["gate_spec"] = results[1]
         info["initial_mapping"] = results[3]
         info["final_mapping"] = results[4]
-        # info["coupling_graph"] = get_char_graph(device_connection)
-        if self.mode == Mode.transition:
-            info["olsq_mode"] = "transition"
-        elif self.mode == Mode.normal:
-            info["olsq_mode"] = "normal"
-        else:
-            info["olsq_mode"] = "mix"
         return info

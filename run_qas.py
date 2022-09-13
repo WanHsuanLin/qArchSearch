@@ -1,8 +1,8 @@
-from qArchSearch.qArchSearch import qArchSearch
+from qArchSearch.search import qArchSearch
 import argparse
 
-from qArchSearch.device import get_device_set_hh, get_device_set_square_4by4
-from qArchSearch.qArchSearch.util import get_qaoa_graph
+from qArchSearch.devices.device import get_device_set_hh, get_device_set_square_4by4
+from qArchSearch.util import get_qaoa_graph
 #from memory_profiler import memory_usage
 
 if __name__ == "__main__":
@@ -21,23 +21,13 @@ if __name__ == "__main__":
         help="The index of qaoa circuit: from 0 to 9")
     parser.add_argument("--filename", dest="filename", type=str,
         help="The file name of the arith circuit")
-    parser.add_argument("--mode", dest="mode", type=int,
-        help="mode: 1 TB-OLSQ, 2 OLSQ, 3 mix")
     parser.add_argument("--memory_max_size", dest="memory_max_size", type=int, default=0,
         help="set hard upper limit for memory consumption (G)")
     parser.add_argument("--verbose", dest="verbose", type=int, default=0,
         help="verbose level for Z3")
     args = parser.parse_args()
 
-
-    if args.mode == 1:
-        my_mode = "transition"
-    elif args.mode == 2:
-        my_mode = "normal"
-    else:
-        my_mode = "mixed"
-
-    lsqc_searcher = qArchSearch(mode=my_mode)
+    lsqc_searcher = qArchSearch()
 
     if args.device_set == "hh":
         lsqc_searcher.setdevice(
@@ -57,7 +47,6 @@ if __name__ == "__main__":
         file.close()
 
     #mem_usage = memory_usage(f)
-    print("start searching...")
     results = lsqc_searcher.search(args.folder, memory_max_size=args.memory_max_size*1000, verbose=args.verbose)
 
     # for i, result in enumerate(results):
