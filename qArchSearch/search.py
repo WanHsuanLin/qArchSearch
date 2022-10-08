@@ -6,6 +6,7 @@ from qArchSearch.input import input_qasm
 from qArchSearch.device import qcDeviceSet
 import math
 import pkgutil
+from pysat.card import CardEnc
 
 TIMEOUT = 90000
 # MEMORY_MAX_SIZE = 1000 * 58
@@ -297,7 +298,7 @@ class qArchSearch:
         while not_solved:
             print("[INFO] Start adding constraints...")
             # variable setting 
-            pi, time, space, sigma, u = self._construct_variable(bound_depth, len(list_qubit_edge))
+            pi, time, sigma, u = self._construct_variable(bound_depth, len(list_qubit_edge))
 
             lsqc = Solver()
             # lsqc = SolverFor("QF_BV")
@@ -312,10 +313,10 @@ class qArchSearch:
             self._add_injective_mapping_constraints(bound_depth, pi, lsqc)
 
             # Consistency between Mapping and Space Coordinates.
-            self._add_consistency_gate_constraints(bound_depth, list_qubit_edge, pi, space, time, lsqc)
+            self._add_consistency_gate_constraints(bound_depth, list_qubit_edge, pi, time, lsqc)
             
             # Avoiding Collisions and Respecting Dependencies. 
-            self._add_dependency_constraints(preprossess_only, lsqc, time, bound_depth)
+            self._add_dependency_constraints(lsqc, time)
 
             # # No swap for t<s
             # # swap gates can not overlap with swap
@@ -326,14 +327,14 @@ class qArchSearch:
 
             if not preprossess_only:
                 # record the use of the extra edge
-                self._add_edge_constraints(bound_depth, u, space, sigma, lsqc)
+                self._add_edge_constraints(bound_depth, u, pi, time, sigma, lsqc)
                 
             # TODO: iterate each swap num
             tight_depth = None
             for num_e in range(len(self.list_extra_qubit_edge)):
                 print(f"[INFO] solving with max number of activate flexible edge = {num_e}")
                 per_start = datetime.datetime.now()
-                tight_depth, not_solved, result, n_swap = self._optimize_circuit(tight_depth, lsqc, num_e, u, sigma, time, bound_depth, swap_bound, pi, space)
+                tight_depth, not_solved, result, n_swap = self._optimize_circuit(tight_depth, lsqc, num_e, u, sigma, time, bound_depth, swap_bound, pi)
                 if not_solved:
                     bound_depth *= 2
                     break
@@ -368,19 +369,16 @@ class qArchSearch:
 
     def _construct_variable(self, bound_depth, count_qubit_edge):
         # at cycle t, logical qubit q is mapped to pi[q][t]
-        length = int(math.log2(max(count_qubit_edge, self.count_physical_qubit)))+1
+        length = int(math.log2(self.count_physical_qubit))+1
         pi = [[BitVec(("map_q{}_t{}".format(i, j)), length) for j in range(bound_depth)]
                 for i in range(self.count_program_qubit)]
 
         # space coordinate for gate l is space[l]
-        space = [BitVec("space{}".format(i), length) for i in range(len(self.list_gate_qubits))]
+        # space = [BitVec("space{}".format(i), length) for i in range(len(self.list_gate_qubits))]
         
         # time coordinate for gate l is time[l]
         length = int(math.log2(bound_depth))+1
         time = [BitVec("time_{}".format(i), length) for i in range(len(self.list_gate_qubits))]
-
-        
-
 
         # if at cycle t, a SWAP finishing on edge k, then sigma[k][t]=1
         sigma = [[Bool("ifswap_e{}_t{}".format(i, j))
@@ -389,7 +387,7 @@ class qArchSearch:
         # if an extra edge e is used, then u[e] = 1
         u = [Bool("u_e{}".format(i)) for i in range(len(self.list_extra_qubit_edge))]
 
-        return pi, time, space, sigma, u
+        return pi, time, sigma, u
 
     def _add_injective_mapping_constraints(self, bound_depth, pi, model):
         # Injective Mapping
@@ -399,40 +397,15 @@ class qArchSearch:
                 for mm in range(m):
                     model.add(pi[m][t] != pi[mm][t])
 
-    def _add_consistency_gate_constraints(self, bound_depth, list_qubit_edge, pi, space, time, model):
+    def _add_consistency_gate_constraints(self, bound_depth, list_qubit_edge, pi, time, model):
     # def _add_consistency_gate_constraints(self, bound_depth, list_qubit_edge, f_map, space, time, model):
         # Consistency between Mapping and Space Coordinates.
         list_gate_qubits = self.list_gate_qubits
-        count_gate = len(list_gate_qubits)
-        count_qubit_edge = len(list_qubit_edge)
-        list_gate_two = self.list_gate_two
-        list_gate_single = self.list_gate_single
-
-        length = int(math.log2(max(count_qubit_edge, self.count_physical_qubit)))+1
-        bv_zero = BitVecVal(0, length)
-        bv_count_qubit = BitVecVal(self.count_physical_qubit, length)
-        bv_count_qubit_edge = BitVecVal(count_qubit_edge, length)
-
-
-        for l in range(count_gate):
-            if l in list_gate_single:
-                model.add(ULE(bv_zero, space[l]), ULT(space[l], bv_count_qubit))
-                for t in range(bound_depth):
-                    model.add(Implies(time[l] == t,
-                        pi[list_gate_qubits[l][0]][t] == space[l]))
-            elif l in list_gate_two:
-                model.add(ULE(bv_zero, space[l]), ULT(space[l], bv_count_qubit_edge))
-                for k in range(count_qubit_edge):
-                    for t in range(bound_depth):
-                        model.add(Implies(And(time[l] == t, space[l] == k),
-                            Or(And(list_qubit_edge[k][0] == \
-                                    pi[list_gate_qubits[l][0]][t],
-                                list_qubit_edge[k][1] == \
-                                    pi[list_gate_qubits[l][1]][t]),
-                            And(list_qubit_edge[k][1] == \
-                                    pi[list_gate_qubits[l][0]][t],
-                                list_qubit_edge[k][0] == \
-                                    pi[list_gate_qubits[l][1]][t])  )    ))
+        
+        for l in self.list_gate_two:
+            for t in range(bound_depth):
+                model.add(Or(Not(time[l] == t), Or([Or(And(pi[list_gate_qubits[l][0]][t] == edge[0], pi[list_gate_qubits[l][1]][t] == edge[1]), \
+                                And(pi[list_gate_qubits[l][0]][t] == edge[1], pi[list_gate_qubits[l][1]][t] == edge[0])) for edge in list_qubit_edge ] )))
 
     def _add_swap_constraints(self, bound_depth, list_qubit_edge, sigma, model):
         # if_overlap_edge takes in two edge indices _e_ and _e'_,
@@ -473,10 +446,8 @@ class qArchSearch:
                             sigma[kk][tt] == False))
         
 
-    def _add_dependency_constraints(self, preprossess_only, model, time, bound_depth):
-        list_gate_duration = self.list_gate_duration
+    def _add_dependency_constraints(self, model, time):
         list_gate_dependency = self.list_gate_dependency
-        count_gate = len(self.list_gate_qubits)
         for d in list_gate_dependency:
             model.add(ULE(time[d[0]],time[d[1]]))
 
@@ -518,15 +489,19 @@ class qArchSearch:
                         pi[m][t] == list_qubit_edge[k][1]),
                             pi[m][t + 1] == list_qubit_edge[k][0]))
 
-    def _add_edge_constraints(self, bound_depth, u, space, sigma, model):
+    def _add_edge_constraints(self, bound_depth, u, pi, time, sigma, model):
         # record the use of the extra edge
+        list_gate_qubits = self.list_gate_qubits
         count_gate = len(self.list_gate_qubits)
         list_extra_qubit_edge = self.list_extra_qubit_edge
         list_extra_qubit_edge_idx = self.list_extra_qubit_edge_idx
         for e in range(len(list_extra_qubit_edge)):
-            all_gate = [space[l] == list_extra_qubit_edge_idx[e] for l in range(count_gate)]
+            all_gate = [Or(pi[list_gate_qubits[l][0]][time[l]] == list_extra_qubit_edge_idx[e][0], \
+                            pi[list_gate_qubits[l][1]][time[l]] == list_extra_qubit_edge_idx[e][0], \
+                            pi[list_gate_qubits[l][0]][time[l]] == list_extra_qubit_edge_idx[e][1], \
+                            pi[list_gate_qubits[l][1]][time[l]] == list_extra_qubit_edge_idx[e][1]) for l in self.list_gate_two]
             swap_gate = [sigma[list_extra_qubit_edge_idx[e]][t] for t in range(bound_depth - 1)]
-            model.add(Or(all_gate + swap_gate) == u[e])
+            model.add(Or(all_gate, swap_gate) == u[e])
         
         # add conflict edge use
         for edge_set in self.list_conflict_edge_set:
@@ -538,22 +513,98 @@ class qArchSearch:
                 idxs = []
                 for edge in edge_set:
                     idxs.append(list_extra_qubit_edge_idx.index(self.dict_extra_qubit_edge_idx[edge]))
-                model.add(PbLe([(u[idx],1) for idx in idxs], 1) )                  
-                
+                # model.add(PbLe([(u[idx],1) for idx in idxs], 1) )                  
+                num_u = 1+len(idxs)
+                u_conflic_list = [i for i in range(1,num_u)]
+                # print(len(sigma_list))
+                # print("Using encoding mehtod {}".format(self.card_encoding))
+                cnf = CardEnc.atmost(lits = u_conflic_list, bound = 1, encoding = 1)
+                ancillary = dict()
+                for c in cnf.clauses:
+                    or_list = []
+                    for l in c:
+                        var = abs(l)
+                        if var < num_u:
+                            if l < 0:
+                                or_list.append(Not(u[var]))
+                            else:
+                                or_list.append(u[var])
+                        else:
+                            if var not in ancillary.keys():
+                                ancillary[var] = Bool("anx_u_conflict_{}".format(var))
+                            if l < 0:
+                                or_list.append(Not(ancillary[var]))
+                            else:
+                                or_list.append(ancillary[var])
+                    model.add(Or(or_list))
+                # print("clauses num: {}".format(len(cnf.clauses)))
+                # print("anxillary num: {}".format(len(ancillary)))
+    
+    def _add_atmostk_cnf_for_u(self, model, u, k):
+        num_u = 1+len(self.list_extra_qubit_edge)
+        u_conflic_list = [i for i in range(1,num_u)]
+        # print(len(sigma_list))
+        # print("Using encoding mehtod {}".format(self.card_encoding))
+        cnf = CardEnc.atmost(lits = u_conflic_list, bound = k, encoding = 1)
+        ancillary = dict()
+        for c in cnf.clauses:
+            or_list = []
+            for l in c:
+                var = abs(l)
+                if var < num_u:
+                    if l < 0:
+                        or_list.append(Not(u[var]))
+                    else:
+                        or_list.append(u[var])
+                else:
+                    if var not in ancillary.keys():
+                        ancillary[var] = Bool("anx_u_{}".format(var))
+                    if l < 0:
+                        or_list.append(Not(ancillary[var]))
+                    else:
+                        or_list.append(ancillary[var])
+            model.add(Or(or_list))
 
-    def _optimize_circuit(self, tight_depth, lsqc, num_e, u, sigma, time, bound_depth, swap_bound, pi, space):
+    def _add_atmostk_cnf_swap(self, model, sigma, k, tight_bound_depth):
+        num_sigma = 1+(tight_bound_depth+1)*len(self.list_qubit_edge)
+        sigma_list = [i for i in range(1,num_sigma)]
+        print("Using encoding mehtod {}".format(self.card_encoding))
+        cnf = CardEnc.atmost(lits = sigma_list, bound = k, encoding = self.card_encoding)
+        ancillary = dict()
+        for c in cnf.clauses:
+            or_list = []
+            for l in c:
+                var = abs(l)
+                if var < num_sigma:
+                    sigma_idx1 = (var - 1)//(1+tight_bound_depth)
+                    sigma_idx2 = (var - 1) % (1+tight_bound_depth)
+                    # print(sigma_idx1, sigma_idx2)
+                    if l < 0:
+                        or_list.append(Not(sigma[sigma_idx1][sigma_idx2]))
+                    else:
+                        or_list.append(sigma[sigma_idx1][sigma_idx2])
+                else:
+                    if var not in ancillary.keys():
+                        ancillary[var] = Bool("anx_swap_{}".format(var))
+                    if l < 0:
+                        or_list.append(Not(ancillary[var]))
+                    else:
+                        or_list.append(ancillary[var])
+            model.add(Or(or_list))
+        print("clauses num: {}".format(len(cnf.clauses)))
+        print("anxillary num: {}".format(len(ancillary)))
+
+    def _optimize_circuit(self, tight_depth, lsqc, num_e, u, sigma, time, bound_depth, swap_bound, pi):
         count_gate = len(self.list_gate_qubits)
-        count_qubit_edge = len(self.list_qubit_edge)
         if swap_bound != None:
             print(f"[INFO] optimizing circuit with swap range ({swap_bound[0]},{swap_bound[1]}) ")
-            lower_b_swap = swap_bound[0]
             upper_b_swap = swap_bound[1]
         else:
             upper_b_swap = count_gate
-            lower_b_swap = 0
         bound_swap_num = 0
         lsqc.push()
-        lsqc.add(PbLe([(u[e], 1) for e in range(len(self.list_extra_qubit_edge))], num_e) )
+        # lsqc.add(PbLe([(u[e], 1) for e in range(len(self.list_extra_qubit_edge))], num_e) )
+        self._add_atmostk_cnf_for_u(lsqc, u, num_e)
         find_min_depth = False
         # incremental solving use pop and push
         tight_bound_depth = self.bound_depth
@@ -590,8 +641,9 @@ class qArchSearch:
         while not find_min_swap:
             lsqc.push()
             print("[INFO] Bound of Trying min swap = {}...".format(upper_b_swap))
-            lsqc.add(PbLe([(sigma[k][t],1) for k in range(count_qubit_edge)
-                         for t in range(bound_depth)], upper_b_swap) )
+            # lsqc.add(PbLe([(sigma[k][t],1) for k in range(count_qubit_edge)
+            #              for t in range(bound_depth)], upper_b_swap) )
+            self._add_atmostk_cnf_swap(lsqc, sigma, upper_b_swap, tight_bound_depth)
             satisfiable = lsqc.check()
             if satisfiable == sat:
                 model = lsqc.model()
@@ -603,7 +655,7 @@ class qArchSearch:
                     find_min_swap = True
                     not_solved = False
 
-                results = self.write_results(model, time, pi, sigma, space, u)
+                results = self.write_results(model, time, pi, sigma, u)
             else:
                 find_min_swap = True
                 not_solved = False
@@ -613,7 +665,7 @@ class qArchSearch:
         return tight_bound_depth, not_solved, results, bound_swap_num
 
 
-    def _extract_results(self, model, time, pi, sigma, space, u):
+    def _extract_results(self, model, time, pi, sigma, u):
         # post-processing
         list_gate_two = self.list_gate_two
         list_gate_single = self.list_gate_single
@@ -710,7 +762,7 @@ class qArchSearch:
             t = result_time[l]
             list_scheduled_gate_name[t].append(list_gate_name[l])
             if l in list_gate_single:
-                q = model[space[l]].as_long()
+                q = model[pi[list_gate_qubits[l][0]][t]].as_long()
                 list_scheduled_gate_qubits[t].append((q,))
             elif l in list_gate_two:
                 [q0, q1] = list_gate_qubits[l]
@@ -749,8 +801,8 @@ class qArchSearch:
                 final_mapping,
                 extra_edge)
     
-    def write_results(self, model, time, pi, sigma, space, u):
-        results = self._extract_results(model, time, pi, sigma, space, u)
+    def write_results(self, model, time, pi, sigma, u):
+        results = self._extract_results(model, time, pi, sigma, u)
         D = results[0]
         program_out = ""
         g2 = 0

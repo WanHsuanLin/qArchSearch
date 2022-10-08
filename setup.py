@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="qArchSearch",
-    version="1.0.1",
+    version="1.0.2",
     author="Wan-Hsuan Lin",
     author_email="wanhsuanlin@ucla.edu",
     description="qArchSearch: A Domain-Secific Quantum Archticture Optimization Tool",
