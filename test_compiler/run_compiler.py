@@ -27,7 +27,7 @@ def run_sabre(benchmark, circuit_info, coupling, objective, count_physical_qubit
     # qc.draw(scale=0.7, filename = "cir.png", output='mpl', style='color')
     device = CouplingMap(couplinglist = coupling, description="sabre_test")
     # initialize sabre
-    sb = SabreSwap(coupling_map = device, heuristic = objective, seed = 0)
+    sb = SabreLayout(coupling_map = device, heuristic = objective, seed = 0)
     pass_manager = PassManager(sb)
     sabre_cir = pass_manager.run(qc)
     # sabre_cir.draw(scale=0.7, filename="sabrecir.png", output='mpl', style='color')
