@@ -2,7 +2,7 @@ from platform import architecture
 from qiskit.transpiler import CouplingMap
 from qiskit import QuantumCircuit
 from qiskit.transpiler import PassManager
-from qiskit.transpiler.passes import SabreSwap
+from qiskit.transpiler.passes import SabreLayout
 from qiskit.converters import *
 
 from pytket.architecture import Architecture
