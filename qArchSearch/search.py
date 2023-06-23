@@ -1,6 +1,6 @@
 import datetime
 
-from z3 import Bool, Implies, And, Or, sat, unsat, Solver, set_option, BitVec, ULT, ULE, UGE, BitVecVal, PbLe, Not
+from z3 import Bool, Implies, And, Or, sat, Solver, set_option, BitVec, ULT, ULE, UGE, Not
 
 from qArchSearch.input import input_qasm
 from qArchSearch.device import qcDeviceSet
