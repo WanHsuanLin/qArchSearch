@@ -558,7 +558,7 @@ class qArchSearch:
             swap_gate = [sigma[list_extra_qubit_edge_idx[e]][t] for t in range(bound_depth - 1)]
             model.add(Or(all_gate))
             model.add(Or(swap_gate))
-            model.add(Or(all_gate, swap_gate) == u[e])
+            model.add(Or(Or(swap_gate), Or(all_gate)) == u[e])
         
 
 
