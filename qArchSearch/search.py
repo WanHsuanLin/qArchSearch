@@ -359,7 +359,7 @@ class qArchSearch:
         print(f"   <RESULT> Total compilation time = {datetime.datetime.now() - start_time}.")
         return swap_bound, results
     
-    def dump(self, folder: str = './', bound_depth = 5, bound_swap = 10):
+    def dump(self, folder: str = './', bound_depth = 5, bound_swap = 10, bound_edge = 1):
         """
         dump constraints for OLSQ mode
         """
@@ -392,7 +392,7 @@ class qArchSearch:
             # record the use of the extra edge
         self._add_edge_constraints(bound_depth, u, pi, time, sigma, lsqc)
 
-        self._add_atmostk_cnf_for_u(lsqc, u, 1)
+        self._add_atmostk_cnf_for_u(lsqc, u, bound_edge)
         
         self._add_atmostk_cnf_swap(lsqc, sigma, bound_swap, bound_depth-1)
         
