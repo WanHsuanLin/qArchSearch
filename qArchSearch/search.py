@@ -602,10 +602,10 @@ class qArchSearch:
                 # print("anxillary num: {}".format(len(ancillary)))
     
     def _add_atmostk_cnf_for_u(self, model, u, k):
-        print(u)
-        print(len(u))
+        # print(u)
+        # print(len(u))
         num_u = 1+len(self.list_extra_qubit_edge)
-        print(num_u)
+        # print(num_u)
         u_conflic_list = [i for i in range(1,num_u)]
         # print(len(sigma_list))
         # print("Using encoding mehtod {}".format(self.card_encoding))
@@ -633,7 +633,7 @@ class qArchSearch:
     def _add_atmostk_cnf_swap(self, model, sigma, k, tight_bound_depth):
         num_sigma = 1+(tight_bound_depth+1)*len(self.list_qubit_edge)
         sigma_list = [i for i in range(1,num_sigma)]
-        print("Using encoding mehtod {}".format(self.card_encoding))
+        # print("Using encoding mehtod {}".format(self.card_encoding))
         cnf = CardEnc.atmost(lits = sigma_list, bound = k, encoding = self.card_encoding)
         ancillary = dict()
         for c in cnf.clauses:
