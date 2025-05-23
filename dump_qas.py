@@ -16,6 +16,7 @@ for size in [10, 12, 16]:
     program = [size,
         get_qaoa_graph(size=size, trial=0),
         ["ZZ" for _ in range( (size * 3) // 2 )] ]
+    print(program)
     arch_searcher.setprogram("qaoa", program, "IR")
 
     #mem_usage = memory_usage(f)
