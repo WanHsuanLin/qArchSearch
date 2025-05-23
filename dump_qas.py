@@ -24,6 +24,10 @@ for size in [10, 12, 16]:
     results = arch_searcher.dump("cnf", bound_depth = 5, bound_swap = 10, bound_edge = 2)
     results = arch_searcher.dump("cnf", bound_depth = 5, bound_swap = 10, bound_edge = 3)
 
+    results = arch_searcher.dump("cnf", bound_depth = 5, bound_swap = 5, bound_edge = 1)
+    results = arch_searcher.dump("cnf", bound_depth = 5, bound_swap = 5, bound_edge = 2)
+    results = arch_searcher.dump("cnf", bound_depth = 5, bound_swap = 5, bound_edge = 3)
+
     # for i, result in enumerate(results):
     #     with open(f"./{args.folder}/extra_edge_{i}.json", 'a') as file_object:
     #         if args.benchmark == "qcnn":
