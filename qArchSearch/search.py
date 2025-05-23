@@ -562,7 +562,14 @@ class qArchSearch:
             #                     pi[list_gate_qubits[l][1]][t] == list_extra_qubit_edge_idx[e][1]))
             #                 for t in range(bound_depth)
             #     )
-            
+            all_gate = [(t, l)
+                            for t in range(bound_depth) for l in self.list_gate_two]
+            print(all_gate)
+            for l in self.list_gate_two:
+                for t in range(bound_depth):
+                    print(pi[list_gate_qubits[l][0]][t])
+                    print(list_extra_qubit_edge_idx[e][0])
+                    
             all_gate = [And( time[l] == t,
                                 Or(pi[list_gate_qubits[l][0]][t] == list_extra_qubit_edge_idx[e][0], \
                                 pi[list_gate_qubits[l][1]][t] == list_extra_qubit_edge_idx[e][0], \
