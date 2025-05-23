@@ -1,6 +1,6 @@
 import datetime
 
-from z3 import Bool, Implies, And, Or, sat, Solver, set_option, BitVec, ULT, ULE, UGE, Not
+from z3 import Bool, Implies, And, Or, sat, Solver, set_option, BitVec, ULT, ULE, UGE, Not, Goal, BitVecVal, Then
 
 from qArchSearch.input import input_qasm
 from qArchSearch.device import qcDeviceSet
@@ -358,6 +358,57 @@ class qArchSearch:
                 
         print(f"   <RESULT> Total compilation time = {datetime.datetime.now() - start_time}.")
         return swap_bound, results
+    
+    def dump(self, folder: str = './', bound_depth = 5, bound_swap = 10):
+        """
+        dump constraints for OLSQ mode
+        """
+        # bound_depth: generate constraints until t = bound_depth
+        print("start adding constraints...")
+        # variable setting 
+        if not self.inpput_dependency:
+            self.list_gate_dependency = collision_extracting(self.list_gate_qubits)
+        list_qubit_edge = self.list_qubit_edge
+
+        pi, time, sigma, u = self._construct_variable(bound_depth, len(list_qubit_edge))
+
+        lsqc = Goal()
+        # constraint setting
+        self._add_injective_mapping_constraints(bound_depth, pi, lsqc)
+
+        # Consistency between Mapping and Space Coordinates.
+        self._add_consistency_gate_constraints(bound_depth, list_qubit_edge, pi, time, lsqc)
+        
+        # Avoiding Collisions and Respecting Dependencies. 
+        self._add_dependency_constraints(lsqc, time)
+
+        # # No swap for t<s
+        # # swap gates can not overlap with swap
+        self._add_swap_constraints(bound_depth, sigma, lsqc, None)
+        # Mapping Not Transformations by SWAP Gates.
+        # Mapping Transformations by SWAP Gates.
+        self._add_transformation_constraints(bound_depth, list_qubit_edge, lsqc, sigma, pi)
+
+            # record the use of the extra edge
+        self._add_edge_constraints(bound_depth, u, pi, time, sigma, lsqc)
+
+        self._add_atmostk_cnf_for_u(lsqc, u, 1)
+        
+        self._add_atmostk_cnf_swap(lsqc, sigma, bound_swap, bound_depth-1)
+        
+        length = int(math.log2(bound_depth))+1
+        bit_tight_bound_depth = BitVecVal(bound_depth-1, length)
+        lsqc.add([UGE(bit_tight_bound_depth, time[l]) for l in range(len(self.list_gate_qubits))])
+        # print("time to generate constraints: {}".format(timeit.default_timer() - start))
+        if bound_swap >=0:
+            self._add_atmostk_cnf(lsqc, sigma, bound_swap, bound_depth-1)
+        tactic = Then('simplify','propagate-values','solve-eqs','card2bv','bit-blast', 'tseitin-cnf')
+        output_file_name = folder+"/"+str(self.count_physical_qubit)+"_"+str(self.count_program_qubit) + "_" + str(bound_depth) + ".txt"
+        cnf = tactic(lsqc)[0]
+        with open(output_file_name,"w") as ous:
+            ous.write(cnf.dimacs())
+        return
+
 
     def _count_swap(self, model, sigma, result_depth):
         n_swap = 0
