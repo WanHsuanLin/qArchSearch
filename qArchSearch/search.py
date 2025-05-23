@@ -616,6 +616,7 @@ class qArchSearch:
             for l in c:
                 var = abs(l)
                 if var < num_u:
+                    var -= 1
                     if l < 0:
                         or_list.append(Not(u[var]))
                     else:
