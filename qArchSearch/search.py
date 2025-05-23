@@ -547,10 +547,13 @@ class qArchSearch:
         list_extra_qubit_edge = self.list_extra_qubit_edge
         list_extra_qubit_edge_idx = self.list_extra_qubit_edge_idx
         for e in range(len(list_extra_qubit_edge)):
-            all_gate = [Or(pi[list_gate_qubits[l][0]][time[l]] == list_extra_qubit_edge_idx[e][0], \
-                            pi[list_gate_qubits[l][1]][time[l]] == list_extra_qubit_edge_idx[e][0], \
-                            pi[list_gate_qubits[l][0]][time[l]] == list_extra_qubit_edge_idx[e][1], \
-                            pi[list_gate_qubits[l][1]][time[l]] == list_extra_qubit_edge_idx[e][1]) for l in self.list_gate_two]
+            all_gate = [Implies( time[l] == t,
+                                Or(pi[list_gate_qubits[l][0]][t] == list_extra_qubit_edge_idx[e][0], \
+                                pi[list_gate_qubits[l][1]][t] == list_extra_qubit_edge_idx[e][0], \
+                                pi[list_gate_qubits[l][0]][t] == list_extra_qubit_edge_idx[e][1], \
+                                pi[list_gate_qubits[l][1]][t] == list_extra_qubit_edge_idx[e][1]))
+                            for t in range(bound_depth - 1)
+                            for l in self.list_gate_two]
             swap_gate = [sigma[list_extra_qubit_edge_idx[e]][t] for t in range(bound_depth - 1)]
             model.add(Or(all_gate, swap_gate) == u[e])
         
