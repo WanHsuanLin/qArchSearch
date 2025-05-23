@@ -400,8 +400,6 @@ class qArchSearch:
         bit_tight_bound_depth = BitVecVal(bound_depth-1, length)
         lsqc.add([UGE(bit_tight_bound_depth, time[l]) for l in range(len(self.list_gate_qubits))])
         # print("time to generate constraints: {}".format(timeit.default_timer() - start))
-        if bound_swap >=0:
-            self._add_atmostk_cnf(lsqc, sigma, bound_swap, bound_depth-1)
         tactic = Then('simplify','propagate-values','solve-eqs','card2bv','bit-blast', 'tseitin-cnf')
         output_file_name = folder+"/"+str(self.count_physical_qubit)+"_"+str(self.count_program_qubit) + "_" + str(bound_depth) + ".txt"
         cnf = tactic(lsqc)[0]
