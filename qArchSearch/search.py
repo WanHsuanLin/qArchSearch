@@ -634,7 +634,7 @@ class qArchSearch:
         num_sigma = 1+(tight_bound_depth+1)*len(self.list_qubit_edge)
         sigma_list = [i for i in range(1,num_sigma)]
         # print("Using encoding mehtod {}".format(self.card_encoding))
-        cnf = CardEnc.atmost(lits = sigma_list, bound = k, encoding = self.card_encoding)
+        cnf = CardEnc.atmost(lits = sigma_list, bound = k, encoding = 1)
         ancillary = dict()
         for c in cnf.clauses:
             or_list = []
