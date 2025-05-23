@@ -401,7 +401,7 @@ class qArchSearch:
         lsqc.add([UGE(bit_tight_bound_depth, time[l]) for l in range(len(self.list_gate_qubits))])
         # print("time to generate constraints: {}".format(timeit.default_timer() - start))
         tactic = Then('simplify','propagate-values','solve-eqs','card2bv','bit-blast', 'tseitin-cnf')
-        output_file_name = folder+"/"+str(self.count_physical_qubit)+"_"+str(self.count_program_qubit) + "_" + str(bound_depth) + ".txt"
+        output_file_name = folder+"/"+str(self.count_physical_qubit)+"_"+str(self.count_program_qubit) + "_" + str(bound_depth) + "_" + bound_edge + ".txt"
         cnf = tactic(lsqc)[0]
         with open(output_file_name,"w") as ous:
             ous.write(cnf.dimacs())
